@@ -16,6 +16,8 @@
 #include "input/input_state.h"
 #include "ui/plugin.h"
 
+#include "../external/imgui/imgui.h"
+
 #include <bgfx.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -316,6 +318,60 @@ void ProDBG_update()
 
     g_pluginUI->update();
 
+    if (ImGui::BeginMainMenuBar())
+    {
+	if (ImGui::BeginMenu("Main menu 1"))
+	{
+	    if (ImGui::BeginMenu("Sub menu 1"))
+	    {
+		if (ImGui::MenuItem("Item 1")) {
+		}
+		if (ImGui::MenuItem("Item 2")) {
+		}
+		ImGui::EndMenu();
+	    }
+	    if (ImGui::BeginMenu("Sub menu 2"))
+	    {
+		if (ImGui::MenuItem("Item 1")) {
+		}
+		if (ImGui::MenuItem("Item 2")) {
+		}
+		ImGui::EndMenu();
+	    }
+	    ImGui::EndMenu();
+	}
+	if (ImGui::BeginMenu("Main menu 2"))
+	{
+	    ImGui::EndMenu();
+	}
+	ImGui::EndMainMenuBar();
+    }
+    
+    if (context->inputState.mouseDown[MouseButton_Right])
+    {
+	ImGui::OpenPopup("context_menu");
+	if (ImGui::BeginPopup("context_menu"))
+	{
+	    if (ImGui::BeginMenu("Menu 1"))
+	    {
+		if (ImGui::MenuItem("Item 1")) {
+		}
+		if (ImGui::MenuItem("Item 2")) {
+		}
+		ImGui::EndMenu();
+	    }
+	    if (ImGui::BeginMenu("Menu 2"))
+	    {
+		if (ImGui::MenuItem("Item 1")) {
+		}
+		if (ImGui::MenuItem("Item 2")) {
+		}
+		ImGui::EndMenu();
+	    }
+	    ImGui::EndPopup();
+	}
+    }
+
     //UIStatusBar_render();
 
     //renderTest();
@@ -580,7 +636,8 @@ void ProDBG_setMouseState(int button, int state)
 
     // TODO: Proper mouse support
 
-    inputState->mouseDown[0] = !!state;
+    // TODO(marco): validate the button index that gets passed
+    inputState->mouseDown[button] = !!state;
 
     IMGUI_setInputState(inputState);
 }
