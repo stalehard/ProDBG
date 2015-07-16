@@ -3,6 +3,7 @@
 #include "core/log.h"
 #include "core/file_monitor.h"
 #include "core/math.h"
+#include "core/alloc.h"
 #include "core/plugin_handler.h"
 #include "session/session.h"
 #include "settings.h"
@@ -15,8 +16,6 @@
 #include "ui/menu.h"
 #include "input/input_state.h"
 #include "ui/plugin.h"
-
-#include "../external/imgui/imgui.h"
 
 #include <bgfx.h>
 #include <stdio.h>
@@ -36,6 +35,10 @@
 int Window_buildPluginMenu(PluginData** plugins, int count);
 void Window_addMenu(const char* name, PDMenuItem* items, uint32_t idOffset);
 
+void ProDBG_event(int id);
+void ProDBG_setMouseState(int button, int state);
+void ProDBG_setMousePos(float x, float y);
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Context
@@ -45,6 +48,8 @@ struct Context
     int height;
     uint64_t time;
     Session* session;   // one session right now
+    bool popupActive;
+    bool popupHover;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -285,6 +290,245 @@ static void updateDock(Context* context)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+void IMGUI_menuUpdate(Context *context)
+{
+    int count = 0;
+    PluginData** viewPlugins = PluginHandler_getViewPlugins(&count);
+    PDMenuItem* menu = (PDMenuItem*)alloc_zero(sizeof(PDMenuItem) * (count + 1)); // + 1 as array needs to end with zeros
+    if (IMGUI_beginMainMenuBar())
+    {
+	// NOTE(marco): these are static values
+	if (IMGUI_beginMenu("File"))
+	{
+	    PDMenuItem *desc = &g_fileMenu[0];
+	    while (desc->name)
+	    {
+		if (IMGUI_menuItem(desc->name))
+		{
+		    ProDBG_event(desc->id);
+		}
+		desc++;
+	    }
+	    IMGUI_endMenu();
+	}
+
+	if (IMGUI_beginMenu("Debug"))
+	{
+	    PDMenuItem *desc = &g_debugMenu[0];
+	    while (desc->name)
+	    {
+		if (IMGUI_menuItem(desc->name))
+		{
+		    ProDBG_event(desc->id);
+		}
+		desc++;
+	    }
+	    IMGUI_endMenu();
+	}
+
+	for (int i = 0; i < count; ++i)
+	{
+	    PluginData* pluginData = viewPlugins[i];
+	    PDPluginBase* pluginBase = (PDPluginBase*)pluginData->plugin;
+	    PDMenuItem* entry = &menu[i];
+
+	    // TODO: Hack hack!
+
+	    if (!strstr(pluginData->type, "View"))
+		continue;
+
+	    entry->name = pluginBase->name;
+
+	    // TODO: Only shortcuts for the first range but we should really have this in a config instead.
+
+	    if (i < 10)
+	    {
+		entry->id = PRODBG_MENU_PLUGIN_START + i;
+		entry->key = '1' + i;
+	    }
+
+	    entry->macMod = PRODBG_KEY_COMMAND;
+	    entry->winMod = PRODBG_KEY_CTRL;
+	}
+	
+	uint32_t menuIdStart = PRODBG_MENU_PLUGINS_START;
+	if (IMGUI_beginMenu("Plugins"))
+	{	    
+	    PDMenuItem *desc = &menu[0];
+	    while (desc->name)
+	    {
+		if (IMGUI_menuItem(desc->name))
+		{
+		    ProDBG_event(desc->id);
+		}
+		desc++;
+	    }
+	    IMGUI_endMenu();
+	}
+
+	PluginData **backendPlugins = PluginHandler_getBackendPlugins(&count);
+	for (int i = 0; i < count; ++i)
+	{
+	    PluginData* pluginData = backendPlugins[i];
+
+	    PDBackendPlugin* plugin = (PDBackendPlugin*)pluginData->plugin;
+
+	    if (!plugin)
+		continue;
+
+	    if (!plugin->registerMenu)
+		continue;
+
+	    PDMenu* menus = plugin->registerMenu();
+	    uint32_t menuRange = findMenuIdRange(menus);
+
+	    while (menus->name)
+	    {
+		if (IMGUI_beginMenu(menus->name))
+		{
+		    PDMenuItem *desc = &menus->items[0];
+		    while(desc->name)
+		    {
+			if (IMGUI_menuItem(desc->name))
+			{
+			    ProDBG_event(desc->id + menuIdStart);
+			}
+			desc++;
+		    }
+		    IMGUI_endMenu();
+		}
+		menus++;
+	    }
+
+	    pluginData->menuStart = menuIdStart;
+	    pluginData->menuEnd = menuIdStart + (menuRange >> 16);
+
+	    menuIdStart += (menuRange >> 16);
+	}
+	
+	IMGUI_endMainMenuBar();
+    }	
+	
+#if 1
+    if (context->inputState.mouseDown[MouseButton_Right])
+    {	
+	static float savedMousePosX = 0.0f;
+	static float savedMousePosY = 0.0f;
+	// NOTE(marco): save the mouse position only the first time we activate
+	// the popup
+	if (!context->popupActive)
+	{
+	    savedMousePosX = context->inputState.mousePos.x;
+	    savedMousePosY = context->inputState.mousePos.y;
+	    context->popupActive = true;
+	}
+	IMGUI_openPopup("context_menu");
+	context->popupHover = false;
+
+	if (IMGUI_beginPopup("context_menu"))
+	{
+	    const char *splitHorz = "Split Horizontally";
+	    if (IMGUI_beginMenu(splitHorz))
+	    {
+		uint32_t startId = PRODBG_MENU_POPUP_SPLIT_HORZ;
+		if (IMGUI_menuItem(splitHorz))
+		{
+		    float tempX = context->inputState.mousePos.x;
+		    float tempY = context->inputState.mousePos.y;
+		    ProDBG_setMousePos(savedMousePosX, savedMousePosY);
+		    ProDBG_event(startId);
+		    ProDBG_setMousePos(tempX, tempY);
+		    ProDBG_setMouseState(MouseButton_Right, 0);
+		}
+		if (IMGUI_isItemHovered())
+		{
+		    context->popupHover = true;
+		}
+		
+		uint32_t idMask = PRODBG_MENU_POPUP_SPLIT_HORZ_SHIFT;
+		PDMenuItem *desc = &menu[0];
+		int popupMenuCount = 0;
+		while (desc->name)
+		{
+		    if (IMGUI_menuItem(desc->name))
+		    {
+			float tempX = context->inputState.mousePos.x;
+			float tempY = context->inputState.mousePos.y;
+			ProDBG_setMousePos(savedMousePosX, savedMousePosY);	     
+			ProDBG_event((uint32_t)popupMenuCount | idMask);
+			ProDBG_setMousePos(tempX, tempY);
+			ProDBG_setMouseState(MouseButton_Right, 0);
+		    }
+		    if (IMGUI_isItemHovered())
+		    {
+			context->popupHover = true;
+		    }
+		    ++popupMenuCount;
+		    desc++;
+		}
+		IMGUI_endMenu();
+		if (IMGUI_isItemHovered())
+		{
+		    context->popupHover = true;
+		}
+	    }
+
+	    const char *splitVert = "Split Vertically";
+	    if (IMGUI_beginMenu(splitVert))
+	    {
+		uint32_t startId = PRODBG_MENU_POPUP_SPLIT_VERT;
+		if (IMGUI_menuItem(splitVert))
+		{
+		    float tempX = context->inputState.mousePos.x;
+		    float tempY = context->inputState.mousePos.y;
+		    ProDBG_setMousePos(savedMousePosX, savedMousePosY);
+		    ProDBG_event(startId);
+		    ProDBG_setMousePos(tempX, tempY);
+		    ProDBG_setMouseState(MouseButton_Right, 0);
+		}
+		if (IMGUI_isItemHovered())
+		{
+		    context->popupHover = true;
+		}
+		uint32_t idMask = PRODBG_MENU_POPUP_SPLIT_VERT_SHIFT;
+		PDMenuItem *desc = &menu[0];
+		int popupMenuCount = 0;
+		while (desc->name)
+		{
+		    if (IMGUI_menuItem(desc->name))
+		    {
+			float tempX = context->inputState.mousePos.x;
+			float tempY = context->inputState.mousePos.y;
+			ProDBG_setMousePos(savedMousePosX, savedMousePosY);	     
+			ProDBG_event((uint32_t)popupMenuCount | idMask);
+			ProDBG_setMousePos(tempX, tempY);
+			ProDBG_setMouseState(MouseButton_Right, 0);
+		    }
+		    if (IMGUI_isItemHovered())
+		    {
+			context->popupHover = true;
+		    }
+		    ++popupMenuCount;
+		    desc++;
+		}
+		IMGUI_endMenu();
+		if (IMGUI_isItemHovered())
+		{
+		    context->popupHover = true;
+		}
+	    }	    
+	    
+	    IMGUI_endPopup();
+	}
+    }
+    else
+    {
+	context->popupActive = false;
+    }
+#endif
+}
+
+
 void ProDBG_update()
 {
     Context* context = &s_context;
@@ -318,59 +562,7 @@ void ProDBG_update()
 
     g_pluginUI->update();
 
-    if (ImGui::BeginMainMenuBar())
-    {
-	if (ImGui::BeginMenu("Main menu 1"))
-	{
-	    if (ImGui::BeginMenu("Sub menu 1"))
-	    {
-		if (ImGui::MenuItem("Item 1")) {
-		}
-		if (ImGui::MenuItem("Item 2")) {
-		}
-		ImGui::EndMenu();
-	    }
-	    if (ImGui::BeginMenu("Sub menu 2"))
-	    {
-		if (ImGui::MenuItem("Item 1")) {
-		}
-		if (ImGui::MenuItem("Item 2")) {
-		}
-		ImGui::EndMenu();
-	    }
-	    ImGui::EndMenu();
-	}
-	if (ImGui::BeginMenu("Main menu 2"))
-	{
-	    ImGui::EndMenu();
-	}
-	ImGui::EndMainMenuBar();
-    }
-    
-    if (context->inputState.mouseDown[MouseButton_Right])
-    {
-	ImGui::OpenPopup("context_menu");
-	if (ImGui::BeginPopup("context_menu"))
-	{
-	    if (ImGui::BeginMenu("Menu 1"))
-	    {
-		if (ImGui::MenuItem("Item 1")) {
-		}
-		if (ImGui::MenuItem("Item 2")) {
-		}
-		ImGui::EndMenu();
-	    }
-	    if (ImGui::BeginMenu("Menu 2"))
-	    {
-		if (ImGui::MenuItem("Item 1")) {
-		}
-		if (ImGui::MenuItem("Item 2")) {
-		}
-		ImGui::EndMenu();
-	    }
-	    ImGui::EndPopup();
-	}
-    }
+    IMGUI_menuUpdate(context);
 
     //UIStatusBar_render();
 
@@ -640,6 +832,15 @@ void ProDBG_setMouseState(int button, int state)
     inputState->mouseDown[button] = !!state;
 
     IMGUI_setInputState(inputState);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool ProDBG_getPopupHoverState()
+{
+    Context* context = &s_context;
+    return context->popupHover;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

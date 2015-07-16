@@ -683,8 +683,16 @@ PluginUI::State BgfxPluginUI::updateInstance(ViewPluginInstance* instance, PDRea
     PDUI* uiInstance = &instance->ui;
     PrivateData* data = (PrivateData*)uiInstance->privateData;
 
-    ImGui::SetNextWindowPos(ImVec2(instance->rect.x, instance->rect.y));
-    ImGui::SetNextWindowSize(ImVec2(instance->rect.width - 4, instance->rect.height - 4));
+    // NOTE(marco): shift down to make space for menu bar
+    // TODO(marco): this is test code, it should be handled when loading/creating the
+    // instance!!
+    float offsetY = 0.0f;
+    if (instance->rect.y == 0.0f)
+    {
+	offsetY = 20.0f;
+    }
+    ImGui::SetNextWindowPos(ImVec2(instance->rect.x, instance->rect.y + offsetY));
+    ImGui::SetNextWindowSize(ImVec2(instance->rect.width - 4, instance->rect.height - 4 - offsetY));
 
     ImGui::Begin(data->name, &data->showWindow, ImVec2(0, 0), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 

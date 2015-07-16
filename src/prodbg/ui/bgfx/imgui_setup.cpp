@@ -8,6 +8,7 @@
 #include "core/file.h"
 #include "core/log.h"
 #include "ui_render.h"
+
 #include "input/input_state.h"
 #include <stdio.h>
 #include <pd_keys.h>
@@ -237,4 +238,44 @@ void IMGUI_postUpdate()
     ImGui::Render();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+bool IMGUI_beginMainMenuBar()
+{
+    return ImGui::BeginMainMenuBar();
+}
+void IMGUI_endMainMenuBar()
+{
+    ImGui::EndMainMenuBar();
+}
+
+bool IMGUI_beginMenu(const char *menuName)
+{
+    return ImGui::BeginMenu(menuName);
+}
+bool IMGUI_menuItem(const char *itemName)
+{
+    return ImGui::MenuItem(itemName);
+}
+void IMGUI_endMenu()
+{
+    ImGui::EndMenu();
+}
+
+void IMGUI_openPopup(const char *popupId)
+{
+    ImGui::OpenPopup(popupId);
+}
+bool IMGUI_beginPopup(const char *popupName)
+{
+    return ImGui::BeginPopup(popupName);
+}
+void IMGUI_endPopup()
+{
+    ImGui::EndPopup();
+}
+
+bool IMGUI_isItemHovered()
+{
+    return ImGui::IsItemHovered();
+}

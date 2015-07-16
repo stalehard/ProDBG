@@ -359,8 +359,11 @@ static int translateKey(unsigned int key)
 
     (void)event;
 
-    ProDBG_setMousePos(location.x, adjustFrame.size.height - location.y);
-    ProDBG_setMouseState(2, 0);
+    if (!ProDBG_getPopupHoverState())
+    {
+	ProDBG_setMousePos(location.x, adjustFrame.size.height - location.y);
+	ProDBG_setMouseState(2, 0);
+    }
     ProDBG_setMouseState(0, 1);
 }
 
@@ -488,10 +491,12 @@ static NSMenu* s_popupMenu;
 
 - (void)rightMouseDown:(NSEvent*)event
 {
-    /*if (!s_popupMenu)
+#if 0
+    if (!s_popupMenu)
         return;
 
-    [NSMenu popUpContextMenu:s_popupMenu withEvent:event forView:self];*/
+    [NSMenu popUpContextMenu:s_popupMenu withEvent:event forView:self];
+#else
     NSWindow* window = [self window];
     NSRect originalFrame = [window frame];
     NSPoint location = [window mouseLocationOutsideOfEventStream];
@@ -501,7 +506,7 @@ static NSMenu* s_popupMenu;
     
     ProDBG_setMousePos(location.x, adjustFrame.size.height - location.y);
     ProDBG_setMouseState(2, 1);
-    
+#endif	
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

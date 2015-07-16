@@ -15,4 +15,15 @@ void IMGUI_setKeyUp(int key, int modifier);
 
 void IMGUI_addInputCharacter(unsigned short c);
 
+bool IMGUI_beginMainMenuBar();
+void IMGUI_endMainMenuBar();
 
+bool IMGUI_beginMenu(const char *menuName);
+bool IMGUI_menuItem(const char *itemName);
+void IMGUI_endMenu();
+
+void IMGUI_openPopup(const char *popupId);
+bool IMGUI_beginPopup(const char *popupName);
+void IMGUI_endPopup();
+
+bool IMGUI_isItemHovered();
