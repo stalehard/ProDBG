@@ -331,7 +331,7 @@ static int textEditCallbackStub(ImGuiTextEditCallbackData* data)
     // We need to mirror any changes to the callback wrapper into the actual ImGui version
     data->UserData       = callbackData.userData;
     data->Buf            = callbackData.buffer;
-    data->BufSize        = (size_t)callbackData.bufferSize;
+    data->BufSize        = callbackData.bufferSize;
     data->BufDirty       = callbackData.bufferDirty;
     data->Flags          = ImGuiInputTextFlags(callbackData.flags);
     data->CursorPos      = callbackData.cursorPos;

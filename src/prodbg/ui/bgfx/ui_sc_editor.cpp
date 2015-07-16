@@ -476,7 +476,7 @@ public:
                 free(result);
             }
         #else
-            ButtonDown(pt, (unsigned int)io.MouseDownTime[0], false, false, false);
+            ButtonDown(pt, ImGui::IsMouseDown(0), false, false, false);
         #endif
         }
     }

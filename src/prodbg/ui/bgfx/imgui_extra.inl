@@ -96,8 +96,8 @@ ImScEditor* ScInputText(const char* label, float xSize, float ySize, void (*call
 
     const ImVec2 text_size = CalcTextSize(label, NULL, true);
 
-    const ImGuiAabb frame_bb(window->DC.CursorPos, window->DC.CursorPos + window->Size); 
-    const ImGuiAabb bb(frame_bb.Min, frame_bb.Max + ImVec2(text_size.x > 0.0f ? (style.ItemInnerSpacing.x + text_size.x) : 0.0f, 0.0f));
+    const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + window->Size); 
+    const ImRect bb(frame_bb.Min, frame_bb.Max + ImVec2(text_size.x > 0.0f ? (style.ItemInnerSpacing.x + text_size.x) : 0.0f, 0.0f));
 
     ItemSize(bb);
 
