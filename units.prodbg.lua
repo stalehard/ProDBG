@@ -20,6 +20,7 @@ Program {
             "src/external/bgfx/include", 
             "src/external/bx/include",
             "src/external/stb",
+            "src/external/i3wm_docking",
             "src/prodbg", 
         	"api/include",
             "src/frontend",
@@ -30,7 +31,8 @@ Program {
         },
 
         CXXOPTS = { 
-			{ "-Wno-conversion",
+			{ 
+			  "-Wno-conversion",
 			  "-Wno-gnu-anonymous-struct",
 			  "-Wno-global-constructors",
 			  "-Wno-nested-anon-types",
@@ -52,7 +54,7 @@ Program {
 
 		PROGCOM = {
 			{ "-lstdc++"; Config = "linux-gcc-*" },
-			{ "-lm -lpthread -ldl -lX11 -lGL"; Config = "linux-*-*" },
+			{ "-lm -lrt -lpthread -ldl -lX11 -lGL"; Config = "linux-*-*" },
 		},
     },
 
@@ -70,13 +72,11 @@ Program {
         },
     },
 
-    Depends = { "core", "script", "ui", "api", "session", "jansson", "lua", "remote_api", "stb", "bgfx", "uv", "imgui", "remotery", "foundation_lib", "scintilla", "tinyxml2" },
+    Depends = { "core", "ui", "api", "session", "jansson", "lua", "remote_api", "stb", "bgfx", "uv", "imgui", "remotery", "foundation_lib", "scintilla", "tinyxml2", "i3wm_docking" },
 
     Libs = { 
-      { 
-    	"Ws2_32.lib", "psapi.lib", "iphlpapi.lib", "wsock32.lib", "Shell32.lib",
-        "kernel32.lib", "user32.lib", "gdi32.lib", "Comdlg32.lib", "Advapi32.lib" ; Config = { "win32-*-*", "win64-*-*" } 
-      },
+      { "Ws2_32.lib", "psapi.lib", "iphlpapi.lib", "wsock32.lib", "Shell32.lib", "kernel32.lib", "user32.lib", "gdi32.lib", "Comdlg32.lib", "Advapi32.lib" ; Config = { "win32-*-*", "win64-*-*" } },
+	  -- { "third-party/lib/wx/wx_osx_cocoau_core-3.1", "third-party/lib/wx/wwx_baseu-3.1" ; Config = { "macosx-*-*", "macosx_test-*-*" } },
     },
 
     Frameworks = { "Cocoa"  },

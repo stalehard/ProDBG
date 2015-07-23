@@ -13,17 +13,15 @@ StaticLibrary {
     Env = { 
         CCOPTS = {
         	{ 
-		"-Werror",
-		"-Wno-parentheses",
+		-- "-Werror",
+		    "-Wno-parentheses",
         	"-Wno-unused-variable",
         	"-Wno-pointer-to-int-cast",
         	"-Wno-int-to-pointer-cast",
         	"-Wno-unused-but-set-variable",
         	"-Wno-return-type",
         	"-Wno-unused-function",
-			"-Wno-error=strict-aliasing",
-			"-Wno-error=maybe-uninitialized"
-        	; Config = "linux-*-*" },
+			"-Wno-error=strict-aliasing" ; Config = "linux-*-*" },
         	{ "-Wno-everything"; Config = "macosx-*-*" },
         	{ "/wd4244", "/wd4267", "/wd4133", "/wd4047", "/wd4204", "/wd4201", "/wd4701", "/wd4703",
 			  "/wd4024", "/wd4100", "/wd4053", "/wd4431", 
@@ -79,6 +77,33 @@ StaticLibrary {
         Glob {
             Dir = "src/external/tinyxml2",
             Extensions = { ".cpp", ".h" },
+        },
+    },
+
+	IdeGenerationHints = { Msvc = { SolutionFolder = "External" } },
+}
+
+-----------------------------------------------------------------------------------------------------------------------
+
+StaticLibrary {
+    Name = "i3wm_docking",
+
+    Env = { 
+        CPPPATH = { 
+			"src/external/jansson/include",
+            "src/external/i3wm_docking/include",
+        },
+        CCOPTS = {
+        	{ "-Wno-everything", "-std=c99"; Config = { "macosx-*-*", "macosx_test-*" } },
+        	{ "-std=c99"; Config = "linux-*-*" },
+        	{ "/wd4267", "/wd4706", "/wd4244", "/wd4701", "/wd4334", "/wd4127"; Config = "win64-*-*" },
+        },
+    },
+
+    Sources = { 
+        Glob {
+            Dir = "src/external/i3wm_docking/src",
+            Extensions = { ".c", ".h" },
         },
     },
 
@@ -148,7 +173,7 @@ StaticLibrary {
 		},
 
         CCOPTS = {
-        	{ "-DFOUNDATION_COMPILE=1", "-funit-at-a-time", "-fstrict-aliasing", "-fno-math-errno", "-ffinite-math-only", "-funsafe-math-optimizations", "-fno-trapping-math", "-ffast-math", "-Wno-missing-braces", "-std=c11"; Config = { "macosx-*-*", "macosx_test-*", "linux-*-*" } },
+        	{ "-DFOUNDATION_COMPILE=1", "-funit-at-a-time", "-fstrict-aliasing", "-fno-math-errno", "-ffinite-math-only", "-funsafe-math-optimizations", "-fno-trapping-math", "-ffast-math", "-Wno-missing-braces", "-std=c99"; Config = { "macosx-*-*", "macosx_test-*", "linux-*-*" } },
 			{ "-Wno-everything"; Config = { "macosx-*-*", "macosx_test-*" } },
         	{ "/DFOUNDATION_COMPILE=1", "/wd4267", "/wd4706", "/wd4244", "/wd4701", "/wd4334", "/wd4127"; Config = "win64-*-*" },
         	{ "-DBUILD_DEBUG=1"; Config = { "macosx-*-debug", "macosx_test-*-debug", "linux-*-debug" } },
@@ -309,6 +334,7 @@ StaticLibrary {
 
     Env = { 
         CPPPATH = { 
+		  { "src/external/bx/include/compat/msvc"; Config = "win64-*-*" },
             "src/external/remotery/lib",
             "src/external/bgfx/include",
             "src/external/bx/include",
@@ -370,6 +396,12 @@ StaticLibrary {
 
 StaticLibrary {
     Name = "imgui",
+
+    Env = { 
+        CPPPATH = { 
+			"src/external/scintilla/include",
+        },
+    },
 
     Sources = { 
         Glob {
@@ -531,8 +563,11 @@ StaticLibrary {
     Env = { 
         CPPPATH = { 
             "src/external/stb",
+            "src/external/lua/src",
+			"src/external/jansson/include",
 			"src/external/foundation_lib",
 			"src/external/libuv/include",
+			"src/external/i3wm_docking/include",
         	"api/include",
             "src/prodbg",
         },
@@ -550,31 +585,6 @@ StaticLibrary {
 
 -----------------------------------------------------------------------------------------------------------------------
 
-StaticLibrary {
-    Name = "script",
-
-    Env = { 
-        CPPPATH = { 
-            "src/external/stb",
-            "src/external/libuv/include",
-            "src/external/lua/src",
-            "api/include",
-            "src/prodbg",
-        },
-    },
-
-    Sources = { 
-        Glob {
-            Dir = "src/prodbg/script",
-            Extensions = { ".cpp", ".h" },
-        },
-    },
-
-    IdeGenerationHints = { Msvc = { SolutionFolder = "Libs" } },
-}
-
------------------------------------------------------------------------------------------------------------------------
-
 
 StaticLibrary {
     Name = "session",
@@ -583,7 +593,9 @@ StaticLibrary {
         CPPPATH = { 
             "src/external/stb",
 			"src/external/libuv/include",
+			"src/external/jansson/include",
 			"src/external/foundation_lib",
+			"src/external/i3wm_docking",
         	"api/include",
             "src/prodbg",
         },
@@ -611,12 +623,14 @@ StaticLibrary {
     Env = { 
 
         CXXOPTS = {
-        	{ "-Wno-gnu-anonymous-struct",
+        	{ "-D__WXOSX_COCOA__",
+        	  "-Wno-gnu-anonymous-struct",
 			  "-Wno-global-constructors",
 			  "-Wno-switch-enum",
 			  "-Wno-nested-anon-types",
 			  "-Wno-float-equal",
 			  "-Wno-cast-align",
+			  "-Wno-everything",
 			  "-Wno-exit-time-destructors",
 			  "-Wno-format-nonliteral"; Config = "macosx-*-*" },
         },
@@ -627,11 +641,13 @@ StaticLibrary {
             "src/external/bx/include",
             "src/external/bgfx/include",
         	"api/include",
+        	"src/external/i3wm_docking",
 			"src/external/foundation_lib",
 			"src/external/libuv/include",
             "src/external/stb",
             "src/external/jansson/include",
             "src/prodbg",
+			"third-party/include",
         },
     },
 

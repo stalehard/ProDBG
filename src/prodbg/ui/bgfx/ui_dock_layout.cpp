@@ -1,14 +1,19 @@
+#ifdef PRODBG_MAC
+#include <foundation/apple.h>
+#endif
 #include "ui_dock.h"
 #include "ui_dock_private.h"
+#include "../plugin.h"
 #include "api/include/pd_view.h"
-#include "core/plugin_handler.h"
 #include "core/alloc.h"
 #include "core/log.h"
-#include "../plugin.h"
+#include "core/plugin_handler.h"
+#include "core/plugin_io.h"
 #include <jansson.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <foundation/assert.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -32,18 +37,36 @@ static void assignIds(UIDockingGrid* grid)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void writeSizer(UIDockSizer* sizer, json_t* root, float xScale, float yScale)
+static void clampSize(UIDockingGrid* grid, IntRect* rect)
 {
-    (void)xScale;
-    (void)yScale;
+	int rectX = rect->x + rect->width;
+	int rectY = rect->y + rect->height;
 
-    json_t* sizerItem = json_pack("{s:i, s:i, s:f, s:f, s:f, s:f}",
-                                  "dir", (int)sizer->dir,
-                                  "id", (int)sizer->id,
-                                  "x",  sizer->rect.x * xScale,
-                                  "y", sizer->rect.y * yScale,
-                                  "width", sizer->rect.width * xScale,
-                                  "height", sizer->rect.height * yScale);
+	FOUNDATION_ASSERT(grid->rect.x == 0);
+	FOUNDATION_ASSERT(grid->rect.y == 0);
+
+	if (rectX > grid->rect.width)
+		rect->width -= rectX - grid->rect.width;
+
+	if (rectY > grid->rect.height)
+		rect->height -= rectY - grid->rect.height;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void writeSizer(UIDockingGrid* grid, UIDockSizer* sizer, json_t* root)
+{
+	clampSize(grid, &sizer->rect);
+
+    json_t* sizerItem = json_pack("{s:i, s:i, s:i, s:i, s:i, s:i}",
+                                  "dir", sizer->dir,
+                                  "id", sizer->id,
+                                  "x",  sizer->rect.x,
+                                  "y", sizer->rect.y,
+                                  "width", sizer->rect.width,
+                                  "height", sizer->rect.height);
+
+    printf("writing sizer %d - %d %d - %d %d\n", sizer->id, sizer->rect.x, sizer->rect.y, sizer->rect.width, sizer->rect.height);
 
     json_t* consArray = json_array();
 
@@ -60,58 +83,77 @@ static void writeSizer(UIDockSizer* sizer, json_t* root, float xScale, float ySc
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void writeSizers(UIDockingGrid* grid, json_t* root, float xScale, float yScale)
+static void writeSizers(UIDockingGrid* grid, json_t* root)
 {
     json_t* sizersArray = json_array();
 
-    writeSizer(&grid->topSizer, sizersArray, xScale, yScale);
-    writeSizer(&grid->bottomSizer, sizersArray, xScale, yScale);
-    writeSizer(&grid->rightSizer, sizersArray, xScale, yScale);
-    writeSizer(&grid->leftSizer, sizersArray, xScale, yScale);
+    writeSizer(grid, &grid->topSizer, sizersArray);
+    writeSizer(grid, &grid->bottomSizer, sizersArray);
+    writeSizer(grid, &grid->rightSizer, sizersArray);
+    writeSizer(grid, &grid->leftSizer, sizersArray);
 
     for (UIDockSizer* sizer : grid->sizers)
-        writeSizer(sizer, sizersArray, xScale, yScale);
+        writeSizer(grid, sizer, sizersArray);
 
     json_object_set_new(root, "sizers", sizersArray);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void writeDocks(UIDockingGrid* grid, json_t* root, float xScale, float yScale)
+static void writeDocks(UIDockingGrid* grid, json_t* root)
 {
-    (void)xScale;
-    (void)yScale;
-
     json_t* docksArray = json_array();
+
+    PDSaveState saveFuncs;
+    PluginIO_initSaveJson(&saveFuncs);
 
     for (UIDock* dock : grid->docks)
     {
+        PluginData* pluginData = 0;
+
         const char* pluginName = "";
         const char* filename = "";
 
         if (dock->view->plugin)
         {
-            PluginData* pluginData = PluginHandler_getPluginData(dock->view->plugin);
-
+            pluginData = PluginHandler_getPluginData(dock->view->plugin);
             pluginName = dock->view->plugin->name;
             filename = pluginData->filename;
         }
 
-        json_t* dockItem = json_pack("{s:s, s:s, s:i, s:i, s:f, s:f, s:f, s:f, s:i, s:i, s:i, s:i}",
+		clampSize(grid, &dock->view->rect);
+
+        json_t* dockItem = json_pack("{s:s, s:s, s:i, s:i, s:i, s:i, s:i, s:i, s:i, s:i, s:i, s:i}",
                                      "plugin_name", pluginName,
                                      "plugin_file", filename,
                                      "type", (int)dock->type,
                                      "id", dock->id,
-                                     "x",  dock->view->rect.x * xScale,
-                                     "y", dock->view->rect.y * yScale,
-                                     "width", dock->view->rect.width * xScale,
-                                     "height", dock->view->rect.height * yScale,
+                                     "x",  dock->view->rect.x,
+                                     "y", dock->view->rect.y,
+                                     "width", dock->view->rect.width,
+                                     "height", dock->view->rect.height,
                                      "s0", dock->sizers[0]->id,
                                      "s1", dock->sizers[1]->id,
                                      "s2", dock->sizers[2]->id,
                                      "s3", dock->sizers[3]->id);
 
         json_array_append_new(docksArray, dockItem);
+
+        if (!pluginData)
+            continue;
+
+        PDViewPlugin* viewPlugin = (PDViewPlugin*)pluginData->plugin;
+
+        if (!viewPlugin->saveState)
+            continue;
+
+        json_t* array = json_array();
+
+        saveFuncs.privData = array;
+
+        viewPlugin->saveState(dock->view->userData, &saveFuncs);
+
+        json_object_set_new(dockItem, "plugin_data", array);
     }
 
     json_object_set_new(root, "docks", docksArray);
@@ -119,23 +161,29 @@ static void writeDocks(UIDockingGrid* grid, json_t* root, float xScale, float yS
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool UIDock_saveLayout(UIDockingGrid* grid, const char* filename, float xScale, float yScale)
+bool UIDock_saveLayout(UIDockingGrid* grid, const char* filename)
 {
-    xScale = 1.0f / xScale;
-    yScale = 1.0f / yScale;
-
-    assignIds(grid);
-
     json_t* root = json_object();
 
-    writeSizers(grid, root, xScale, yScale);
-    writeDocks(grid, root, xScale, yScale);
+    UIDock_saveLayoutJson(grid, root);
 
     if (json_dump_file(root, filename, JSON_INDENT(4) | JSON_PRESERVE_ORDER) != 0)
     {
         pd_error("JSON: Unable to open %s for write\n", filename);
         return false;
     }
+
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool UIDock_saveLayoutJson(UIDockingGrid* grid, json_t* root)
+{
+    assignIds(grid);
+
+    writeSizers(grid, root);
+    writeDocks(grid, root);
 
     return true;
 }
@@ -167,15 +215,18 @@ static UIDockSizer* findSizer(UIDockingGrid* grid, const int id)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void loadDocks(UIDockingGrid* grid, json_t* root, float xScale, float yScale)
+static void loadDocks(UIDockingGrid* grid, json_t* root)
 {
     const size_t count = json_array_size(root);
 
     grid->docks.reserve(count);
 
+    PDLoadState loadFuncs;
+    PluginIO_initLoadJson(&loadFuncs);
+
     for (size_t i = 0; i < count; ++i)
     {
-        double x, y, width, height;
+        int x, y, width, height;
         const char* pluginName;
         const char* filename;
         int id, type;
@@ -183,7 +234,7 @@ static void loadDocks(UIDockingGrid* grid, json_t* root, float xScale, float ySc
 
         json_t* item = json_array_get(root, i);
 
-        json_unpack(item, "{s:s, s:s, s:i, s:i, s:f, s:f, s:f, s:f, s:i, s:i, s:i, s:i}",
+        json_unpack(item, "{s:s, s:s, s:i, s:i, s:i, s:i, s:i, s:i, s:i, s:i, s:i, s:i}",
                     "plugin_name", &pluginName,
                     "plugin_file", &filename,
                     "type", &type,
@@ -197,7 +248,9 @@ static void loadDocks(UIDockingGrid* grid, json_t* root, float xScale, float ySc
                     "s2", &ids[2],
                     "s3", &ids[3]);
 
-        FloatRect rect = {{{ (float)x * xScale, (float)y * yScale, (float)width * xScale, (float)height * yScale }}};
+        IntRect rect = {{{ x, y, width, height }}};
+
+        clampSize(grid, &rect);
 
         ViewPluginInstance* view = 0;
 
@@ -215,6 +268,17 @@ static void loadDocks(UIDockingGrid* grid, json_t* root, float xScale, float ySc
                 view = (ViewPluginInstance*)alloc_zero(sizeof(ViewPluginInstance));
             else
                 view = g_pluginUI->createViewPlugin(pluginData);
+
+            PDViewPlugin* viewPlugin = (PDViewPlugin*)pluginData->plugin;
+
+            json_t* pluginJsonData = json_object_get(item, "plugin_data");
+
+            if (pluginJsonData && viewPlugin && viewPlugin->loadState)
+            {
+                SessionLoadState loadState = { pluginJsonData, (int)json_array_size(pluginJsonData), 0 };
+                loadFuncs.privData = &loadState;
+                viewPlugin->loadState(view->userData, &loadFuncs);
+            }
         }
 
         assert(view);
@@ -234,18 +298,18 @@ static void loadDocks(UIDockingGrid* grid, json_t* root, float xScale, float ySc
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void loadSizers(UIDockingGrid* grid, json_t* root, float xScale, float yScale)
+static void loadSizers(UIDockingGrid* grid, json_t* root)
 {
     const size_t count = json_array_size(root);
 
     for (size_t i = 0; i < count; ++i)
     {
-        double x, y, width, height;
+        int x, y, width, height;
         int dir, id;
 
         json_t* item = json_array_get(root, i);
 
-        json_unpack(item, "{s:i, s:i, s:f, s:f, s:f, s:f}",
+        json_unpack(item, "{s:i, s:i, s:i, s:i, s:i, s:i}",
                     "dir", &dir,
                     "id", &id,
                     "x", &x,
@@ -253,7 +317,10 @@ static void loadSizers(UIDockingGrid* grid, json_t* root, float xScale, float yS
                     "width", &width,
                     "height", &height);
 
-        FloatRect rect = {{{ (float)x * xScale, (float)y * yScale, (float)width * xScale, (float)height * yScale }}};
+
+        IntRect rect = {{{ x, y, width, height }}};
+
+        clampSize(grid, &rect);
 
         UIDockSizer* sizer = 0;
 
@@ -264,6 +331,7 @@ static void loadSizers(UIDockingGrid* grid, json_t* root, float xScale, float yS
             case UIDock::Top:
             {
                 sizer = &grid->topSizer;
+                printf("top sizer %d %d\n", sizer->rect.x, sizer->rect.width);
                 break;
             }
 
@@ -350,7 +418,7 @@ static void mapDockSizers(UIDockingGrid* grid)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIDockingGrid* UIDock_loadLayout(const char* filename, float xSize, float ySize)
+UIDockingGrid* UIDock_loadLayout(const char* filename, int width, int height)
 {
     UIDockingGrid* grid = 0;
     json_error_t error;
@@ -363,7 +431,16 @@ UIDockingGrid* UIDock_loadLayout(const char* filename, float xSize, float ySize)
         return 0;
     }
 
-    FloatRect rect = {{{ 0.0f, 0.0f, xSize, ySize }}};
+    return UIDock_loadLayoutJson(root, width, height);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+UIDockingGrid* UIDock_loadLayoutJson(struct json_t* root, int width, int height)
+{
+    UIDockingGrid* grid = 0;
+
+    IntRect rect = {{{ 0, 0, width, height }}};
 
     grid = UIDock_createGrid(&rect);
 
@@ -378,7 +455,7 @@ UIDockingGrid* UIDock_loadLayout(const char* filename, float xSize, float ySize)
         return 0;
     }
 
-    loadSizers(grid, sizers, xSize, ySize);
+    loadSizers(grid, sizers);
 
     json_t* docks = json_object_get(root, "docks");
 
@@ -389,7 +466,7 @@ UIDockingGrid* UIDock_loadLayout(const char* filename, float xSize, float ySize)
         return 0;
     }
 
-    loadDocks(grid, docks, xSize, ySize);
+    loadDocks(grid, docks);
 
     // map up the docks with the sizers
 
@@ -397,3 +474,4 @@ UIDockingGrid* UIDock_loadLayout(const char* filename, float xSize, float ySize)
 
     return grid;
 }
+

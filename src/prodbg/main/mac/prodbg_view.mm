@@ -3,6 +3,7 @@
 #include "../prodbg_version.h"
 #include "ui/menu.h"
 #include "core/alloc.h"
+#include "core/input_state.h"
 #include "core/plugin_handler.h"
 #include <core/log.h>
 #include <bgfx.h>
@@ -268,6 +269,37 @@ static int translateKey(unsigned int key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+- (void)flagsChanged:(NSEvent *)event
+{
+	bool release = false;
+    const unsigned int modifierFlags = [event modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+    const int key = translateKey([event keyCode]);
+    const int mods = getModifierFlags(modifierFlags);
+
+	InputState* state = InputState_getState();
+
+    if (modifierFlags == state->modifierFlags)
+    {
+        if (state->keysDown[key])
+            release = true;
+        else
+            release = false;
+    }
+    else if (modifierFlags > state->modifierFlags)
+        release = false;
+    else
+        release = true;
+
+    state->modifierFlags = modifierFlags;
+
+	if (release)
+    	ProDBG_keyUp(key, mods);
+    else
+    	ProDBG_keyDown(key, mods);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 - (void)keyUp:(NSEvent*)event
 {
     const int key = translateKey([event keyCode]);
@@ -288,7 +320,7 @@ static int translateKey(unsigned int key)
 -(void) viewWillMoveToWindow:(NSWindow*)newWindow
 {
     NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self frame]
-                                    options: (NSTrackingMouseMoved | NSTrackingActiveAlways) owner:self userInfo:nil];
+                                    options: (NSTrackingInVisibleRect |NSTrackingMouseMoved | NSTrackingActiveAlways) owner:self userInfo:nil];
     [self addTrackingArea:trackingArea];
     (void)newWindow;
 }
@@ -323,17 +355,14 @@ static int translateKey(unsigned int key)
     ProDBG_setMousePos(location.x, adjustFrame.size.height - location.y);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)scrollWheel:(NSEvent*)theEvent
+- (void)scrollWheel:(NSEvent *)event
 {
-    (void)theEvent;
-    //float x = (float)[theEvent deltaX];
-    //float y = (float)[theEvent deltaY];
-    //int flags = getModifierFlags([theEvent modifierFlags]);
-
-    //printf("%f %f %d\n", x, y, flags);
-    //Editor_scroll(-x, -y, flags);
+	float x = (float)[event deltaX];
+	float y = (float)[event deltaY];
+	//int flags = getModifierFlags([theEvent modifierFlags]);
+	ProDBG_setScroll(x, y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

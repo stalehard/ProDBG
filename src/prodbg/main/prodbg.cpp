@@ -7,17 +7,17 @@
 #include "core/plugin_handler.h"
 #include "session/session.h"
 #include "settings.h"
+#include "core/settings.h"
+#include "ui/wx/wx_plugin_ui.h"
 #include "ui/bgfx/bgfx_plugin_ui.h"
-#include "ui/bgfx/imgui_setup.h"
 #include "ui/bgfx/dialogs.h"
-#include "ui/bgfx/cursor.h"
-#include "ui/bgfx/ui_render.h"
-//#include "ui/bgfx/ui_statusbar.h"
+#include "ui/bgfx/ui_dock.h"
 #include "ui/menu.h"
-#include "input/input_state.h"
+#include "core/input_state.h"
 #include "ui/plugin.h"
+#include "i3wm_docking.h"
 
-#include <bgfx.h>
+//#include <bgfx.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -39,11 +39,24 @@ void ProDBG_event(int id);
 void ProDBG_setMouseState(int button, int state);
 void ProDBG_setMousePos(float x, float y);
 
+// TODO(marco): need to figure out where this goes
+bool IMGUI_beginMainMenuBar();
+void IMGUI_endMainMenuBar();
+
+bool IMGUI_beginMenu(const char *menuName);
+bool IMGUI_menuItem(const char *itemName);
+void IMGUI_endMenu();
+
+void IMGUI_openPopup(const char *popupId);
+bool IMGUI_beginPopup(const char *popupName);
+void IMGUI_endPopup();
+
+bool IMGUI_isItemHovered();
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct Context
 {
-    InputState inputState;
     int width;
     int height;
     uint64_t time;
@@ -64,6 +77,7 @@ static const char* s_plugins[] =
     "sourcecode_plugin",
     "disassembly_plugin",
     "locals_plugin",
+    "threads_plugin",
     "callstack_plugin",
     "registers_plugin",
     "breakpoints_plugin",
@@ -80,17 +94,23 @@ static const char* s_plugins[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void loadLayout(Session* session, float width, float height)
+void loadLayout(Session* session, int width, int height)
 {
-    // TODO: Fix convesion
+    Session_createDockingGrid(session, width, height);
 
-    if (Session_loadLayout(session, "data/current_layout.json", (int)width, (int)height))
+	if (docksys_load_layout("data/current_layout_2.json"))
+		return;
+
+	docksys_load_layout("data/default_layout_2.json");
+
+	/*
+    if (Session_loadLayout(session, "data/current_layout.json", width, height))
         return;
 
-    if (Session_loadLayout(session, "data/default_layout.json", (int)width, (int)height))
+    if (Session_loadLayout(session, "data/default_layout.json", width, height))
         return;
+    */
 
-    Session_createDockingGrid(session, (int)width, (int)height);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -207,27 +227,19 @@ void ProDBG_create(void* window, int width, int height)
     findDataDirectory();
 
     g_pluginUI = new BgfxPluginUI;
+    //g_pluginUI = new WxPluginUI;
+
+	Settings_loadSettings("data/settings.json");
 
     Session_globalInit(true);
+    Settings_registerService();
 
     context->session = Session_create();
     context->time = time_current();
 
-#if PRODBG_USING_DOCKING
-    loadLayout(context->session, (float)width, (float)(height - g_pluginUI->getStatusBarSize()));
-#endif
+    g_pluginUI->create(window, width, height);
 
-    /*
-       if (RMT_ERROR_NONE != rmt_CreateGlobalInstance(&s_remotery))
-       {
-        pd_error("Unable to setup Remotery");
-        return;
-       }
-     */
-
-    //Settings_getWindowRect(&settingsRect);
-    //width = settingsRect.width;
-    //height = settingsRect.height;
+    loadLayout(context->session, width, height - g_pluginUI->getStatusBarSize());
 
     (void)window;
 
@@ -238,55 +250,10 @@ void ProDBG_create(void* window, int width, int height)
     }
 
 
-    bgfx::init();
-    bgfx::reset(width, height);
-    bgfx::setViewSeq(0, true);
-
     context->width = width;
     context->height = height;
-
-    IMGUI_setup(width, height);
-
-    Cursor_init();
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-static void updateDock(Context* context)
-{
-    UIDockingGrid* grid = Session_getDockingGrid(context->session);
-    const InputState* inputState = &context->inputState;
-
-    switch (UIDock_getSizingState(grid))
-    {
-        case UIDockSizerDir_None:
-        {
-            Cunsor_setType(CursorType_Default);
-            break;
-        }
-
-        case UIDockSizerDir_Horz:
-        {
-            Cunsor_setType(CursorType_SizeHorizontal);
-            break;
-        }
-
-        case UIDockSizerDir_Vert:
-        {
-            Cunsor_setType(CursorType_SizeVertical);
-            break;
-        }
-
-        case UIDockSizerDir_Both:
-        {
-            Cunsor_setType(CursorType_SizeAll);
-            break;
-        }
-    }
-
-    UIDock_update(grid, inputState);
-    UIDock_renderSizers(grid);
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -410,7 +377,8 @@ void IMGUI_menuUpdate(Context *context)
     }	
 	
 #if 1
-    if (context->inputState.mouseDown[MouseButton_Right])
+    InputState *inputState = InputState_getState();
+    if (inputState->mouseDown[MouseButton_Right])
     {	
 	static float savedMousePosX = 0.0f;
 	static float savedMousePosY = 0.0f;
@@ -418,13 +386,14 @@ void IMGUI_menuUpdate(Context *context)
 	// the popup
 	if (!context->popupActive)
 	{
-	    savedMousePosX = context->inputState.mousePos.x;
-	    savedMousePosY = context->inputState.mousePos.y;
+	    savedMousePosX = inputState->mousePos.x;
+	    savedMousePosY = inputState->mousePos.y;
 	    context->popupActive = true;
 	}
 	IMGUI_openPopup("context_menu");
 	context->popupHover = false;
 
+	// TODO(marco): need to update this to read from new context menu list
 	if (IMGUI_beginPopup("context_menu"))
 	{
 	    const char *splitHorz = "Split Horizontally";
@@ -433,8 +402,8 @@ void IMGUI_menuUpdate(Context *context)
 		uint32_t startId = PRODBG_MENU_POPUP_SPLIT_HORZ;
 		if (IMGUI_menuItem(splitHorz))
 		{
-		    float tempX = context->inputState.mousePos.x;
-		    float tempY = context->inputState.mousePos.y;
+		    float tempX = inputState->mousePos.x;
+		    float tempY = inputState->mousePos.y;
 		    ProDBG_setMousePos(savedMousePosX, savedMousePosY);
 		    ProDBG_event(startId);
 		    ProDBG_setMousePos(tempX, tempY);
@@ -452,8 +421,8 @@ void IMGUI_menuUpdate(Context *context)
 		{
 		    if (IMGUI_menuItem(desc->name))
 		    {
-			float tempX = context->inputState.mousePos.x;
-			float tempY = context->inputState.mousePos.y;
+			float tempX = inputState->mousePos.x;
+			float tempY = inputState->mousePos.y;
 			ProDBG_setMousePos(savedMousePosX, savedMousePosY);	     
 			ProDBG_event((uint32_t)popupMenuCount | idMask);
 			ProDBG_setMousePos(tempX, tempY);
@@ -479,8 +448,8 @@ void IMGUI_menuUpdate(Context *context)
 		uint32_t startId = PRODBG_MENU_POPUP_SPLIT_VERT;
 		if (IMGUI_menuItem(splitVert))
 		{
-		    float tempX = context->inputState.mousePos.x;
-		    float tempY = context->inputState.mousePos.y;
+		    float tempX = inputState->mousePos.x;
+		    float tempY = inputState->mousePos.y;
 		    ProDBG_setMousePos(savedMousePosX, savedMousePosY);
 		    ProDBG_event(startId);
 		    ProDBG_setMousePos(tempX, tempY);
@@ -497,8 +466,8 @@ void IMGUI_menuUpdate(Context *context)
 		{
 		    if (IMGUI_menuItem(desc->name))
 		    {
-			float tempX = context->inputState.mousePos.x;
-			float tempY = context->inputState.mousePos.y;
+			float tempX = inputState->mousePos.x;
+			float tempY = inputState->mousePos.y;
 			ProDBG_setMousePos(savedMousePosX, savedMousePosY);	     
 			ProDBG_event((uint32_t)popupMenuCount | idMask);
 			ProDBG_setMousePos(tempX, tempY);
@@ -533,89 +502,24 @@ void ProDBG_update()
 {
     Context* context = &s_context;
 
-    rmt_ScopedCPUSample(ProDBG_update);
+    //uint64_t currentTime = time_current();
+    //float dt = time_elapsed(context->time);
+    //context->time = currentTime;
 
-    bgfx::setViewRect(0, 0, 0, (uint16_t)context->width, (uint16_t)context->height);
-    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x101010ff, 1.0f, 0);
-    bgfx::submit(0);
+    //updateDock(context);
 
-    uint64_t currentTime = time_current();
+    g_pluginUI->preUpdate();
 
-    float dt = time_elapsed(context->time);
-
-    context->time = currentTime;
-
-#if PRODBG_USING_DOCKING
-    updateDock(context);
-#endif
-    {
-        rmt_ScopedCPUSample(IMGUI_preUpdate);
-        IMGUI_preUpdate(&context->inputState, dt);
-    }
-
-    // TODO: Support multiple sessions
-
-    {
-        rmt_ScopedCPUSample(Session_update);
-        Session_update(context->session);
-    }
-
-    g_pluginUI->update();
-
+    Session_update(context->session);
     IMGUI_menuUpdate(context);
 
-    //UIStatusBar_render();
 
-    //renderTest();
-
-    /*
-
-       bool show = true;
-
-       ImGui::Begin("ImGui Test", &show, ImVec2(550, 480), true, ImGuiWindowFlags_ShowBorders);
-
-       if (ImGui::Button("Test0r testing!"))
-       {
-        printf("test\n");
-       }
-
-       ImGui::End();
-     */
-
-    {
-        rmt_ScopedCPUSample(IMGUI_postUpdate);
-        IMGUI_postUpdate();
-    }
-
-
-    {
-        rmt_ScopedCPUSample(bgfx_frame);
-        bgfx::frame();
-    }
+    g_pluginUI->postUpdate();
 
     FileMonitor_update();
 }
 
 // Temprory test for monkey
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ProDBG_setWindowSize(int width, int height)
-{
-    Context* context = &s_context;
-
-    context->width = width;
-    context->height = height;
-
-    bgfx::reset(width, height);
-    IMGUI_updateSize(width, height);
-
-#if PRODBG_USING_DOCKING
-    UIDock_updateSize(Session_getDockingGrid(context->session), width, height - (int)g_pluginUI->getStatusBarSize());
-#endif
-
-    ProDBG_update();
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -637,12 +541,15 @@ void ProDBG_destroy()
 
     //rmt_DestroyGlobalInstance(s_remotery);
 
-    UIDock_saveLayout(Session_getDockingGrid(context->session),
-                      "data/current_layout.json", (float)context->width, (float)(context->height - g_pluginUI->getStatusBarSize()));
+	docksys_save_layout("data/current_layout_2.json");
 
     Session_destroy(context->session);
 
     Settings_save();
+
+    g_pluginUI->destroy();
+
+    Settings_destroy();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -656,11 +563,11 @@ void ProDBG_timedUpdate()
 
 static void onLoadRunExec(Session* session, const char* filename)
 {
-    PluginData* pluginData = PluginHandler_findPlugin(0, "lldb_plugin", "LLDB Mac", true);
+    PluginData* pluginData = PluginHandler_findPlugin(0, "lldb_plugin", "LLDB", true);
 
     if (!pluginData)
     {
-        pd_error("Unable to find LLDB Mac backend\n");
+        pd_error("Unable to find LLDB backend\n");
         return;
     }
 
@@ -669,6 +576,14 @@ static void onLoadRunExec(Session* session, const char* filename)
     // Temp test
     // Session_startLocal(context->session, (PDBackendPlugin*)pluginData->plugin, "t2-output/macosx-clang-debug-default/ProDBG.app/Contents/MacOS/prodbg");
     // Session_startLocal(context->session, (PDBackendPlugin*)pluginData->plugin, OBJECT_DIR "/crashing_native");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// We should mave this place some where better, I really don't like this approach but will have to do for now
+
+Con* getCoveredCon(int x, int y)
+{
+	return docksys_con_by_user_data(Session_getViewAt(s_context.session, x, y, 0));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -684,18 +599,20 @@ void ProDBG_event(int eventId)
 
     pd_info("eventId 0x%x\n", eventId);
 
-    Vec2 mousePos = context->inputState.mousePos;
+    Vec2 mousePos = InputState_getState()->mousePos;
+    (void)mousePos;
 
 #if PRODBG_USING_DOCKING
     if (eventId & PRODBG_MENU_POPUP_SPLIT_HORZ_SHIFT)
     {
-        UIDockingGrid* grid = Session_getDockingGrid(context->session);
-        UIDock* dockAtMouse = UIDock_getDockAt(grid, (int)mousePos.x, (int)mousePos.y);
-
         eventId &= (PRODBG_MENU_POPUP_SPLIT_HORZ_SHIFT - 1);
 
         ViewPluginInstance* instance = g_pluginUI->createViewPlugin(pluginsData[eventId]);
-        UIDock_splitHorizontal(Session_getDockingGrid(context->session), dockAtMouse, instance);
+		Con* con = getCoveredCon((int)mousePos.x, (int)mousePos.y);
+
+		docksys_horizontal_split(con, instance);
+
+        //UIDock_splitHorizontalAt(Session_getDockingGrid(context->session), (int)mousePos.x, (int)mousePos.y, instance);
 
         Session_addViewPlugin(context->session, instance);
         return;
@@ -703,14 +620,16 @@ void ProDBG_event(int eventId)
 
     if (eventId & PRODBG_MENU_POPUP_SPLIT_VERT_SHIFT)
     {
-
-        UIDockingGrid* grid = Session_getDockingGrid(context->session);
-        UIDock* dockAtMouse = UIDock_getDockAt(grid, (int)mousePos.x, (int)mousePos.y);
-
         eventId &= (PRODBG_MENU_POPUP_SPLIT_VERT_SHIFT - 1);
 
         ViewPluginInstance* instance = g_pluginUI->createViewPlugin(pluginsData[eventId]);
-        UIDock_splitVertical(Session_getDockingGrid(context->session), dockAtMouse, instance);
+		Con* con = getCoveredCon((int)mousePos.x, (int)mousePos.y);
+
+		docksys_vertical_split(con, instance);
+
+		printf("con %p\n", con);
+
+        //UIDock_splitVerticalAt(Session_getDockingGrid(context->session), (int)mousePos.x, (int)mousePos.y, instance);
 
         Session_addViewPlugin(context->session, instance);
         return;
@@ -720,6 +639,7 @@ void ProDBG_event(int eventId)
 
     // TODO: This code really needs to be made more robust.
 
+#if 0
     if (eventId >= PRODBG_MENU_PLUGIN_START && eventId < PRODBG_MENU_PLUGIN_START + 9)
     {
         ViewPluginInstance* instance = g_pluginUI->createViewPlugin(pluginsData[eventId - PRODBG_MENU_PLUGIN_START]);
@@ -731,7 +651,7 @@ void ProDBG_event(int eventId)
         Session_addViewPlugin(context->session, instance);
         return;
     }
-
+#endif
 
     switch (eventId)
     {
@@ -797,42 +717,7 @@ void ProDBG_event(int eventId)
     }
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_scroll(const PDMouseWheelEvent& wheelEvent)
-{
-    Context* context = &s_context;
-    context->inputState.scrollEvent = wheelEvent;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ProDBG_setMousePos(float x, float y)
-{
-    Context* context = &s_context;
-
-    context->inputState.mousePos.x = x;
-    context->inputState.mousePos.y = y;
-
-    IMGUI_setInputState(&context->inputState);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ProDBG_setMouseState(int button, int state)
-{
-    Context* context = &s_context;
-    (void)button;
-
-    InputState* inputState = &context->inputState;
-
-    // TODO: Proper mouse support
-
-    // TODO(marco): validate the button index that gets passed
-    inputState->mouseDown[button] = !!state;
-
-    IMGUI_setInputState(inputState);
-}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -842,28 +727,6 @@ bool ProDBG_getPopupHoverState()
     Context* context = &s_context;
     return context->popupHover;
 }
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ProDBG_keyDown(int key, int modifier)
-{
-    IMGUI_setKeyDown(key, modifier);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ProDBG_keyUp(int key, int modifier)
-{
-    IMGUI_setKeyUp(key, modifier);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void ProDBG_addChar(unsigned short c)
-{
-    IMGUI_addInputCharacter(c);
-}
-
 
 
 

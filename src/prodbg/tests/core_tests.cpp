@@ -9,6 +9,8 @@
 #include "core/file_monitor.h"
 #include "core/log.h"
 #include "core/plugin_handler.h"
+#include "core/settings.h"
+#include "pd_keys.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <foundation/types.h>
@@ -16,36 +18,36 @@
 #include <foundation/thread.h>
 #include <foundation/path.h>
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void plugin_handler_null_base_path(void**)
+void plugin_handler_null_base_path(void**)
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void plugin_handler_null_plugin(void**)
+void plugin_handler_null_plugin(void**)
 {
     assert_false(PluginHandler_addPlugin("dummyPath", 0));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void plugin_handler_dummy_paths(void**)
+void plugin_handler_dummy_paths(void**)
 {
     assert_false(PluginHandler_addPlugin("dummyPath", "dummy"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void plugin_handler_add_plugin(void**)
+void plugin_handler_add_plugin(void**)
 {
     assert_false(PluginHandler_addPlugin("dummyPath", "dummy"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void plugin_handler_add_plugin_true(void**)
+void plugin_handler_add_plugin_true(void**)
 {
     int count = 0;
 
@@ -68,7 +70,7 @@ static void plugin_handler_add_plugin_true(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void plugin_handler_find_plugin(void**)
+void plugin_handler_find_plugin(void**)
 {
     assert_null(PluginHandler_findPlugin(0, "dummyFile", "dummyName", false));
     assert_null(PluginHandler_findPlugin(0, "dummyFile", "dummyName", true));
@@ -88,7 +90,7 @@ static void plugin_handler_find_plugin(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void test_load_file_ok(void**)
+void test_load_file_ok(void**)
 {
     size_t size;
 
@@ -102,7 +104,7 @@ static void test_load_file_ok(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void test_load_file_fail(void**)
+void test_load_file_fail(void**)
 {
     size_t size;
 
@@ -385,10 +387,64 @@ void test_file_notification(void**)
 
     assert_int_equal(s_checkPhase, 5);
 
-
     FileMonitor_close();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void test_settings(void**)
+{
+    assert_true(Settings_loadSettings("test_data/settings.json"));
+
+    assert_string_equal(Settings_getString("default_native_backend", "mac"), "LLDB");
+    assert_string_equal(Settings_getString("default_native_backend", "windows"), "Microsoft Debugger Engine");
+    assert_int_equal(Settings_getInt("window_size", "width"), 1024);
+    assert_true((Settings_getReal("window_size", "scale") - 2.2) < 0.001f);
+
+    assert_true(Settings_loadSettings("test_data/user_settings.json"));
+
+    assert_string_equal(Settings_getString("default_native_backend", "mac"), "gdb");
+    assert_string_equal(Settings_getString("default_native_backend", "windows"), "windbg");
+    assert_int_equal(Settings_getInt("window_size", "width"), 1280);
+    assert_true((Settings_getReal("window_size", "scale") - 4.4) < 0.001f);
+
+    assert_int_equal(Settings_getInt("window_size", "not_existing_tag"), 0);
+    assert_null(Settings_getString("window_size", "not_existing_tag"));
+    assert_true(Settings_getReal("window_size", "not_existing_tag") < 0.0001f);
+
+    assert_false(Settings_loadSettings("test_data/user_settings_2.json"));
+
+    uint32_t key = Settings_getShortcut("Source Code View", "fast_open");
+    assert_int_equal((key & 0xf), PDKEY_CTRL);
+    assert_int_equal((key >> 4), 'o');
+
+    key = Settings_getShortcut("Source Code View", "open_file");
+#ifdef PRODBG_MAC
+    assert_int_equal((key & 0xf), PDKEY_ALT | PDKEY_SUPER);
+#else
+    assert_int_equal((key & 0xf), PDKEY_CTRL | PDKEY_ALT);
+#endif
+    assert_int_equal((key >> 4), 'o');
+
+    key = Settings_getShortcut("Source Code View", "funky");
+#ifdef PRODBG_WIN
+    assert_int_equal((key & 0xf), PDKEY_CTRL);
+    assert_int_equal((key >> 4), 'w');
+#else
+    assert_int_equal((key & 0xf), PDKEY_CTRL);
+    assert_int_equal((key >> 4), 'o');
+#endif
+
+    key = Settings_getShortcut("Source Code View", "multi_combo");
+    assert_int_equal((key & 0xf), PDKEY_CTRL | PDKEY_ALT | PDKEY_SHIFT | PDKEY_SUPER);
+    assert_int_equal((key >> 4), PDKEY_ESCAPE);
+
+    key = Settings_getShortcut("Source Code View", "f_key");
+    assert_int_equal((key & 0xf), 0); 
+    assert_int_equal((key >> 4), PDKEY_F4);
+
+    Settings_destroy();
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -409,6 +465,7 @@ int main()
         unit_test(test_load_file_fail),
         unit_test(test_commands),
         unit_test(test_file_notification),
+        unit_test(test_settings),
     };
 
     return run_tests(tests);

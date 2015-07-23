@@ -1,0 +1,46 @@
+{
+	"default_native_backend": {
+		"mac": "LLDB",
+		"windows": "Microsoft Debugger Engine",
+		"linux": "LLDB Mac",
+		"freebsd": "LLDB Mac"
+	},
+
+	"window_size":{
+		"width": 1024,
+		"height": 768,
+		"scale": 2.2
+	},
+
+	"window_position":{
+		"x": -1,
+		"y": -1
+	},
+
+	"Source Code View":{
+		"some_regular_setting": "test",
+		"keys":{
+			"fast_open": { 
+				"Default": "Ctrl+o"
+			},
+
+			"open_file": { 
+				"Default": "Ctrl+Alt+o",
+				"Mac": "Super+Alt+o"
+			},
+
+			"funky": { 
+				"Default": "Ctrl+o",
+				"Windows": "Ctrl+w"
+			},
+
+			"multi_combo": { 
+				"Default": "Super+Alt+Ctrl+Shift+Escape"
+			},
+
+			"f_key": { 
+				"Default": "F4"
+			}
+		}
+	}
+}

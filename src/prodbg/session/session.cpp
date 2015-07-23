@@ -1,25 +1,31 @@
+#ifdef PRODBG_MAC
+#include <foundation/apple.h>
+#endif
 #include "session.h"
 #include "session_private.h"
 #include "api/plugin_instance.h"
-#include "api/include/pd_script.h"
 #include "api/src/remote/pd_readwrite_private.h"
 #include "api/src/remote/remote_connection.h"
 #include "core/alloc.h"
 #include "core/log.h"
 #include "core/math.h"
 #include "core/file_monitor.h"
+#include "core/script.h"
 #include "core/plugin_handler.h"
+#include "core/service.h"
 #include "ui/plugin.h"
 #include "ui/bgfx/ui_host.h"
 #include "ui/bgfx/ui_dock_private.h" // TODO: Fix me
 #include "ui/plugin.h"
+#include "i3wm_docking.h"
+
 
 #include <stdlib.h>
 //#include <stb.h>
 #include <assert.h>
 
-#include <pd_view.h>
-#include <pd_backend.h>
+#include "pd_view.h"
+#include "pd_backend.h"
 
 #include <foundation/array.h>
 #include <foundation/path.h>
@@ -95,6 +101,8 @@ void Session_globalInit(bool reloadPlugins)
     if (!reloadPlugins)
         return;
 
+	//init_logging();
+
     FileMonitor_addPath(OBJECT_DIR, LIB_EXT, fileUpdateCallback, 0);
 }
 
@@ -102,6 +110,43 @@ void Session_globalInit(bool reloadPlugins)
 
 void Session_globalDestroy()
 {
+    int count = array_size(s_sessions);
+
+    for (int i = 0; i < count; ++i)
+        delete s_sessions[i];
+
+    array_clear(s_sessions);
+
+    FileMonitor_removePath(OBJECT_DIR);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Session_destroy(Session* session)
+{
+    int count = array_size(s_sessions);
+
+    for (int i = 0; i < count; ++i)
+    {
+        if (s_sessions[i] != session)
+            continue;
+
+        if (session->backend)
+            session->backend->plugin->destroyInstance(session->backend->userData);
+
+        delete session;
+
+        array_erase(s_sessions, i);
+
+        return;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Session** Session_getSessions()
+{
+    return s_sessions;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,20 +190,38 @@ struct Session* Session_create()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if PRODBG_USING_DOCKING
-
 void Session_createDockingGrid(Session* session, int width, int height)
 {
-    FloatRect rect = {{{ 0.0f, 0.0f, (float)width, (float)height }}};
+	(void)session;
+	(void)width;
+	(void)height;
 
-    session->uiDockingGrid = UIDock_createGrid(&rect);
+	docksys_create(0, 0, width, height);
+
+	session->i3_dock_grid = 0; //docksys_create_workspace("test_ws");
+
+    //tree_open_con(NULL, NULL);
+	//tree_split(focused, HORIZ);
+
+	printf("cerated dock grid %p\n", session->i3_dock_grid);
+
+#if 0
+    IntRect rect = {{{ 0, 0, width, height }}};
+
+    session->uiDockingGrid = 0; UIDock_createGrid(&rect);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool Session_loadLayout(Session* session, const char* filename, int width, int height)
 {
-    UIDockingGrid* grid = UIDock_loadLayout(filename, (float)width, (float)height);
+	(void)session;
+	(void)filename;
+	(void)width;
+	(void)height;
+	/*
+    UIDockingGrid* grid = UIDock_loadLayout(filename, width, height);
 
     if (!grid)
         return false;
@@ -169,11 +232,10 @@ bool Session_loadLayout(Session* session, const char* filename, int width, int h
 
     for (UIDock* dock : grid->docks)
         Session_addViewPlugin(session, dock->view);
+    */
 
     return true;
 }
-
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -222,18 +284,6 @@ Session* Session_createRemote(const char* target, int port)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* serviceFunc(const char* service)
-{
-    // TODO: Handle versions
-
-    if (!strcmp(service, PDMESSAGEFUNCS_GLOBAL))
-        return (void*)&g_serviceMessageFuncs;
-
-    return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 Session* Session_startLocal(Session* s, PDBackendPlugin* backend, const char* filename)
 {
     // Create the backend
@@ -241,7 +291,7 @@ Session* Session_startLocal(Session* s, PDBackendPlugin* backend, const char* fi
     s->type = Session_Local;
     s->backend = (PDBackendInstance*)alloc_zero(sizeof(struct PDBackendInstance));
     s->backend->plugin = backend;
-    s->backend->userData = backend->createInstance(serviceFunc);
+    s->backend->userData = backend->createInstance(Service_getService);
 
     // Set the executable if we have any
 
@@ -280,18 +330,6 @@ Session* Session_createLocal(PDBackendPlugin* backend, const char* filename)
     commonInit(s);
 
     return Session_startLocal(s, backend, filename);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Session_destroy(Session* session)
-{
-    if (session->backend)
-        session->backend->plugin->destroyInstance(session->backend->userData);
-
-    session->backend = 0;
-
-    delete session;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,9 +410,9 @@ static void executeCommand(Session* s, PDReader* reader)
 
     const char* command;
     PDRead_findString(reader, &command, "command", 0);
-    PDScriptState* scriptState;
-    PDScript_createState(&scriptState);
-    if (PDScript_loadString(scriptState, command))
+    ScriptState* scriptState;
+    Script_createState(&scriptState);
+    if (Script_loadString(scriptState, command))
         goto cleanup;
 
     /*PDScriptCallState callState;
@@ -389,7 +427,7 @@ static void executeCommand(Session* s, PDReader* reader)
 
     cleanup:
     //free(callState.funcName);
-    PDScript_destroyState(&scriptState);
+    Script_destroyState(&scriptState);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -410,6 +448,10 @@ static void updateScript(Session* s, PDReader* reader)
         }
     }
 }
+
+// TOOD: Fix me
+
+Con* getCoveredCon(int x, int y);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -439,7 +481,8 @@ static void updateLocal(Session* s, PDAction action)
     if (backend)
     {
         s->state = backend->plugin->update(backend->userData, action, s->reader, s->currentWriter);
-        g_pluginUI->setStatusText("%s Backend: %s", backend->plugin->name, getStateName(s->state));
+		if (g_pluginUI)
+			g_pluginUI->setStatusText("%s Backend: %s", backend->plugin->name, getStateName(s->state));
     }
 
     int len = array_size(s->viewPlugins);
@@ -454,9 +497,7 @@ static void updateLocal(Session* s, PDAction action)
 
         if (state == PluginUI::CloseView)
         {
-        #if PRODBG_USING_DOCKING
-            UIDock_deleteView(s->uiDockingGrid, p);
-        #endif
+			docksys_close_con(p);
             p->markDeleted = true;
         }
 
@@ -536,9 +577,7 @@ static void updateRemote(Session* s, PDAction action)
 
         if (state == PluginUI::CloseView)
         {
-        #if PRODBG_USING_DOCKING
-            UIDock_deleteView(s->uiDockingGrid, p);
-        #endif
+			docksys_close_con(p);
             p->markDeleted = true;
         }
 
@@ -761,7 +800,7 @@ SessionStatus Session_onMenu(Session* session, int eventId)
                 backend = (PDBackendInstance*)alloc_zero(sizeof(struct PDBackendInstance));
                 backend->plugin = plugin;
                 backend->pluginData = pluginData;
-                backend->userData = backend->plugin->createInstance(serviceFunc);
+                backend->userData = backend->plugin->createInstance(Service_getService);
             }
 
             session->backend = backend;
@@ -782,15 +821,34 @@ SessionStatus Session_onMenu(Session* session, int eventId)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#if PRODBG_USING_DOCKING
-
-struct UIDockingGrid* Session_getDockingGrid(struct Session* session)
+struct Con* Session_getDockingGrid(struct Session* session)
 {
-    return session->uiDockingGrid;
+    //return session->uiDockingGrid;
+    return session->i3_dock_grid;
 }
 
-#endif
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct ViewPluginInstance* Session_getViewAt(struct Session* session, int x, int y, int border)
+{
+	int count = 0;
 
+	ViewPluginInstance** instances = Session_getViewPlugins(session, &count);
+
+	for (int i = 0; i < count; ++i)
+	{
+        IntRect rect = instances[i]->rect; 
+
+        const int x0 = rect.x;
+        const int y0 = rect.y;
+        const int x1 = (rect.width + x0) - border;
+        const int y1 = (rect.height + y0) - border;
+
+        if ((x >= x0 && x < x1) && (y >= y0 && y < y1))
+        	return instances[i]; 
+    }
+
+    return 0;
+}
 
 

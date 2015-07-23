@@ -1,5 +1,5 @@
-#include <pd_view.h>
-#include <pd_backend.h>
+#include "pd_view.h"
+#include "pd_backend.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -98,7 +98,7 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
 
         uiFuncs->text("%s: ", addressText); uiFuncs->sameLine(0, -1);
 
-        PDVec4 color = { 1.0, 0.0f, 0.0f, 1.0f };
+        PDColor color = PDUI_COLOR(255, 0, 0, 255); 
 
         // Print hex values
 
@@ -149,7 +149,7 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
 void drawUI(HexMemoryData* data, PDUI* uiFuncs)
 {
     uiFuncs->pushItemWidth(100);
-    uiFuncs->inputText("Start Address", data->startAddress, sizeof(data->startAddress), PDInputTextFlags_CharsHexadecimal, 0, 0);
+    uiFuncs->inputText("Start Address", data->startAddress, sizeof(data->startAddress), PDUIInputTextFlags_CharsHexadecimal, 0, 0);
     uiFuncs->sameLine(0, -1);
     uiFuncs->inputText("End Address", data->endAddress, sizeof(data->endAddress), 0, 0, 0);
     uiFuncs->popItemWidth();
@@ -185,7 +185,8 @@ void drawUI(HexMemoryData* data, PDUI* uiFuncs)
     //printf("pos %f %f\n", pos.x, pos.y);
     //printf("rect %f %f %f %f\n", rect.x, rect.y, rect.width, rect.height);
 
-    const float fontWidth = uiFuncs->getFontWidth();
+	// TODO: Fix me
+    const float fontWidth = 13.0f; // uiFuncs->getFontWidth();
 
     float drawableChars = (float)(int)(windowSize.x / (fontWidth + 23));
 
@@ -292,12 +293,38 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* w
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+static int saveState(void* userData, struct PDSaveState* saveState)
+{
+    HexMemoryData* data = (HexMemoryData*)userData;
+
+    PDIO_writeString(saveState, data->startAddress);
+    PDIO_writeString(saveState, data->endAddress);
+
+    return 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static int loadState(void* userData, struct PDLoadState* loadState)
+{
+    HexMemoryData* data = (HexMemoryData*)userData;
+
+    PDIO_readString(loadState, data->startAddress, sizeof(data->startAddress));
+    PDIO_readString(loadState, data->endAddress, sizeof(data->endAddress));
+
+    return 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 static PDViewPlugin plugin =
 {
     "Hex Memory View",
     createInstance,
     destroyInstance,
     update,
+    saveState,
+    loadState,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

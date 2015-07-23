@@ -1,6 +1,7 @@
 #pragma once
 
 #include "api/plugin_instance.h"
+#include "ui_dock.h"
 
 #include <vector> // TODO: replace with custom arrays
 
@@ -23,6 +24,7 @@ enum UIDockSide
     UIDockSide_Bottom,
     UIDockSide_Right,
     UIDockSide_Left,
+    UIDockSide_Tab,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,8 +45,9 @@ struct UIDockSizer
     std::vector<UIDock*> cons;  // connected docks
     std::vector<int> dockIds; // TODO: used during loading, move?
     UIDockSizerDir dir;
-    FloatRect rect;
+    IntRect rect;
     int id;
+    bool highlight;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,11 +109,25 @@ enum UIDockStatus
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct OverlayData
+{
+    IntRect rect;
+    uint32_t color;
+    bool enabled;
+    UIDock* dragDock;
+    UIDock* target;
+    UIDockSide targetSide;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 struct UIDockingGrid
 {
     UIDockingGrid() : state(UIDockState_None)
     {
         prevDragPos = { 0.0f, 0.0f };
+        idCounter = 0;
+        memset(&overlay, 0, sizeof(overlay));
     }
 
     std::vector<UIDock*> docks;
@@ -119,9 +136,11 @@ struct UIDockingGrid
     UIDockSizer bottomSizer;
     UIDockSizer rightSizer;
     UIDockSizer leftSizer;
-    FloatRect rect;
+    IntRect rect;
 
+    OverlayData overlay;
     UIDockState state;
+    int idCounter;
     Vec2 prevDragPos;
     std::vector<UIDockSizer*> hoverSizers;
 };

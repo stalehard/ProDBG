@@ -8,8 +8,7 @@
 #include "core/file.h"
 #include "core/log.h"
 #include "ui_render.h"
-
-#include "input/input_state.h"
+#include "core/input_state.h"
 #include <stdio.h>
 #include <pd_keys.h>
 #include <bgfx.h>
@@ -21,63 +20,69 @@ static bgfx::TextureHandle s_textureId;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void imguiRender(ImDrawList** const cmd_lists, int cmd_lists_count)
+static void imguiRender(ImDrawData* draw_data)
 {
-    (void)cmd_lists;
-    (void)cmd_lists_count;
-
     const float width = ImGui::GetIO().DisplaySize.x;
     const float height = ImGui::GetIO().DisplaySize.y;
 
     float ortho[16];
-    bx::mtxOrtho(ortho, 0.0f, width, height, 0.0f, -1.0f, 1.0f);
+	bx::mtxOrtho(ortho, 0.0f, width, height, 0.0f, -1.0f, 1.0f);
 
     bgfx::setViewTransform(0, NULL, ortho);
 
-    // Render command lists
+	// Render command lists
+	for (int32_t ii = 0; ii < draw_data->CmdListsCount; ++ii)
+	{
+		bgfx::TransientVertexBuffer tvb;
+		bgfx::TransientIndexBuffer tib;
 
-    for (int n = 0; n < cmd_lists_count; n++)
-    {
-        bgfx::TransientVertexBuffer tvb;
-
-        uint32_t vtx_size = 0;
-
-        const ImDrawList* cmd_list = cmd_lists[n];
-        const ImDrawVert* vtx_buffer = cmd_list->vtx_buffer.begin();
-        (void)vtx_buffer;
-
-        const ImDrawCmd* pcmd_end_t = cmd_list->commands.end();
-
-        for (const ImDrawCmd* pcmd = cmd_list->commands.begin(); pcmd != pcmd_end_t; pcmd++)
-            vtx_size += (uint32_t)pcmd->vtx_count;
+		const ImDrawList* cmd_list = draw_data->CmdLists[ii];
+		uint32_t vtx_size = (uint32_t)cmd_list->VtxBuffer.size();
+		uint32_t idx_size = (uint32_t)cmd_list->IdxBuffer.size();
 
         UIRender_allocPosTexColorTb(&tvb, (uint32_t)vtx_size);
+		bgfx::allocTransientIndexBuffer(&tib, idx_size);
 
-        ImDrawVert* verts = (ImDrawVert*)tvb.data;
+		ImDrawVert* verts = (ImDrawVert*)tvb.data;
+		memcpy(verts, cmd_list->VtxBuffer.begin(), vtx_size * sizeof(ImDrawVert) );
 
-        memcpy(verts, vtx_buffer, vtx_size * sizeof(ImDrawVert));
+		ImDrawIdx* indices = (ImDrawIdx*)tib.data;
+		memcpy(indices, cmd_list->IdxBuffer.begin(), idx_size * sizeof(ImDrawIdx) );
 
-        uint32_t vtx_offset = 0;
-        const ImDrawCmd* pcmd_end = cmd_list->commands.end();
-        for (const ImDrawCmd* pcmd = cmd_list->commands.begin(); pcmd != pcmd_end; pcmd++)
-        {
-            bgfx::setState(0
-                           | BGFX_STATE_RGB_WRITE
-                           | BGFX_STATE_ALPHA_WRITE
-                           | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-                           | BGFX_STATE_MSAA);
+		uint32_t elem_offset = 0;
+		const ImDrawCmd* pcmd_begin = cmd_list->CmdBuffer.begin();
+		const ImDrawCmd* pcmd_end = cmd_list->CmdBuffer.end();
 
-            bgfx::setScissor(uint16_t(pcmd->clip_rect.x)
-                             , uint16_t(pcmd->clip_rect.y)
-                             , uint16_t(pcmd->clip_rect.z - pcmd->clip_rect.x)
-                             , uint16_t(pcmd->clip_rect.w - pcmd->clip_rect.y)
-                             );
+		for (const ImDrawCmd* pcmd = pcmd_begin; pcmd != pcmd_end; pcmd++)
+		{
+			if (pcmd->UserCallback)
+			{
+				pcmd->UserCallback(cmd_list, pcmd);
+				elem_offset += pcmd->ElemCount;
+				continue;
+			}
 
-            UIRender_posTexColor(&tvb, vtx_offset, pcmd->vtx_count, s_textureId);
+			if (0 == pcmd->ElemCount)
+				continue;
 
-            vtx_offset += pcmd->vtx_count;
-        }
-    }
+			bgfx::setState(0
+				| BGFX_STATE_RGB_WRITE
+				| BGFX_STATE_ALPHA_WRITE
+				| BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
+				| BGFX_STATE_MSAA
+				);
+			bgfx::setScissor(uint16_t(bx::fmax(pcmd->ClipRect.x, 0.0f) )
+				, uint16_t(bx::fmax(pcmd->ClipRect.y, 0.0f) )
+				, uint16_t(bx::fmin(pcmd->ClipRect.z, 65535.0f)-bx::fmax(pcmd->ClipRect.x, 0.0f) )
+				, uint16_t(bx::fmin(pcmd->ClipRect.w, 65535.0f)-bx::fmax(pcmd->ClipRect.y, 0.0f) )
+				);
+			union { void* ptr; bgfx::TextureHandle handle; } texture = { pcmd->TextureId };
+
+			UIRender_posIdxTexColor(&tvb, &tib, vtx_size, elem_offset, pcmd->ElemCount, 0 != texture.handle.idx ? texture.handle : s_textureId);
+
+			elem_offset += pcmd->ElemCount;
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,7 +128,7 @@ void IMGUI_setup(int width, int height)
     style.Colors[ImGuiCol_CloseButtonHovered] = ImVec4(0.70f, 0.70f, 0.70f, 0.60f);
     style.Colors[ImGuiCol_CloseButtonActive] = ImVec4(0.80f, 0.80f, 0.80f, 1.00f);
     style.Colors[ImGuiCol_TitleBgCollapsed] = style.Colors[ImGuiCol_TitleBg];
-    style.WindowPadding = ImVec2(0, 0);
+    style.WindowPadding = ImVec2(4, 0);
 
     style.WindowRounding = 0.0f;
 
@@ -151,32 +156,36 @@ void IMGUI_updateSize(int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_setInputState(const InputState* inputState)
-{
-    ImGuiIO& io = ImGui::GetIO();
-    io.MousePos = ImVec2(inputState->mousePos.x, inputState->mousePos.y);
-    io.MouseDown[0] = inputState->mouseDown[MouseButton_Left];
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void IMGUI_preUpdate(const InputState* inputState, float deltaTime)
+void IMGUI_preUpdate(float deltaTime)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.DeltaTime = deltaTime;
-    io.MousePos = ImVec2(inputState->mousePos.x, inputState->mousePos.y);
-    io.MouseDown[0] = inputState->mouseDown[MouseButton_Left];
 
     ImGui::NewFrame();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_setMouse(float x, float y, int mouseLmb)
+void IMGUI_setMouseState(int mouseBtn, int state)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.MouseDown[mouseBtn] = !!state;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void IMGUI_setMousePos(float x, float y)
 {
     ImGuiIO& io = ImGui::GetIO();
     io.MousePos = ImVec2(x, y);
-    io.MouseDown[0] = !!mouseLmb;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void IMGUI_setScroll(float scroll)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.MouseWheel = scroll;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -236,46 +245,4 @@ void IMGUI_addInputCharacter(unsigned short c)
 void IMGUI_postUpdate()
 {
     ImGui::Render();
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool IMGUI_beginMainMenuBar()
-{
-    return ImGui::BeginMainMenuBar();
-}
-void IMGUI_endMainMenuBar()
-{
-    ImGui::EndMainMenuBar();
-}
-
-bool IMGUI_beginMenu(const char *menuName)
-{
-    return ImGui::BeginMenu(menuName);
-}
-bool IMGUI_menuItem(const char *itemName)
-{
-    return ImGui::MenuItem(itemName);
-}
-void IMGUI_endMenu()
-{
-    ImGui::EndMenu();
-}
-
-void IMGUI_openPopup(const char *popupId)
-{
-    ImGui::OpenPopup(popupId);
-}
-bool IMGUI_beginPopup(const char *popupName)
-{
-    return ImGui::BeginPopup(popupName);
-}
-void IMGUI_endPopup()
-{
-    ImGui::EndPopup();
-}
-
-bool IMGUI_isItemHovered()
-{
-    return ImGui::IsItemHovered();
 }

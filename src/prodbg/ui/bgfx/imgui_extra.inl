@@ -1,6 +1,8 @@
 
 #include "ui_sc_editor.h"
 
+#include <Scintilla.h>
+
 namespace ImGui
 {
 
@@ -36,8 +38,11 @@ ImVec2 GetRelativeMousePos()
 
 bool IsFocusWindowKeyDown(int key, bool repeat)
 {
-	if (!GetWindowIsFocused())
+	if (!IsWindowFocused())
 		return false;
+
+	//if (!GetWindowIsFocused())
+	//	return false;
 
     //ImGuiState& g = GImGui;
     //ImGuiWindow* window = GetCurrentWindow();
@@ -80,29 +85,13 @@ bool IsActiveWindow(ImGuiWindow* window)
 
 ImScEditor* ScInputText(const char* label, float xSize, float ySize, void (*callback)(void*), void* userData)
 {
-    ImGuiState& g = *GImGui;
     ImGuiWindow* window = GetCurrentWindow();
-    if (window->SkipItems)
-        return 0;
+    const ImGuiID id = window->GetID(label);
 
     (void)callback;
     (void)userData;
 
-    const ImGuiIO& io = g.IO;
-    const ImGuiStyle& style = g.Style;
-
-    const ImGuiID id = window->GetID(label);
-    //const float w = window->DC.ItemWidth.back();
-
-    const ImVec2 text_size = CalcTextSize(label, NULL, true);
-
-    const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + window->Size); 
-    const ImRect bb(frame_bb.Min, frame_bb.Max + ImVec2(text_size.x > 0.0f ? (style.ItemInnerSpacing.x + text_size.x) : 0.0f, 0.0f));
-
-    ItemSize(bb);
-
-    if (!ItemAdd(frame_bb, &id))
-        return 0;
+    //ImGui::BeginChild("Log");
 
 	ImGuiStorage* storage = GetStateStorage();
 	ScEditor* editor = (ScEditor*)storage->GetVoidPtr(id);
@@ -111,45 +100,48 @@ ImScEditor* ScInputText(const char* label, float xSize, float ySize, void (*call
 	{
 		(void)xSize;
 		(void)ySize;
-		editor = ScEditor_create((int)frame_bb.Max.x, (int)frame_bb.Max.y);
+		editor = ScEditor_create((int)xSize, (int)ySize);
 		storage->SetVoidPtr(id, (void*)editor);
 	}
 
-    // NB: we are only allowed to access 'edit_state' if we are the active widget.
-    //ImGuiTextEditState& edit_state = g.InputTextState;
+	ImScEditor* editorInterface = ScEditor_getInterface(editor);
 
-    const bool hovered = IsHovered(frame_bb, id);
+	//float textSize = ImGui::GetTextLineHeightWithSpacing() - 1;
+	// TODO: Remove hardcoded value, ask scintilla
+	float textSize = 26;
 
-    if (hovered)
-        g.HoveredId = id;
+	ScEditor_resize(editor, 0, 0, (int)window->Size.x - 20, (int)window->Size.y); 
 
-    if (hovered && io.MouseClicked[0])
-    {
-        if (g.ActiveId != id)
-        {
-            // Start edition
+	int lineCount = (int)editorInterface->SendCommand(SCI_GETLINECOUNT, 0, 0);
 
-        }
+	editorInterface->HandleInput();
 
-        g.ActiveId = id;
-        FocusWindow(window);
-    }
-    else if (io.MouseClicked[0])
-    {
-        // Release focus when we click outside
-        if (g.ActiveId == id)
-        {
-            g.ActiveId = 0;
-        }
-    }
+	ImGuiListClipper clipper(lineCount, textSize);
+
+	//ImVec2 pos = window->DC.CursorPos;
 
     ScEditor_setDrawList(GetWindowDrawList());
     ScEditor_setFont(GetWindowFont());
-	ScEditor_setPos(frame_bb.Min.x, frame_bb.Min.y);
+	ScEditor_setPos(0.0f, 14.0f);
 
-	ScEditor_resize(editor, 0, 0, (int)(frame_bb.Max.x - frame_bb.Min.x) , (int)(frame_bb.Max.y - frame_bb.Min.y));
+	//int currentPos = (int)editorInterface->SendCommand(SCN_GETTOPLINE, 0, 0);
+
+	//float scrollPos = ImGui::GetScrollPosY();
 	
-	return ScEditor_getInterface(editor);
+	//int iPos = (int)(((int)ImGui::GetScrollPosY()) / (int)(textSize)); 
+
+	//if (currentPos != iPos)
+	//{
+	editorInterface->ScrollTo(clipper.DisplayStart);
+	//}
+
+	//printf("current pos in scintilla %d - pos sent %d\n", newPos, iPos);
+
+	clipper.End();
+
+    //ImGui::EndChild();
+	
+	return editorInterface;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

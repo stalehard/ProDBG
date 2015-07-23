@@ -336,7 +336,7 @@ public:
 
     void Update()
     {
-        HandleInput();
+        //HandleInput();
         Tick();
     }
 
@@ -356,6 +356,7 @@ public:
         }
         else
         {
+        	printf("marker add %d\n", lineNumber);
             // Breakpoint added
             m_breakpointLines.push_back(lineNumber);
             SendCommand(SCI_MARKERADD, lineNumber /* line number */, 0 /* marker id */);
@@ -440,10 +441,12 @@ public:
         // TODO: Would be better to decouple ImGui key values here and abstract it into a prodbg api instead
         if (IsKeyPressedMap(ImGuiKey_DownArrow, true))
         {
+        	ImGui::SetScrollY(ImGui::GetScrollY() + 23); 
             Editor::KeyDown(SCK_DOWN /*SCK_NEXT*/, false, false, false);
         }
         else if (IsKeyPressedMap(ImGuiKey_UpArrow, true))
         {
+        	ImGui::SetScrollY(ImGui::GetScrollY() - 23); 
             Editor::KeyDown(SCK_UP /*SCK_PRIOR*/, false, false, false);
         }
         else if (IsKeyPressedMap(ImGuiKey_V, false))
@@ -476,7 +479,7 @@ public:
                 free(result);
             }
         #else
-            ButtonDown(pt, ImGui::IsMouseDown(0), false, false, false);
+            ButtonDown(pt, (unsigned int)io.MouseDownDuration[0], false, false, false);
         #endif
         }
     }
@@ -633,11 +636,9 @@ public:
         //SCI_MARKERDEFINEPIXMAP
         SendCommand(SCI_MARKERDEFINE, 0, SC_MARK_RGBAIMAGE);
 
-
         SetFocusState(true);
         CaretSetPeriod(0);
 
-        /*
            size_t textSize = 0;
            const char* text = static_cast<const char*>(File_loadToMemory("examples/fake_6502/fake6502_main.c", &textSize, 0));
            assert(text);
@@ -646,7 +647,10 @@ public:
                     reinterpret_cast<sptr_t>(static_cast<const char*>(text)));
 
            free((void*)text);
-         */
+
+        SendCommand(SCI_MARKERADD, 0, 0);
+        SendCommand(SCI_MARKERADD, 1, 0);
+        SendCommand(SCI_MARKERADD, 2, 0);
 
         // Need to do this after setting the text
         //SendCommand(SCI_SETREADONLY, 1);
@@ -786,6 +790,18 @@ public:
 
     sptr_t SendCommand(unsigned int iMessage, uptr_t wParam = 0, sptr_t lParam = 0)
     {
+		// Handle our messages first and the fallback on default path
+
+    	switch (iMessage)
+		{
+			case SCN_TOGGLE_BREAKPOINT:
+			{
+				printf("toggle breakpoint\n");
+				ToggleBreakpoint();
+				return 0;
+			}
+		}
+
         return WndProc(iMessage, wParam, lParam);
     }
 
@@ -820,6 +836,23 @@ void ImScEditor::Draw()
 {
     ScEditor* editor = (ScEditor*)privateData;
     ScEditor_render(editor);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ImScEditor::HandleInput()
+{
+    ScEditor* editor = (ScEditor*)privateData;
+    if (editor)
+    	editor->HandleInput();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ImScEditor::ScrollTo(int line, bool moveThumb)
+{
+    ScEditor* editor = (ScEditor*)privateData;
+    editor->ScrollTo(line, moveThumb);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

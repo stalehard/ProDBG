@@ -61,6 +61,12 @@ typedef enum PDEventType
     PDEventType_setDisassembly,
     PDEventType_getStatus,
     PDEventType_setStatus,
+    PDEventType_setThreads,
+    PDEventType_getThreads,
+    PDEventType_selectThread,
+    PDEventType_selectFrame,
+    PDEventType_getSourceFiles,
+    PDEventType_setSourceFiles,
 
     // setbreakpoint send a breakpoint to the backend with supplied id
     // Back end will reply if this worked correct with supplied ID
