@@ -16,10 +16,12 @@ class BgfxPluginUI : public PluginUI
     void postUpdate(); // update after plugins
 
     int getStatusBarSize();
+    int getMenuBarSize();
     void setStatusTextNoFormat(const char* text);
 
 private:
     int m_statusSize = 18;
+    int m_menuBarSize = 19;
     char m_statusText[4096];
 };
 

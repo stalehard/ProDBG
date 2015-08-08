@@ -7,7 +7,7 @@
         "x": 0,
         "y": 0,
         "width": 1024,
-        "height": 750
+        "height": 731
     },
     "window_rect": {
         "x": 0,
@@ -26,7 +26,7 @@
                 "x": 0,
                 "y": 0,
                 "width": 1024,
-                "height": 503
+                "height": 484
             },
             "window_rect": {
                 "x": 0,
@@ -43,15 +43,15 @@
                     "percent": 0.7275390625,
                     "rect": {
                         "x": 0,
-                        "y": 0,
+                        "y": 19,
                         "width": 745,
-                        "height": 503
+                        "height": 484
                     },
                     "window_rect": {
                         "x": 3,
                         "y": 0,
                         "width": 739,
-                        "height": 500
+                        "height": 481
                     },
                     "userdata": true,
                     "plugin_name": "Source Code View",
@@ -64,15 +64,15 @@
                     "percent": 0.2724609375,
                     "rect": {
                         "x": 745,
-                        "y": 0,
+                        "y": 19,
                         "width": 279,
-                        "height": 503
+                        "height": 484
                     },
                     "window_rect": {
                         "x": 3,
                         "y": 0,
                         "width": 273,
-                        "height": 500
+                        "height": 481
                     },
                     "userdata": true,
                     "plugin_name": "CallStack",
@@ -89,7 +89,7 @@
                 "x": 0,
                 "y": 503,
                 "width": 1024,
-                "height": 247
+                "height": 228
             },
             "window_rect": {
                 "x": 0,
@@ -108,13 +108,13 @@
                         "x": 0,
                         "y": 503,
                         "width": 512,
-                        "height": 247
+                        "height": 228
                     },
                     "window_rect": {
                         "x": 3,
                         "y": 0,
                         "width": 506,
-                        "height": 244
+                        "height": 225
                     },
                     "userdata": true,
                     "plugin_name": "Locals",
@@ -129,13 +129,13 @@
                         "x": 512,
                         "y": 503,
                         "width": 512,
-                        "height": 247
+                        "height": 228
                     },
                     "window_rect": {
                         "x": 3,
                         "y": 0,
                         "width": 506,
-                        "height": 244
+                        "height": 225
                     },
                     "userdata": true,
                     "plugin_name": "Hex Memory View",

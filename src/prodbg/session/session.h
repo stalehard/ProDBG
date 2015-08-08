@@ -75,7 +75,7 @@ void Session_loadSourceFile(Session* session, const char* filename);
 void Session_toggleBreakpointCurrentLine(Session* s);
 
 struct Con* Session_getDockingGrid(struct Session* session);
-void Session_createDockingGrid(struct Session* session, int width, int height);
+void Session_createDockingGrid(struct Session* session, int topOffset, int width, int height);
 
 
 

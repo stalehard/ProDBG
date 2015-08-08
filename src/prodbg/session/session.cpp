@@ -190,21 +190,21 @@ struct Session* Session_create()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_createDockingGrid(Session* session, int width, int height)
+void Session_createDockingGrid(Session* session, int topOffset, int width, int height)
 {
 	(void)session;
+    (void)topOffset;
 	(void)width;
 	(void)height;
 
-	int menuBarOffset = 20;
-	docksys_create(0, menuBarOffset, width, height);
+	docksys_create(0, topOffset, width, height);
 
 	session->i3_dock_grid = 0; //docksys_create_workspace("test_ws");
 
     //tree_open_con(NULL, NULL);
 	//tree_split(focused, HORIZ);
 
-	printf("cerated dock grid %p\n", session->i3_dock_grid);
+	printf("created dock grid %p\n", session->i3_dock_grid);
 
 #if 0
     IntRect rect = {{{ 0, 0, width, height }}};

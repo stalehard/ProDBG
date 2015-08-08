@@ -45,8 +45,8 @@ Con* docksys_create_workspace(const char *name)
 
 void docksys_create(int x, int y, int width, int height)
 {
-	tree_init((I3Rect) { 0, 0, (uint32_t)width, (uint32_t)height });
-	fake_outputs_init(0, 0, (uint32_t)width, (uint32_t)height);
+	tree_init((I3Rect) { (uint32_t)x, (uint32_t)y, (uint32_t)width, (uint32_t)height });
+	fake_outputs_init((uint32_t)x, (uint32_t)y, (uint32_t)width, (uint32_t)height);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

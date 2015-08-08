@@ -49,6 +49,7 @@ struct PluginUI
 
     virtual void setStatusTextNoFormat(const char* text) = 0;
     virtual int getStatusBarSize() = 0;
+    virtual int getMenuBarSize() = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

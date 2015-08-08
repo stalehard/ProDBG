@@ -95,9 +95,9 @@ static const char* s_plugins[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void loadLayout(Session* session, int width, int height)
+void loadLayout(Session* session, int topOffset, int width, int height)
 {
-    Session_createDockingGrid(session, width, height);
+    Session_createDockingGrid(session, topOffset, width, height);
 
 	if (docksys_load_layout("data/current_layout_2.json"))
 		return;
@@ -240,7 +240,7 @@ void ProDBG_create(void* window, int width, int height)
 
     g_pluginUI->create(window, width, height);
 
-    loadLayout(context->session, width, height - g_pluginUI->getStatusBarSize());
+    loadLayout(context->session, g_pluginUI->getMenuBarSize(), width, height - g_pluginUI->getStatusBarSize() - g_pluginUI->getMenuBarSize());
 
     (void)window;
 

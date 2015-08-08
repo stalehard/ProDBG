@@ -2347,6 +2347,11 @@ int BgfxPluginUI::getStatusBarSize()
     return m_statusSize;
 }
 
+int BgfxPluginUI::getMenuBarSize()
+{
+    return m_menuBarSize;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void renderStatusBar(const char* text, float statusSize)
