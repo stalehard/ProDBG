@@ -332,7 +332,7 @@ static void separator()
 
 static void sameLine(int columnX, int spacingW)
 {
-    ImGui::SameLine(columnX, spacingW);
+    ImGui::SameLine((float)columnX, (float)spacingW);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2567,6 +2567,7 @@ void BgfxPluginUI::create(void* windowHandle, int width, int height)
     s_context.height = height;
 
 	Service_register(&g_serviceMessageFuncs, PDMESSAGEFUNCS_GLOBAL);
+	Service_register(&g_dialogFuncs, PDDIALOGS_GLOBAL);
 
     Cursor_init();
 }

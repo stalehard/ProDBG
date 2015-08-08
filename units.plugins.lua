@@ -212,6 +212,34 @@ SharedLibrary {
 -----------------------------------------------------------------------------------------------------------------------
 
 SharedLibrary {
+    Name = "workspace_plugin",
+    
+    Env = {
+        CPPPATH = { 
+			"src/external/foundation_lib",
+        	"api/include", 
+        },
+        CXXOPTS = { { "-fPIC"; Config = "linux-gcc"; }, },
+    },
+
+    Sources = { "src/plugins/workspace/workspace_plugin.cpp" },
+
+    Depends = { "foundation_lib" },
+
+    Frameworks = { "Cocoa"  },
+
+    Libs = { 
+      { "Ws2_32.lib", "psapi.lib", "iphlpapi.lib", "wsock32.lib", "Shell32.lib", "kernel32.lib", "user32.lib", "gdi32.lib", "Comdlg32.lib", "Advapi32.lib" ; Config = { "win32-*-*", "win64-*-*" } },
+	  -- { "third-party/lib/wx/wx_osx_cocoau_core-3.1", "third-party/lib/wx/wwx_baseu-3.1" ; Config = { "macosx-*-*", "macosx_test-*-*" } },
+    },
+
+
+    IdeGenerationHints = { Msvc = { SolutionFolder = "Plugins" } },
+}
+
+-----------------------------------------------------------------------------------------------------------------------
+
+SharedLibrary {
     Name = "c64_vice_plugin",
     
     Env = {
@@ -268,6 +296,7 @@ Default "locals_plugin"
 Default "threads_plugin"
 Default "breakpoints_plugin"
 Default "hex_memory_plugin"
+Default "workspace_plugin"
 Default "console_plugin"
 Default "c64_vice_plugin"
 

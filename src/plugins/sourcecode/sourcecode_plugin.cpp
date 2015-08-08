@@ -100,27 +100,14 @@ static void destroyInstance(void* userData)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void setExceptionLocation(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, SourceCodeData* data, PDReader* inEvents)
+static void setSourceCodeFile(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, SourceCodeData* data, const char* filename, uint32_t line)
 {
-    const char* filename;
-    uint32_t line;
-
-    // TODO: How to show this? Tell user to switch to disassembly view?
-
-    if (PDRead_findString(inEvents, &filename, "filename", 0) == PDReadStatus_notFound)
-        return;
-
-    if (PDRead_findU32(inEvents, &line, "line", 0) == PDReadStatus_notFound)
-        return;
-
     if (strcmp(filename, data->filename))
     {
         size_t size = 0;
         void* fileData = readFileFromDisk(filename, &size);
 
         printf("reading file to buffer %s\n", filename);
-
-        (void)uiFuncs;
 
         PDUI_setTitle(uiFuncs, filename);
 
@@ -143,9 +130,24 @@ static void setExceptionLocation(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, So
     PDUI_SCSendCommand(sourceFuncs, SCI_GOTOLINE, (uintptr_t)line, 0);
 
     data->line = (int)line;
+}
 
-    //if (strcmp(filename, data->filename))
-    // PDUI_setTitle(uiFuncs, filename); 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void setExceptionLocation(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, SourceCodeData* data, PDReader* inEvents)
+{
+    const char* filename;
+    uint32_t line;
+
+    // TODO: How to show this? Tell user to switch to disassembly view?
+
+    if (PDRead_findString(inEvents, &filename, "filename", 0) == PDReadStatus_notFound)
+        return;
+
+    if (PDRead_findU32(inEvents, &line, "line", 0) == PDReadStatus_notFound)
+        return;
+
+	setSourceCodeFile(uiFuncs, sourceFuncs, data, filename, line);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -168,20 +170,23 @@ static void updateKeyboard(SourceCodeData* data, PDUISCInterface* sourceFuncs, P
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void toggleBreakpointCurrentLine(SourceCodeData* data, PDWriter* writer)
+static void toggleBreakpointCurrentLine(PDUISCInterface* sourceFuncs, SourceCodeData* data, PDWriter* writer)
 {
     (void)data;
     (void)writer;
-    /*
-       // TODO: Currenty we don't handly if we set breakpoints on a line we can't
 
-       PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
-       PDWrite_string(writer, "filename", data->file.filename);
-       PDWrite_u32(writer, "line", (unsigned int)data->cursorPos + 1);
-       PDWrite_eventEnd(writer);
+	PDUI_SCSendCommand(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
 
-       data->file.lines[data->cursorPos].breakpoint = !data->file.lines[data->cursorPos].breakpoint;
-     */
+	uint32_t currentLine = (uint32_t)PDUI_SCSendCommand(sourceFuncs, SCN_GETCURRENT_LINE, 0, 0);
+
+	printf("currentLine %d\n", currentLine);
+
+	// TODO: Currenty we don't handly if we set breakpoints on a line we can't
+
+	PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
+	PDWrite_string(writer, "filename", data->filename);
+	PDWrite_u32(writer, "line", currentLine);
+	PDWrite_eventEnd(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -206,9 +211,21 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* w
                 break;
             }
 
+			case PDEventType_setSourceCodeFile:
+			{
+				const char* filename;
+
+    			if (PDRead_findString(inEvents, &filename, "filename", 0) == PDReadStatus_notFound)
+    				break;
+
+				setSourceCodeFile(uiFuncs, sourceFuncs, data, filename, 0);
+
+				break;
+			}
+
             case PDEventType_toggleBreakpointCurrentLine:
             {
-                toggleBreakpointCurrentLine(data, writer);
+                toggleBreakpointCurrentLine(sourceFuncs, data, writer);
                 break;
             }
 
