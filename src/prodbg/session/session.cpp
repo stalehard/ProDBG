@@ -196,7 +196,8 @@ void Session_createDockingGrid(Session* session, int width, int height)
 	(void)width;
 	(void)height;
 
-	docksys_create(0, 0, width, height);
+	int menuBarOffset = 20;
+	docksys_create(0, menuBarOffset, width, height);
 
 	session->i3_dock_grid = 0; //docksys_create_workspace("test_ws");
 
