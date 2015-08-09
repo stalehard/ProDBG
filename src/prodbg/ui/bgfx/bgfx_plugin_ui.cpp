@@ -2671,7 +2671,7 @@ void ProDBG_setWindowSize(int width, int height)
     for (int i = 0; i < array_size(sessions); ++i)
     {
         Session* session = sessions[i];
-        docksys_update_size(width, height - (int)g_pluginUI->getStatusBarSize());
+        docksys_update_size(width, height - (int)(g_pluginUI->getStatusBarSize() + g_pluginUI->getMenuBarSize()));
     }
 }
 
