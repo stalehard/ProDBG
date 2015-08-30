@@ -58,7 +58,8 @@ void processEvents()
                 {
                     const XButtonEvent& xbutton = event.xbutton;
 
-                    ProDBG_setMouseState(0, 1);
+		    // NOTE(marco): X buttons start from 1?
+                    ProDBG_setMouseState(xbutton.button-1, 1);
                     ProDBG_setMousePos(xbutton.x, xbutton.y);
 
                     ProDBG_update();
@@ -69,7 +70,7 @@ void processEvents()
                 {
                     const XButtonEvent& xbutton = event.xbutton;
 
-                    ProDBG_setMouseState(0, 0);
+                    ProDBG_setMouseState(xbutton.button-1, 0);
                     ProDBG_setMousePos(xbutton.x, xbutton.y);
 
                     ProDBG_update();

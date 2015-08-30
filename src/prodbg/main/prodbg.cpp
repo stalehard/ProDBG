@@ -379,7 +379,17 @@ void IMGUI_menuUpdate(Context *context)
 	
 #if 1
     InputState *inputState = InputState_getState();
-    if (inputState->mouseDown[MouseButton_Right])
+    // TODO(marco): need to fix the Mac version!!
+    static bool rightMouseWasPressed = false;
+    if (inputState->mouseDown[MouseButton_Right] && !rightMouseWasPressed)
+    {
+	rightMouseWasPressed = true;	
+    }
+    else if (inputState->mouseDown[MouseButton_Left] && rightMouseWasPressed)
+    {
+	rightMouseWasPressed = false;
+    }
+    if (rightMouseWasPressed)
     {	
 	static float savedMousePosX = 0.0f;
 	static float savedMousePosY = 0.0f;
