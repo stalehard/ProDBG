@@ -20,6 +20,8 @@ flags = [
 '-I',
 'api/include',
 '-I',
+'api/src/remote',
+'-I',
 'src/external',
 '-I',
 'src/external/imgui',
@@ -39,6 +41,8 @@ flags = [
 'src/prodbg',
 '-I',
 'src/external/i3wm_docking/include'
+'-I',
+'api/include/capstore',
 '-I',
 '.'
 ]
