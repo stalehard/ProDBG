@@ -35,6 +35,9 @@ typedef struct PDViewPlugin
 	int (*saveState)(void* userData, struct PDSaveState* saveState);
 	int (*loadState)(void* userData, struct PDLoadState* loadState);
 
+    // NOTE(marco): callback to load contextual popup menu entries
+    void (*popupMenu)(void* userData, PDReader* reader, PDWriter* writer, PDUI* ui);
+
 } PDViewPlugin;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

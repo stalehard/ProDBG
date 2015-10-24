@@ -106,11 +106,11 @@ void loadLayout(Session* session, int topOffset, int width, int height)
 	docksys_load_layout("data/default_layout_2.json");
 
 	/*
-    if (Session_loadLayout(session, "data/current_layout.json", width, height))
-        return;
+      if (Session_loadLayout(session, "data/current_layout.json", width, height))
+      return;
 
-    if (Session_loadLayout(session, "data/default_layout.json", width, height))
-        return;
+      if (Session_loadLayout(session, "data/default_layout.json", width, height))
+      return;
     */
 
 }
@@ -201,11 +201,11 @@ static bool findDataDirectory()
 
     for (int i = 0; i < 10; ++i)
     {
-    #if defined(PRODBG_WIN)
+#if defined(PRODBG_WIN)
         path = string_append(path, "\\..");
-    #else
+#else
         path = string_append(path, "/..");
-    #endif
+#endif
 
         environment_set_current_working_directory(path);
 
@@ -266,116 +266,116 @@ void IMGUI_menuUpdate(Context *context)
     PDMenuItem* menu = (PDMenuItem*)alloc_zero(sizeof(PDMenuItem) * (count + 1)); // + 1 as array needs to end with zeros
     if (IMGUI_beginMainMenuBar())
     {
-	// NOTE(marco): these are static values
-	if (IMGUI_beginMenu("File"))
-	{
-	    PDMenuItem *desc = &g_fileMenu[0];
-	    while (desc->name)
-	    {
-		if (IMGUI_menuItem(desc->name))
-		{
-		    ProDBG_event(desc->id);
-		}
-		desc++;
-	    }
-	    IMGUI_endMenu();
-	}
+        // NOTE(marco): these are static values
+        if (IMGUI_beginMenu("File"))
+        {
+            PDMenuItem *desc = &g_fileMenu[0];
+            while (desc->name)
+            {
+                if (IMGUI_menuItem(desc->name))
+                {
+                    ProDBG_event(desc->id);
+                }
+                desc++;
+            }
+            IMGUI_endMenu();
+        }
 
-	if (IMGUI_beginMenu("Debug"))
-	{
-	    PDMenuItem *desc = &g_debugMenu[0];
-	    while (desc->name)
-	    {
-		if (IMGUI_menuItem(desc->name))
-		{
-		    ProDBG_event(desc->id);
-		}
-		desc++;
-	    }
-	    IMGUI_endMenu();
-	}
+        if (IMGUI_beginMenu("Debug"))
+        {
+            PDMenuItem *desc = &g_debugMenu[0];
+            while (desc->name)
+            {
+                if (IMGUI_menuItem(desc->name))
+                {
+                    ProDBG_event(desc->id);
+                }
+                desc++;
+            }
+            IMGUI_endMenu();
+        }
 
-	for (int i = 0; i < count; ++i)
-	{
-	    PluginData* pluginData = viewPlugins[i];
-	    PDPluginBase* pluginBase = (PDPluginBase*)pluginData->plugin;
-	    PDMenuItem* entry = &menu[i];
+        for (int i = 0; i < count; ++i)
+        {
+            PluginData* pluginData = viewPlugins[i];
+            PDPluginBase* pluginBase = (PDPluginBase*)pluginData->plugin;
+            PDMenuItem* entry = &menu[i];
 
-	    // TODO: Hack hack!
+            // TODO: Hack hack!
 
-	    if (!strstr(pluginData->type, "View"))
-		continue;
+            if (!strstr(pluginData->type, "View"))
+                continue;
 
-	    entry->name = pluginBase->name;
+            entry->name = pluginBase->name;
 
-	    // TODO: Only shortcuts for the first range but we should really have this in a config instead.
+            // TODO: Only shortcuts for the first range but we should really have this in a config instead.
 
-	    if (i < 10)
-	    {
-		entry->id = PRODBG_MENU_PLUGIN_START + i;
-		entry->key = '1' + i;
-	    }
+            if (i < 10)
+            {
+                entry->id = PRODBG_MENU_PLUGIN_START + i;
+                entry->key = '1' + i;
+            }
 
-	    entry->macMod = PRODBG_KEY_COMMAND;
-	    entry->winMod = PRODBG_KEY_CTRL;
-	}
+            entry->macMod = PRODBG_KEY_COMMAND;
+            entry->winMod = PRODBG_KEY_CTRL;
+        }
 	
-	uint32_t menuIdStart = PRODBG_MENU_PLUGINS_START;
-	if (IMGUI_beginMenu("Plugins"))
-	{	    
-	    PDMenuItem *desc = &menu[0];
-	    while (desc->name)
-	    {
-		if (IMGUI_menuItem(desc->name))
-		{
-		    ProDBG_event(desc->id);
-		}
-		desc++;
-	    }
-	    IMGUI_endMenu();
-	}
+        uint32_t menuIdStart = PRODBG_MENU_PLUGINS_START;
+        if (IMGUI_beginMenu("Plugins"))
+        {	    
+            PDMenuItem *desc = &menu[0];
+            while (desc->name)
+            {
+                if (IMGUI_menuItem(desc->name))
+                {
+                    ProDBG_event(desc->id);
+                }
+                desc++;
+            }
+            IMGUI_endMenu();
+        }
 
-	PluginData **backendPlugins = PluginHandler_getBackendPlugins(&count);
-	for (int i = 0; i < count; ++i)
-	{
-	    PluginData* pluginData = backendPlugins[i];
+        PluginData **backendPlugins = PluginHandler_getBackendPlugins(&count);
+        for (int i = 0; i < count; ++i)
+        {
+            PluginData* pluginData = backendPlugins[i];
 
-	    PDBackendPlugin* plugin = (PDBackendPlugin*)pluginData->plugin;
+            PDBackendPlugin* plugin = (PDBackendPlugin*)pluginData->plugin;
 
-	    if (!plugin)
-		continue;
+            if (!plugin)
+                continue;
 
-	    if (!plugin->registerMenu)
-		continue;
+            if (!plugin->registerMenu)
+                continue;
 
-	    PDMenu* menus = plugin->registerMenu();
-	    uint32_t menuRange = findMenuIdRange(menus);
+            PDMenu* menus = plugin->registerMenu();
+            uint32_t menuRange = findMenuIdRange(menus);
 
-	    while (menus->name)
-	    {
-		if (IMGUI_beginMenu(menus->name))
-		{
-		    PDMenuItem *desc = &menus->items[0];
-		    while(desc->name)
-		    {
-			if (IMGUI_menuItem(desc->name))
-			{
-			    ProDBG_event(desc->id + menuIdStart);
-			}
-			desc++;
-		    }
-		    IMGUI_endMenu();
-		}
-		menus++;
-	    }
+            while (menus->name)
+            {
+                if (IMGUI_beginMenu(menus->name))
+                {
+                    PDMenuItem *desc = &menus->items[0];
+                    while(desc->name)
+                    {
+                        if (IMGUI_menuItem(desc->name))
+                        {
+                            ProDBG_event(desc->id + menuIdStart);
+                        }
+                        desc++;
+                    }
+                    IMGUI_endMenu();
+                }
+                menus++;
+            }
 
-	    pluginData->menuStart = menuIdStart;
-	    pluginData->menuEnd = menuIdStart + (menuRange >> 16);
+            pluginData->menuStart = menuIdStart;
+            pluginData->menuEnd = menuIdStart + (menuRange >> 16);
 
-	    menuIdStart += (menuRange >> 16);
-	}
+            menuIdStart += (menuRange >> 16);
+        }
 	
-	IMGUI_endMainMenuBar();
+        IMGUI_endMainMenuBar();
     }	
 	
 #if 1
@@ -384,127 +384,147 @@ void IMGUI_menuUpdate(Context *context)
     static bool rightMouseWasPressed = false;
     if (inputState->mouseDown[MouseButton_Right] && !rightMouseWasPressed)
     {
-	rightMouseWasPressed = true;	
+        rightMouseWasPressed = true;	
     }
     else if (inputState->mouseDown[MouseButton_Left] && rightMouseWasPressed)
     {
-	rightMouseWasPressed = false;
+        rightMouseWasPressed = false;
     }
     if (rightMouseWasPressed)
     {	
-	static float savedMousePosX = 0.0f;
-	static float savedMousePosY = 0.0f;
-	// NOTE(marco): save the mouse position only the first time we activate
-	// the popup
-	if (!context->popupActive)
-	{
-	    savedMousePosX = inputState->mousePos.x;
-	    savedMousePosY = inputState->mousePos.y;
-	    context->popupActive = true;
-	}
-	IMGUI_openPopup("context_menu");
-	context->popupHover = false;
+        static PDVec2 savedMousePos = {0};
+        // NOTE(marco): save the mouse position only the first time we activate
+        // the popup
+        if (!context->popupActive)
+        {
+            savedMousePos.x = inputState->mousePos.x;
+            savedMousePos.y = inputState->mousePos.y;
+            context->popupActive = true;
+        }
+        IMGUI_openPopup("context_menu");
+        context->popupHover = false;
 
-	// TODO(marco): need to update this to read from new context menu list
-	if (IMGUI_beginPopup("context_menu"))
-	{
-	    const char *splitHorz = "Split Horizontally";
-	    if (IMGUI_beginMenu(splitHorz))
-	    {
-		uint32_t startId = PRODBG_MENU_POPUP_SPLIT_HORZ;
-		if (IMGUI_menuItem(splitHorz))
-		{
-		    float tempX = inputState->mousePos.x;
-		    float tempY = inputState->mousePos.y;
-		    ProDBG_setMousePos(savedMousePosX, savedMousePosY);
-		    ProDBG_event(startId);
-		    ProDBG_setMousePos(tempX, tempY);
-		    ProDBG_setMouseState(MouseButton_Right, 0);
-		}
-		if (IMGUI_isItemHovered())
-		{
-		    context->popupHover = true;
-		}
+        // TODO(marco): need to update this to read from new context menu list
+        if (IMGUI_beginPopup("context_menu"))
+        {
+            const char *splitHorz = "Split Horizontally";
+            if (IMGUI_beginMenu(splitHorz))
+            {
+                uint32_t startId = PRODBG_MENU_POPUP_SPLIT_HORZ;
+                if (IMGUI_menuItem(splitHorz))
+                {
+                    float tempX = inputState->mousePos.x;
+                    float tempY = inputState->mousePos.y;
+                    ProDBG_setMousePos(savedMousePos.x, savedMousePos.y);
+                    ProDBG_event(startId);
+                    ProDBG_setMousePos(tempX, tempY);
+                    ProDBG_setMouseState(MouseButton_Right, 0);
+                }
+                if (IMGUI_isItemHovered())
+                {
+                    context->popupHover = true;
+                }
 		
-		uint32_t idMask = PRODBG_MENU_POPUP_SPLIT_HORZ_SHIFT;
-		PDMenuItem *desc = &menu[0];
-		int popupMenuCount = 0;
-		while (desc->name)
-		{
-		    if (IMGUI_menuItem(desc->name))
-		    {
-			float tempX = inputState->mousePos.x;
-			float tempY = inputState->mousePos.y;
-			ProDBG_setMousePos(savedMousePosX, savedMousePosY);	     
-			ProDBG_event((uint32_t)popupMenuCount | idMask);
-			ProDBG_setMousePos(tempX, tempY);
-			ProDBG_setMouseState(MouseButton_Right, 0);
-		    }
-		    if (IMGUI_isItemHovered())
-		    {
-			context->popupHover = true;
-		    }
-		    ++popupMenuCount;
-		    desc++;
-		}
-		IMGUI_endMenu();
-		if (IMGUI_isItemHovered())
-		{
-		    context->popupHover = true;
-		}
-	    }
+                uint32_t idMask = PRODBG_MENU_POPUP_SPLIT_HORZ_SHIFT;
+                PDMenuItem *desc = &menu[0];
+                int popupMenuCount = 0;
+                while (desc->name)
+                {
+                    if (IMGUI_menuItem(desc->name))
+                    {
+                        float tempX = inputState->mousePos.x;
+                        float tempY = inputState->mousePos.y;
+                        ProDBG_setMousePos(savedMousePos.x, savedMousePos.y);	     
+                        ProDBG_event((uint32_t)popupMenuCount | idMask);
+                        ProDBG_setMousePos(tempX, tempY);
+                        ProDBG_setMouseState(MouseButton_Right, 0);
+                    }
+                    if (IMGUI_isItemHovered())
+                    {
+                        context->popupHover = true;
+                    }
+                    ++popupMenuCount;
+                    desc++;
+                }
+                IMGUI_endMenu();
+                if (IMGUI_isItemHovered())
+                {
+                    context->popupHover = true;
+                }
+            }
 
-	    const char *splitVert = "Split Vertically";
-	    if (IMGUI_beginMenu(splitVert))
-	    {
-		uint32_t startId = PRODBG_MENU_POPUP_SPLIT_VERT;
-		if (IMGUI_menuItem(splitVert))
-		{
-		    float tempX = inputState->mousePos.x;
-		    float tempY = inputState->mousePos.y;
-		    ProDBG_setMousePos(savedMousePosX, savedMousePosY);
-		    ProDBG_event(startId);
-		    ProDBG_setMousePos(tempX, tempY);
-		    ProDBG_setMouseState(MouseButton_Right, 0);
-		}
-		if (IMGUI_isItemHovered())
-		{
-		    context->popupHover = true;
-		}
-		uint32_t idMask = PRODBG_MENU_POPUP_SPLIT_VERT_SHIFT;
-		PDMenuItem *desc = &menu[0];
-		int popupMenuCount = 0;
-		while (desc->name)
-		{
-		    if (IMGUI_menuItem(desc->name))
-		    {
-			float tempX = inputState->mousePos.x;
-			float tempY = inputState->mousePos.y;
-			ProDBG_setMousePos(savedMousePosX, savedMousePosY);	     
-			ProDBG_event((uint32_t)popupMenuCount | idMask);
-			ProDBG_setMousePos(tempX, tempY);
-			ProDBG_setMouseState(MouseButton_Right, 0);
-		    }
-		    if (IMGUI_isItemHovered())
-		    {
-			context->popupHover = true;
-		    }
-		    ++popupMenuCount;
-		    desc++;
-		}
-		IMGUI_endMenu();
-		if (IMGUI_isItemHovered())
-		{
-		    context->popupHover = true;
-		}
-	    }	    
+            const char *splitVert = "Split Vertically";
+            if (IMGUI_beginMenu(splitVert))
+            {
+                uint32_t startId = PRODBG_MENU_POPUP_SPLIT_VERT;
+                if (IMGUI_menuItem(splitVert))
+                {
+                    float tempX = inputState->mousePos.x;
+                    float tempY = inputState->mousePos.y;
+                    ProDBG_setMousePos(savedMousePos.x, savedMousePos.y);
+                    ProDBG_event(startId);
+                    ProDBG_setMousePos(tempX, tempY);
+                    ProDBG_setMouseState(MouseButton_Right, 0);
+                }
+                if (IMGUI_isItemHovered())
+                {
+                    context->popupHover = true;
+                }
+                uint32_t idMask = PRODBG_MENU_POPUP_SPLIT_VERT_SHIFT;
+                PDMenuItem *desc = &menu[0];
+                int popupMenuCount = 0;
+                while (desc->name)
+                {
+                    if (IMGUI_menuItem(desc->name))
+                    {
+                        float tempX = inputState->mousePos.x;
+                        float tempY = inputState->mousePos.y;
+                        ProDBG_setMousePos(savedMousePos.x, savedMousePos.y);	     
+                        ProDBG_event((uint32_t)popupMenuCount | idMask);
+                        ProDBG_setMousePos(tempX, tempY);
+                        ProDBG_setMouseState(MouseButton_Right, 0);
+                    }
+                    if (IMGUI_isItemHovered())
+                    {
+                        context->popupHover = true;
+                    }
+                    ++popupMenuCount;
+                    desc++;
+                }
+                IMGUI_endMenu();
+                if (IMGUI_isItemHovered())
+                {
+                    context->popupHover = true;
+                }
+            }
+
+            // NOTE(marco): insert entries that are specific to this plugin
+            ViewPluginInstance** views = Session_getViewPlugins(context->session, &count);            
+            for (int pluginIndex = 0; pluginIndex < count; ++pluginIndex)
+            {
+                ViewPluginInstance *instance = views[pluginIndex];
+                IntRect *rect = &instance->rect;
+                if ((savedMousePos.x >= rect->x &&
+                     savedMousePos.x <= (rect->x + rect->width) &&
+                     savedMousePos.y >= rect->y &&
+                     savedMousePos.y <= (rect->y + rect->height)))
+                {
+                    PluginData *pluginData = PluginHandler_getPluginData(instance->plugin);
+                    PDViewPlugin *viewPlugin = (PDViewPlugin*)pluginData->plugin;
+                    
+                    if (viewPlugin->popupMenu)
+                    {
+                        viewPlugin->popupMenu(0, 0, 0, &instance->ui);
+                    }
+                }
+            }
 	    
-	    IMGUI_endPopup();
-	}
+            IMGUI_endPopup();
+        }
     }
     else
     {
-	context->popupActive = false;
+        context->popupActive = false;
     }
 #endif
 }

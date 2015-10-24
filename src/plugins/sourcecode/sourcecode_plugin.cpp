@@ -258,6 +258,17 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* w
     return 0;
 }
 
+void popupMenu(void* userData, PDReader* reader, PDWriter* writer, PDUI* ui)
+{
+    (void)userData;
+    (void)reader;
+    (void)writer;
+    
+    if (ui->menuItem("Test Contextual Menu", 0, 0, 1))
+    {
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static PDViewPlugin plugin =
@@ -266,6 +277,9 @@ static PDViewPlugin plugin =
     createInstance,
     destroyInstance,
     update,
+    0,
+    0,
+    popupMenu
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
