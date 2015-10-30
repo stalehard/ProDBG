@@ -12,14 +12,12 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Setting
-{
+struct Setting {
     char* name;
     uint32_t hash;
     uint32_t type;
 
-    union
-    {
+    union {
         double dvalue;
         char* svalue;
         int64_t ivalue;
@@ -28,18 +26,16 @@ struct Setting
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Key
-{
-	char* name;
-	char* keyCombo;
-	uint32_t key;
-	uint32_t hash;
+struct Key {
+    char* name;
+    char* keyCombo;
+    uint32_t key;
+    uint32_t hash;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Category
-{
+struct Category {
     char* name;
     uint32_t hash;
     Setting** settings;
@@ -52,12 +48,12 @@ static Category** s_categories = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDSettingsFuncs s_settingsFuncs = 
+static PDSettingsFuncs s_settingsFuncs =
 {
-	Settings_getInt,
-	Settings_getReal,
-	Settings_getString,
-	Settings_getShortcut,
+    Settings_getInt,
+    Settings_getReal,
+    Settings_getString,
+    Settings_getShortcut,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -67,8 +63,7 @@ uint32_t jenkinsOneHash(const char* key)
     uint32_t hash = 0;
     uint32_t i = 0;
 
-    while (key[i] != 0)
-    {
+    while (key[i] != 0) {
         hash += (uint32_t)key[i++];
         hash += (hash << 10);
         hash ^= (hash >> 6);
@@ -91,8 +86,7 @@ static void updateSetting(Setting* setting, json_t* value)
     int type = setting->type = json_typeof(value);
     FOUNDATION_ASSERT(type != JSON_STRING || type != JSON_INTEGER || type != JSON_REAL);
 
-    switch (setting->type)
-    {
+    switch (setting->type) {
         case JSON_STRING:
             setting->svalue = string_clone(json_string_value(value)); break;
         case JSON_REAL:
@@ -109,8 +103,7 @@ static void insertOrUpdateSetting(Category* category, const char* key, json_t* v
     uint32_t hash = jenkinsOneHash(key);
     int settingsCount = array_size(category->settings);
 
-    for (int i  = 0; i < settingsCount; ++i)
-    {
+    for (int i  = 0; i < settingsCount; ++i) {
         Setting* setting = category->settings[i];
 
         if (setting->hash == hash && string_equal(setting->name, key))
@@ -134,27 +127,26 @@ static uint32_t decodeKey(const char* keyCombo);
 
 void updateKey(Key* key, const char* shortcut)
 {
-	if (key->keyCombo)
-		string_deallocate(key->keyCombo);
+    if (key->keyCombo)
+        string_deallocate(key->keyCombo);
 
-	key->keyCombo = string_clone(shortcut);
+    key->keyCombo = string_clone(shortcut);
 
-	key->key = decodeKey(shortcut);
+    key->key = decodeKey(shortcut);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void insertOrUpdateKey(Category* category, const char* name, const char* keyCombo)
 {
-	if (!keyCombo)
-		return;
+    if (!keyCombo)
+        return;
 
     uint32_t hash = jenkinsOneHash(name);
 
     int keyCount = array_size(category->keys);
 
-    for (int i  = 0; i < keyCount; ++i)
-    {
+    for (int i  = 0; i < keyCount; ++i) {
         Key* key = &category->keys[i];
 
         if (key->hash == hash && string_equal(key->name, name))
@@ -162,7 +154,7 @@ static void insertOrUpdateKey(Category* category, const char* name, const char* 
     }
 
     Key key = { 0 };
-    key.hash = hash; 
+    key.hash = hash;
     key.name = string_clone(name);
 
     updateKey(&key, keyCombo);
@@ -174,27 +166,26 @@ static void insertOrUpdateKey(Category* category, const char* name, const char* 
 
 static void insertOrUpdateKeys(Category* category, json_t* root)
 {
-	if (!json_is_object(root))
-		return;
+    if (!json_is_object(root))
+        return;
 
     void* iter = json_object_iter(root);
 
-    while (iter)
-    {
+    while (iter) {
         const char* key = json_object_iter_key(iter);
         json_t* value = json_object_iter_value(iter);
 
-		const char* shortcut = json_string_value(json_object_get(value, "Default"));
+        const char* shortcut = json_string_value(json_object_get(value, "Default"));
 
-	#ifdef PRODBG_MAC
-		if (json_t* t = json_object_get(value, "Mac"))
-			shortcut = json_string_value(t);
-	#elif PRODBG_WIN
-		if (json_t* t = json_object_get(value, "Windows"))
-			shortcut = json_string_value(t);
-	#endif
+    #ifdef PRODBG_MAC
+        if (json_t* t = json_object_get(value, "Mac"))
+            shortcut = json_string_value(t);
+    #elif PRODBG_WIN
+        if (json_t* t = json_object_get(value, "Windows"))
+            shortcut = json_string_value(t);
+    #endif
 
-		insertOrUpdateKey(category, key, shortcut);
+        insertOrUpdateKey(category, key, shortcut);
 
         iter = json_object_iter_next(root, iter);
     }
@@ -206,15 +197,14 @@ static void insertOrUpdateSettings(Category* category, json_t* root)
 {
     void* iter = json_object_iter(root);
 
-    while (iter)
-    {
+    while (iter) {
         const char* key = json_object_iter_key(iter);
         json_t* value = json_object_iter_value(iter);
 
         if (string_equal(key, "keys"))
-        	insertOrUpdateKeys(category, value);
+            insertOrUpdateKeys(category, value);
         else
-        	insertOrUpdateSetting(category, key, value);
+            insertOrUpdateSetting(category, key, value);
 
         iter = json_object_iter_next(root, iter);
     }
@@ -228,8 +218,7 @@ static void insertOrUpdateCategory(const char* categoryName, json_t* root)
 
     int categoryCount = array_size(s_categories);
 
-    for (int i = 0; i < categoryCount; ++i)
-    {
+    for (int i = 0; i < categoryCount; ++i) {
         Category* category = s_categories[i];
 
         if (category->hash == hash && string_equal(category->name, categoryName))
@@ -251,8 +240,7 @@ static void traverseData(json_t* root)
 {
     void* iter = json_object_iter(root);
 
-    while (iter)
-    {
+    while (iter) {
         const char* key = json_object_iter_key(iter);
         json_t* value = json_object_iter_value(iter);
 
@@ -270,8 +258,7 @@ bool Settings_loadSettings(const char* filename)
 
     json_t* root = json_load_file(filename, 0, &error);
 
-    if (!root)
-    {
+    if (!root) {
         pd_error("JSON Error: %s:(%d:%d) - %s\n", filename, error.line, error.column, error.text);
         return false;
     }
@@ -285,7 +272,7 @@ bool Settings_loadSettings(const char* filename)
 
 void Settings_registerService()
 {
-	Service_register(&s_settingsFuncs, PDSETTINGS_GLOBAL); 
+    Service_register(&s_settingsFuncs, PDSETTINGS_GLOBAL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -294,14 +281,12 @@ void Settings_destroy()
 {
     int categoryCount = array_size(s_categories);
 
-    for (int ic = 0; ic < categoryCount; ++ic)
-    {
+    for (int ic = 0; ic < categoryCount; ++ic) {
         Category* category = s_categories[ic];
 
         int settingsCount = array_size(category->settings);
 
-        for (int is = 0; is < settingsCount; ++is)
-        {
+        for (int is = 0; is < settingsCount; ++is) {
             Setting* setting = category->settings[is];
 
             if (setting->type == JSON_STRING)
@@ -313,15 +298,14 @@ void Settings_destroy()
 
         int keyCount = array_size(category->keys);
 
-        for (int ik = 0; ik < keyCount; ++ik)
-        {
+        for (int ik = 0; ik < keyCount; ++ik) {
             Key* key = &category->keys[ik];
 
-			if (key->name)
-            	string_deallocate(key->name);
+            if (key->name)
+                string_deallocate(key->name);
 
-			if (key->keyCombo)
-            	string_deallocate(key->keyCombo);
+            if (key->keyCombo)
+                string_deallocate(key->keyCombo);
         }
 
         array_clear(category->keys);
@@ -342,8 +326,7 @@ static const Setting* findSetting(const char* categoryName, const char* settingN
 
     uint32_t hash = jenkinsOneHash(categoryName);
 
-    for (int ic = 0; ic < categoryCount; ++ic)
-    {
+    for (int ic = 0; ic < categoryCount; ++ic) {
         const Category* category = s_categories[ic];
 
         if (category->hash != hash)
@@ -355,8 +338,7 @@ static const Setting* findSetting(const char* categoryName, const char* settingN
         uint32_t settingHash = jenkinsOneHash(settingName);
         int settingsCount = array_size(category->settings);
 
-        for (int is = 0; is < settingsCount; ++is)
-        {
+        for (int is = 0; is < settingsCount; ++is) {
             const Setting* setting = category->settings[is];
 
             if (setting->hash == settingHash && string_equal(setting->name, settingName))
@@ -405,90 +387,85 @@ const char* Settings_getString(const char* category, const char* value)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct KeyRemapTable
-{
-	const char* name;
-	uint32_t id;
+struct KeyRemapTable {
+    const char* name;
+    uint32_t id;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static KeyRemapTable s_remap[] = 
+static KeyRemapTable s_remap[] =
 {
-	{ "Escape", PDKEY_ESCAPE },
-	{ "Enter", PDKEY_ENTER },
-	{ "Tab", PDKEY_TAB },
-	{ "Backspace", PDKEY_BACKSPACE },
-	{ "Insert", PDKEY_INSERT },
-	{ "Delete", PDKEY_DELETE },
-	{ "Right", PDKEY_RIGHT },
-	{ "Left", PDKEY_LEFT },
-	{ "Down", PDKEY_DOWN },
-	{ "Up", PDKEY_UP },
-	{ "PageUp", PDKEY_PAGE_UP },
-	{ "PageDown", PDKEY_PAGE_DOWN },
-	{ "Home", PDKEY_HOME },
-	{ "End", PDKEY_END },
-	{ "CapsLock", PDKEY_CAPS_LOCK },
-	{ "ScrollLock", PDKEY_SCROLL_LOCK },
-	{ "NumLock", PDKEY_NUM_LOCK },
-	{ "PrintScreen", PDKEY_PRINT_SCREEN },
-	{ "F1", PDKEY_F1 },
-	{ "F2", PDKEY_F2 },
-	{ "F3", PDKEY_F3 },
-	{ "F4", PDKEY_F4 },
-	{ "F5", PDKEY_F5 },
-	{ "F6", PDKEY_F6 },
-	{ "F7", PDKEY_F7 },
-	{ "F8", PDKEY_F8 },
-	{ "F9", PDKEY_F9 },
-	{ "F10", PDKEY_F10 },
-	{ "F11", PDKEY_F11 },
-	{ "F12", PDKEY_F12 },
+    { "Escape", PDKEY_ESCAPE },
+    { "Enter", PDKEY_ENTER },
+    { "Tab", PDKEY_TAB },
+    { "Backspace", PDKEY_BACKSPACE },
+    { "Insert", PDKEY_INSERT },
+    { "Delete", PDKEY_DELETE },
+    { "Right", PDKEY_RIGHT },
+    { "Left", PDKEY_LEFT },
+    { "Down", PDKEY_DOWN },
+    { "Up", PDKEY_UP },
+    { "PageUp", PDKEY_PAGE_UP },
+    { "PageDown", PDKEY_PAGE_DOWN },
+    { "Home", PDKEY_HOME },
+    { "End", PDKEY_END },
+    { "CapsLock", PDKEY_CAPS_LOCK },
+    { "ScrollLock", PDKEY_SCROLL_LOCK },
+    { "NumLock", PDKEY_NUM_LOCK },
+    { "PrintScreen", PDKEY_PRINT_SCREEN },
+    { "F1", PDKEY_F1 },
+    { "F2", PDKEY_F2 },
+    { "F3", PDKEY_F3 },
+    { "F4", PDKEY_F4 },
+    { "F5", PDKEY_F5 },
+    { "F6", PDKEY_F6 },
+    { "F7", PDKEY_F7 },
+    { "F8", PDKEY_F8 },
+    { "F9", PDKEY_F9 },
+    { "F10", PDKEY_F10 },
+    { "F11", PDKEY_F11 },
+    { "F12", PDKEY_F12 },
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 uint32_t decodeKey(const char* keyCombo)
 {
-	char temp[1024];
+    char temp[1024];
 
-	string_copy(temp, keyCombo, sizeof(temp));
+    string_copy(temp, keyCombo, sizeof(temp));
 
-	char* pch = strtok(temp, "+"); 
+    char* pch = strtok(temp, "+");
 
-	uint32_t key = 0;
+    uint32_t key = 0;
 
-	while (pch != NULL)
-	{	
-		if (string_length(pch) == 1)
-			key |= ((uint32_t)pch[0]) << 4;
-		else if (string_equal(pch, "Ctrl"))
-			key |= PDKEY_CTRL;
-		else if (string_equal(pch, "Super"))
-			key |= PDKEY_SUPER;
-		else if (string_equal(pch, "Alt"))
-			key |= PDKEY_ALT;
-		else if (string_equal(pch, "Shift"))
-			key |= PDKEY_SHIFT;
-		else
-		{
-			for (uint32_t i = 0; i < sizeof_array(s_remap); ++i)
-			{
-				KeyRemapTable* entry = &s_remap[i];
-		
-				if (string_equal(pch, entry->name))
-				{
-					key |= (entry->id << 4);
-					break;
-				}
-			}
-		}
+    while (pch != NULL) {
+        if (string_length(pch) == 1)
+            key |= ((uint32_t)pch[0]) << 4;
+        else if (string_equal(pch, "Ctrl"))
+            key |= PDKEY_CTRL;
+        else if (string_equal(pch, "Super"))
+            key |= PDKEY_SUPER;
+        else if (string_equal(pch, "Alt"))
+            key |= PDKEY_ALT;
+        else if (string_equal(pch, "Shift"))
+            key |= PDKEY_SHIFT;
+        else{
+            for (uint32_t i = 0; i < sizeof_array(s_remap); ++i) {
+                KeyRemapTable* entry = &s_remap[i];
 
-		pch = strtok(NULL, "+"); 
-	}
+                if (string_equal(pch, entry->name)) {
+                    key |= (entry->id << 4);
+                    break;
+                }
+            }
+        }
 
-	return key;
+        pch = strtok(NULL, "+");
+    }
+
+    return key;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -499,8 +476,7 @@ uint32_t Settings_getShortcut(const char* categoryName, const char* keyName)
 
     uint32_t hash = jenkinsOneHash(categoryName);
 
-    for (int ic = 0; ic < categoryCount; ++ic)
-    {
+    for (int ic = 0; ic < categoryCount; ++ic) {
         const Category* category = s_categories[ic];
 
         if (category->hash != hash)
@@ -512,8 +488,7 @@ uint32_t Settings_getShortcut(const char* categoryName, const char* keyName)
         uint32_t keyHash = jenkinsOneHash(keyName);
         int keysCount = array_size(category->keys);
 
-        for (int ik = 0; ik < keysCount; ++ik)
-        {
+        for (int ik = 0; ik < keysCount; ++ik) {
             const Key* key = &category->keys[ik];
 
             if (key->hash == keyHash && string_equal(key->name, keyName))

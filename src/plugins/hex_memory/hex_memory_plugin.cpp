@@ -6,8 +6,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct HexMemoryData
-{
+struct HexMemoryData {
     unsigned char* data;
     unsigned char* oldData;
     int dataSize;
@@ -61,8 +60,7 @@ static void destroyInstance(void* user_data)
 
 static void getAddressLine(char* adressText, uint64_t address, int adressSize)
 {
-    switch (adressSize)
-    {
+    switch (adressSize) {
         case 1:
             sprintf(adressText, "0x%02x", (uint8_t)address); break;
         case 2:
@@ -86,8 +84,7 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
     if (charsPerLine > 1024)
         charsPerLine = 1024;
 
-    for (int i = 0; i < lineCount; ++i)
-    {
+    for (int i = 0; i < lineCount; ++i) {
         char addressText[64] = { 0 };
 
         // Get Address
@@ -98,12 +95,11 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
 
         uiFuncs->text("%s: ", addressText); uiFuncs->same_line(0, -1);
 
-        PDColor color = PDUI_COLOR(255, 0, 0, 255); 
+        PDColor color = PDUI_COLOR(255, 0, 0, 255);
 
         // Print hex values
 
-        for (int p = 0; p < charsPerLine; ++p)
-        {
+        for (int p = 0; p < charsPerLine; ++p) {
             uint8_t c = memoryData[p];
             uint8_t co = oldMemoryData[p];
 
@@ -117,8 +113,7 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
 
         // print characters
 
-        for (int p = 0; p < charsPerLine; ++p)
-        {
+        for (int p = 0; p < charsPerLine; ++p) {
             uint8_t c = memoryData[p];
             uint8_t co = oldMemoryData[p];
             char wc = 0;
@@ -162,14 +157,12 @@ void drawUI(HexMemoryData* data, PDUI* uiFuncs)
     if ((endAddress >= startAddress) && !data->data)
         return;
 
-    if (data->sa != (uint64_t)startAddress)
-    {
+    if (data->sa != (uint64_t)startAddress) {
         data->requestData = true;
         data->sa = (uint64_t)startAddress;
     }
 
-    if (data->ea != (uint64_t)endAddress)
-    {
+    if (data->ea != (uint64_t)endAddress) {
         data->requestData = true;
         data->ea = (uint64_t)endAddress;
     }
@@ -185,7 +178,7 @@ void drawUI(HexMemoryData* data, PDUI* uiFuncs)
     //printf("pos %f %f\n", pos.x, pos.y);
     //printf("rect %f %f %f %f\n", rect.x, rect.y, rect.width, rect.height);
 
-	// TODO: Fix me
+    // TODO: Fix me
     const float fontWidth = 13.0f; // uiFuncs->getFontWidth();
 
     float drawableChars = (float)(int)(windowSize.x / (fontWidth + 23));
@@ -217,8 +210,7 @@ static void updateMemory(HexMemoryData* user_data, PDReader* reader)
     // TODO: Currently we just copy the memory into a predefined memory range. This needs to really be fixed
     // We need some overlapping memory ranges and such here to handle this correctly
 
-    if (address + size >= 1024 * 1024)
-    {
+    if (address + size >= 1024 * 1024) {
         printf("%s(%d) address (0x%16llx %x) + size larger than 1 mb which isn't supported right now\n", __FILE__, __LINE__, address, (int)size);
         return;
     }
@@ -259,10 +251,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     // Loop over all the in events
 
-    while ((event = PDRead_getEvent(inEvents)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(inEvents)) != 0) {
+        switch (event) {
             case PDEventType_setMemory:
             {
                 updateMemory(data, inEvents);
@@ -279,8 +269,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     drawUI(data, uiFuncs);
 
-    if (data->requestData)
-    {
+    if (data->requestData) {
         //printf("requesting memory range %04x - %04x\n", (uint16_t)data->sa, (uint16_t)data->ea);
         PDWrite_eventBegin(writer, PDEventType_getMemory);
         PDWrite_u64(writer, "address_start", data->sa);

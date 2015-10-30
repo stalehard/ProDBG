@@ -54,8 +54,7 @@ void debug_log(const char* fmt, ...)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct VICEConnection
-{
+typedef struct VICEConnection {
     enum VICEConnectionType type;
 
     int serverSocket;     // used when having a listener socket
@@ -102,14 +101,12 @@ static int createListner(VICEConnection* conn, int port)
     sin.sin_addr.s_addr = INADDR_ANY;
     sin.sin_port = htons((unsigned short)port);
 
-    if (setsockopt(conn->serverSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int)) == -1)
-    {
+    if (setsockopt(conn->serverSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int)) == -1) {
         perror("setsockopt");
         return 0;
     }
 
-    if (-1 == bind(conn->serverSocket, (struct sockaddr*)&sin, sizeof(sin)))
-    {
+    if (-1 == bind(conn->serverSocket, (struct sockaddr*)&sin, sizeof(sin))) {
         perror("bind");
         return 0;
     }
@@ -125,8 +122,7 @@ static int createListner(VICEConnection* conn, int port)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct VICEConnection* VICEConnection_create(enum VICEConnectionType type, int port)
-{
+struct VICEConnection* VICEConnection_create(enum VICEConnectionType type, int port){
     VICEConnection* conn = 0;
 
 #if defined(_WIN32)
@@ -141,10 +137,8 @@ struct VICEConnection* VICEConnection_create(enum VICEConnectionType type, int p
     conn->serverSocket = INVALID_SOCKET;
     conn->socket = INVALID_SOCKET;
 
-    if (type == VICEConnectionType_Listener)
-    {
-        if (!createListner(conn, port))
-        {
+    if (type == VICEConnectionType_Listener) {
+        if (!createListner(conn, port)) {
             free(conn);
             return 0;
         }
@@ -166,14 +160,12 @@ int VICEConnection_connect(VICEConnection* conn, const char* address, int port)
 
     he = gethostbyname(address);
 
-    if (!he)
-    {
+    if (!he) {
         debug_log("Failed to get hostname\n");
         return 0;
     }
 
-    for (ap = he->h_addr_list; *ap; ++ap)
-    {
+    for (ap = he->h_addr_list; *ap; ++ap) {
     #ifndef _WIN32
         sa.sin_family = (sa_family_t)he->h_addrtype;
     #else
@@ -194,8 +186,7 @@ int VICEConnection_connect(VICEConnection* conn, const char* address, int port)
         sock = INVALID_SOCKET;
     }
 
-    if (sock == INVALID_SOCKET)
-    {
+    if (sock == INVALID_SOCKET) {
         debug_log("No socket to connect to\n");
         return 0;
     }
@@ -238,8 +229,7 @@ static int clientConnect(VICEConnection* conn, struct sockaddr_in* host)
 
     conn->socket = (int)accept(conn->serverSocket, (struct sockaddr*)&hostTemp, (socklen_t*)&hostSize);
 
-    if (INVALID_SOCKET == conn->socket)
-    {
+    if (INVALID_SOCKET == conn->socket) {
         perror("accept");
         debug_log("Unable to accept connection..\n");
         return 0;
@@ -280,8 +270,7 @@ void VICEConnection_updateListner(VICEConnection* conn)
 
     // look for new clients
 
-    if (select(conn->serverSocket + 1, &fds, NULL, NULL, &timeout) > 0)
-    {
+    if (select(conn->serverSocket + 1, &fds, NULL, NULL, &timeout) > 0) {
         if (clientConnect(conn, &client))
             debug_log("Connected to %s\n", inet_ntoa(client.sin_addr));
     }
@@ -312,8 +301,7 @@ int VICEConnection_recv(VICEConnection* conn, char* buffer, int length, int flag
 
     ret = (int)recv(conn->socket, buffer, (size_t)length, flags);
 
-    if (ret <= 0)
-    {
+    if (ret <= 0) {
         debug_log("recv %d %d\n", ret, length);
         VICEConnection_disconnect(conn);
         return 0;
@@ -331,8 +319,7 @@ int VICEConnection_send(VICEConnection* conn, const void* buffer, int length, in
     if (!VICEConnection_connected(conn))
         return 0;
 
-    if ((ret = (int)send(conn->socket, buffer, (size_t)length, flags)) != (int)length)
-    {
+    if ((ret = (int)send(conn->socket, buffer, (size_t)length, flags)) != (int)length) {
         VICEConnection_disconnect(conn);
         return 0;
     }
@@ -350,8 +337,7 @@ int VICEConnection_sendStream(VICEConnection* conn, const unsigned char* buffer)
 
     //debug_log("Going to send stream of size %d\n", size);
 
-    while (size != 0)
-    {
+    while (size != 0) {
         uint32_t sizeLeft = size > 1024 ? 1024 : (uint32_t)size;
 
         int sent = VICEConnection_send(conn, buffer, (int)sizeLeft, 0);
@@ -376,8 +362,7 @@ unsigned char* VICEConnection_recvStream(VICEConnection* conn, unsigned char* ou
     uint8_t* retBuffer = outputBuffer;
     uint8_t ownBuffer = 0;
 
-    if (!outputBuffer)
-    {
+    if (!outputBuffer) {
         outputBuffer = retBuffer = malloc((size_t)size);
         memset(outputBuffer, 0xcd, size);
         ownBuffer = 1;
@@ -394,16 +379,14 @@ unsigned char* VICEConnection_recvStream(VICEConnection* conn, unsigned char* ou
     //debug_log("about to get data (expected size %d)\n", size);
     //debug_log("filling buffer %p\n", outputBuffer);
 
-    while (size != 0)
-    {
+    while (size != 0) {
         uint32_t currSize = size > 1024 ? 1024 : (uint32_t)size;
 
         int ret = VICEConnection_recv(conn, (char*)outputBuffer, (int)currSize, 0);
 
         //debug_log("got size %d (%d)\n", ret, currSize);
 
-        if (ret <= 0)
-        {
+        if (ret <= 0) {
             debug_log("Lost connection or error :(\n");
 
             if (ownBuffer)

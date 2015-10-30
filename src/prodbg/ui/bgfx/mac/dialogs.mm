@@ -61,8 +61,8 @@ int Dialog_selectDirectory(char* dest)
     NSOpenPanel* open = [NSOpenPanel openPanel];
 
     [open setCanChooseDirectories:YES];
-	[open setCanChooseFiles:NO];
-	[open setAllowsMultipleSelection:NO];
+    [open setCanChooseFiles:NO];
+    [open setAllowsMultipleSelection:NO];
 
     long result = [open runModal];
 

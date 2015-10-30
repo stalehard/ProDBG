@@ -5,8 +5,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct CommandEntry
-{
+typedef struct CommandEntry {
     Command command;
     struct CommandEntry* next;
     struct CommandEntry* prev;
@@ -14,8 +13,7 @@ typedef struct CommandEntry
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct CommandList
-{
+typedef struct CommandList {
     CommandEntry* first;
     CommandEntry* last;
 } CommandList;
@@ -35,8 +33,7 @@ static void CommandList_pop(CommandList* commandList);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct MultiCommandData
-{
+struct MultiCommandData {
     CommandList list;
 };
 
@@ -76,12 +73,9 @@ static void execCommand(CommandEntry* entry)
 {
     // set if we have multi command recording enabled)
 
-    if (s_multiCommand)
-    {
+    if (s_multiCommand) {
         CommandList_addEntry(&s_multiCommand->list, entry);
-    }
-    else
-    {
+    }else {
         CommandList_addEntry(&s_undoStack, entry);
         entry->command.exec(entry->command.user_data);
     }
@@ -124,8 +118,7 @@ void Commands_endMulti()
 {
     // Check if any command was added during multi command
 
-    if (CommandList_isEmpty(&s_multiCommand->list))
-    {
+    if (CommandList_isEmpty(&s_multiCommand->list)) {
         free(s_multiCommand);
         s_multiCommand = 0;
         return;
@@ -190,14 +183,11 @@ void Commands_execute(Command command)
 
 static void CommandList_addEntry(CommandList* list, CommandEntry* command)
 {
-    if (list->last)
-    {
+    if (list->last) {
         list->last->next = command;
         command->prev = list->last;
         list->last = command;
-    }
-    else
-    {
+    }else {
         list->first = command;
         list->last = command;
     }
@@ -213,28 +203,19 @@ static void CommandList_unlinkEntry(CommandList* list, CommandEntry* entry)
     prev = entry->prev;
     next = entry->next;
 
-    if (prev)
-    {
-        if (next)
-        {
+    if (prev) {
+        if (next) {
             prev->next = next;
             next->prev = prev;
-        }
-        else
-        {
+        }else {
             prev->next = 0;
             list->last = prev;
         }
-    }
-    else
-    {
-        if (next)
-        {
+    }else {
+        if (next) {
             next->prev = 0;
             list->first = next;
-        }
-        else
-        {
+        }else {
             list->first = 0;
             list->last = 0;
         }
@@ -255,8 +236,7 @@ static void CommandList_delEntry(CommandList* list, CommandEntry* entry)
 
 static void CommandList_clear(CommandList* list)
 {
-    while (list->last)
-    {
+    while (list->last) {
         CommandEntry* entry = list->last;
         CommandList_delEntry(list, entry);
     }

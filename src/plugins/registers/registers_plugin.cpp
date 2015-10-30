@@ -6,23 +6,20 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum
-{
+enum {
     ValueSize = 1024,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Register
-{
+struct Register {
     char name[ValueSize];
     char value[ValueSize];
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct RegistersData
-{
+struct RegistersData {
     int dummy;
     Register* registers;
     int registerCount;
@@ -63,16 +60,14 @@ static void getRegisterString(char* value, PDReader* reader, PDReaderIterator it
 
     // Support that backend can write down value in custom format
 
-    if (PDRead_findString(reader, &regString, "register_string", it) & PDReadStatus_ok)
-    {
+    if (PDRead_findString(reader, &regString, "register_string", it) & PDReadStatus_ok) {
         strncpy(value, regString, ValueSize);
         return;
     }
 
     uint32_t type = PDRead_findU64(reader, &regValue, "register", it);
 
-    switch (type & PDReadStatus_typeMask)
-    {
+    switch (type & PDReadStatus_typeMask) {
         case PDReadType_u8:
             sprintf(value, "0x%02x", (uint8_t)regValue); break;
         case PDReadType_s8:
@@ -94,10 +89,8 @@ static void addOrUpdate(RegistersData* data, const char* name, const char* value
 {
     int count = data->registerCount;
 
-    for (int i = 0; i < count; ++i)
-    {
-        if (!strcmp(data->registers[i].name, name))
-        {
+    for (int i = 0; i < count; ++i) {
+        if (!strcmp(data->registers[i].name, name)) {
             strncpy(data->registers[i].value, value, ValueSize);
             data->registers[i].value[ValueSize - 1] = 0;
 
@@ -123,8 +116,7 @@ static void updateRegisters(RegistersData* data, PDReader* reader)
     if (PDRead_findArray(reader, &it, "registers", 0) == PDReadStatus_notFound)
         return;
 
-    while (PDRead_getNextEntry(reader, &it))
-    {
+    while (PDRead_getNextEntry(reader, &it)) {
         const char* name = "";
         char registerValue[ValueSize];
 
@@ -144,8 +136,7 @@ static void showUI(RegistersData* data, PDUI* uiFuncs)
     uiFuncs->text("Name"); uiFuncs->next_column();
     uiFuncs->text("Value"); uiFuncs->next_column();
 
-    for (int i = 0; i < data->registerCount; ++i)
-    {
+    for (int i = 0; i < data->registerCount; ++i) {
         uiFuncs->text(data->registers[i].name); uiFuncs->next_column();
         uiFuncs->text(data->registers[i].value); uiFuncs->next_column();
     }
@@ -162,10 +153,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     // Loop over all the in events
 
-    while ((event = PDRead_getEvent(inEvents)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(inEvents)) != 0) {
+        switch (event) {
             case PDEventType_setRegisters:
                 updateRegisters(data, inEvents); break;
         }

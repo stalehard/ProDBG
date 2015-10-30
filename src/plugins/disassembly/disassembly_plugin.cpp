@@ -8,8 +8,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Line
-{
+struct Line {
     uint64_t address;
     const char* text;
     bool breakpoint;
@@ -20,8 +19,7 @@ struct Line
 
 const int BlockSize = 64;
 
-struct Block
-{
+struct Block {
     uint64_t id;
     uint64_t address;
     uint64_t addressEnd;
@@ -30,8 +28,7 @@ struct Block
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct DissassemblyData
-{
+struct DissassemblyData {
     std::vector<Block*> blocks;
     uint64_t location;
     uint64_t pc;
@@ -67,8 +64,7 @@ static void destroyInstance(void* user_data)
 
 Block* findBlock(DissassemblyData* data, uint64_t blockId)
 {
-    for (Block* b : data->blocks)
-    {
+    for (Block* b : data->blocks) {
         if (b->id == blockId)
             return b;
     }
@@ -99,12 +95,10 @@ void insertLineBlock(Block* block, uint64_t address, const char* text)
 {
     // So this isn't very smart but will do for now
 
-    for (auto i = block->lines.begin(); i != block->lines.end(); ++i)
-    {
+    for (auto i = block->lines.begin(); i != block->lines.end(); ++i) {
         Line& line = *i;
 
-        if (address < line.address)
-        {
+        if (address < line.address) {
             Line newLine = { 0 };
             newLine.address = address;
             newLine.text = strdup(text);
@@ -114,8 +108,7 @@ void insertLineBlock(Block* block, uint64_t address, const char* text)
 
         // found matching address, update the disassembly
 
-        if (line.address == address)
-        {
+        if (line.address == address) {
             free((void*)line.text);
             line.text = (const char*)strdup(text);
             return;
@@ -157,8 +150,7 @@ static void setDisassemblyCode(DissassemblyData* data, PDReader* reader)
     if (PDRead_findArray(reader, &it, "disassembly", 0) == PDReadStatus_notFound)
         return;
 
-    while (PDRead_getNextEntry(reader, &it))
-    {
+    while (PDRead_getNextEntry(reader, &it)) {
         uint64_t address;
         const char* text;
 
@@ -173,8 +165,7 @@ static void setDisassemblyCode(DissassemblyData* data, PDReader* reader)
 
 static Block* findBlockWithPC(DissassemblyData* data, uint64_t pc)
 {
-    for (Block* b : data->blocks)
-    {
+    for (Block* b : data->blocks) {
         if (pc >= b->address && pc <= b->addressEnd)
             return b;
     }
@@ -195,10 +186,8 @@ void renderUI(DissassemblyData* data, PDUI* uiFuncs)
 
     PDVec2 size = uiFuncs->get_window_size();
 
-    for (Line& line : block->lines)
-    {
-        if (line.address == data->pc)
-        {
+    for (Line& line : block->lines) {
+        if (line.address == data->pc) {
             PDRect rect;
             PDVec2 pos = uiFuncs->get_cursor_pos();
             rect.x = pos.x;
@@ -222,14 +211,12 @@ static void updateRegisters(DissassemblyData* data, PDReader* reader)
     if (PDRead_findArray(reader, &it, "registers", 0) == PDReadStatus_notFound)
         return;
 
-    while (PDRead_getNextEntry(reader, &it))
-    {
+    while (PDRead_getNextEntry(reader, &it)) {
         const char* name = "";
 
         PDRead_findString(reader, &name, "name", it);
 
-        if (!strcmp(name, "pc"))
-        {
+        if (!strcmp(name, "pc")) {
             PDRead_findU64(reader, &data->pc, "register", it);
         }
     }
@@ -245,10 +232,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     data->requestDisassembly = false;
 
-    while ((event = PDRead_getEvent(inEvents)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(inEvents)) != 0) {
+        switch (event) {
             case PDEventType_setDisassembly:
             {
                 setDisassemblyCode(data, inEvents);
@@ -261,8 +246,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
                 PDRead_findU64(inEvents, &location, "address", 0);
 
-                if (location != data->location)
-                {
+                if (location != data->location) {
                     data->location = location;
                     data->requestDisassembly = true;
                 }
@@ -282,8 +266,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     renderUI(data, uiFuncs);
 
-    if (data->requestDisassembly)
-    {
+    if (data->requestDisassembly) {
         int pc = (int)(data->pc) & ~(BlockSize - 1);
         PDWrite_eventBegin(writer, PDEventType_getDisassembly);
         PDWrite_u64(writer, "address_start", (uint64_t)pc);

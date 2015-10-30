@@ -40,14 +40,12 @@ static PDLoadStatus readJsonInt(void* privData, int64_t* dest)
     if (!item)
         return PDLoadStatus_outOfData;
 
-    if (json_typeof(item) == JSON_INTEGER)
-    {
+    if (json_typeof(item) == JSON_INTEGER) {
         *dest = json_integer_value(item);
         return PDLoadStatus_ok;
     }
 
-    if (json_typeof(item) == JSON_REAL)
-    {
+    if (json_typeof(item) == JSON_REAL) {
         *dest = (int64_t)json_real_value(item);
         return PDLoadStatus_converted;
     }
@@ -67,14 +65,12 @@ static PDLoadStatus readJsonDouble(void* privData, double* dest)
     if (!item)
         return PDLoadStatus_outOfData;
 
-    if (json_typeof(item) == JSON_REAL)
-    {
+    if (json_typeof(item) == JSON_REAL) {
         *dest = json_real_value(item);
         return PDLoadStatus_ok;
     }
 
-    if (json_typeof(item) == JSON_INTEGER)
-    {
+    if (json_typeof(item) == JSON_INTEGER) {
         *dest = (double)json_integer_value(item);
         return PDLoadStatus_converted;
     }
@@ -96,8 +92,7 @@ static PDLoadStatus readJsonString(void* privData, char* dest, int len)
     if (len == 0)
         return PDLoadStatus_fail;
 
-    if (len == 1)
-    {
+    if (len == 1) {
         *dest = 0;
         return PDLoadStatus_truncated;
     }
@@ -105,13 +100,11 @@ static PDLoadStatus readJsonString(void* privData, char* dest, int len)
     if (json_is_number(item))
         return PDLoadStatus_fail;
 
-    if (json_is_string(item))
-    {
+    if (json_is_string(item)) {
         const char* jsonString = json_string_value(item);
         int jsonStringLength = (int)string_length(jsonString);
 
-        if (jsonStringLength < len)
-        {
+        if (jsonStringLength < len) {
             strcpy(dest, jsonString);
             return PDLoadStatus_ok;
         }

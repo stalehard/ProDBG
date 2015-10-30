@@ -38,8 +38,7 @@ const int s_borderSize = 4;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Context
-{
+struct Context {
     int width;
     int height;
     //InputState inputState;
@@ -51,8 +50,7 @@ static Context s_context;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct PrivateData
-{
+struct PrivateData {
     ImGuiWindow* window;
     const char* name;
     const char* title;
@@ -63,17 +61,16 @@ struct PrivateData
 
 ImVec4 pdColorToImVec4(uint32_t color)
 {
-	float r = ((color >> 24) & 0xff) * 1.0f / 255.0f;
-	float g = ((color >> 16) & 0xff) * 1.0f / 255.0f;
-	float b = ((color >> 8) & 0xff) * 1.0f / 255.0f;
-	float a = ((color >> 0) & 0xff) * 1.0f / 255.0f;
-	return ImVec4(r, g, b, a);
+    float r = ((color >> 24) & 0xff) * 1.0f / 255.0f;
+    float g = ((color >> 16) & 0xff) * 1.0f / 255.0f;
+    float b = ((color >> 8) & 0xff) * 1.0f / 255.0f;
+    float a = ((color >> 0) & 0xff) * 1.0f / 255.0f;
+    return ImVec4(r, g, b, a);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDSCFuncs
-{
+typedef struct PDSCFuncs {
     intptr_t (*send_command)(void* privData, unsigned int message, uintptr_t p0, intptr_t p1);
     void (*update)(void* privData);
     void (*draw)(void* privData);
@@ -108,17 +105,17 @@ static void scDraw(void* privData)
 
 static void set_title(void* private_data, const char* title)
 {
-	PrivateData* data = (PrivateData*)private_data;
+    PrivateData* data = (PrivateData*)private_data;
 
-	(void)data;
+    (void)data;
 
-	if (string_equal(data->title, title))
-		return;
+    if (string_equal(data->title, title))
+        return;
 
-	if (data->title)
-		free((void*)data->title);
+    if (data->title)
+        free((void*)data->title);
 
-	data->title = strdup(title); 
+    data->title = strdup(title);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,91 +154,91 @@ static void end_child()
 
 static float get_scroll_y()
 {
-	return ImGui::GetScrollY();
+    return ImGui::GetScrollY();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static float get_scroll_max_y()
 {
-	return ImGui::GetScrollMaxY();
+    return ImGui::GetScrollMaxY();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void set_scroll_y(float scrollY)
 {
-	ImGui::SetScrollY(scrollY);
+    ImGui::SetScrollY(scrollY);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void set_scroll_here(float centerYratio)
 {
-	ImGui::SetScrollHere(centerYratio);
+    ImGui::SetScrollHere(centerYratio);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void set_scroll_from_pos_y(float posY, float centerYratio)
 {
-	ImGui::SetScrollFromPosY(posY, centerYratio);
+    ImGui::SetScrollFromPosY(posY, centerYratio);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void set_keyboard_focus_here(int offset)
 {
-	ImGui::SetKeyboardFocusHere(offset);
+    ImGui::SetKeyboardFocusHere(offset);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_font(PDUIFont font)
 {
-	ImGui::PushFont((ImFont*)font);
+    ImGui::PushFont((ImFont*)font);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void pop_font()
 {
-	ImGui::PopFont();
+    ImGui::PopFont();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_style_color(PDUICol idx, PDColor col)
 {
-	ImGui::PushStyleColor(idx, pdColorToImVec4(col));
+    ImGui::PushStyleColor(idx, pdColorToImVec4(col));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void pop_style_color(int count)
 {
-	ImGui::PopStyleVar(count);
+    ImGui::PopStyleVar(count);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_style_var(PDUIStyleVar idx, float val)
 {
-	ImGui::PushStyleVar(ImGuiStyleVar(idx), val);
+    ImGui::PushStyleVar(ImGuiStyleVar(idx), val);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_style_varVec(PDUIStyleVar idx, PDVec2 val)
 {
-	ImGui::PushStyleVar(ImGuiStyleVar(idx), ImVec2(val.x, val.y));
+    ImGui::PushStyleVar(ImGuiStyleVar(idx), ImVec2(val.x, val.y));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void pop_style_var(int count)
 {
-	ImGui::PopStyleVar(count);
+    ImGui::PopStyleVar(count);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -262,70 +259,70 @@ static void pop_item_width()
 
 static float calc_item_width()
 {
-	return ImGui::CalcItemWidth();
+    return ImGui::CalcItemWidth();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_allow_keyboard_focus(bool v)
 {
-	ImGui::PushAllowKeyboardFocus(v);
+    ImGui::PushAllowKeyboardFocus(v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void pop_allow_keyboard_focus()
 {
-	ImGui::PopAllowKeyboardFocus();
+    ImGui::PopAllowKeyboardFocus();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_text_wrap_pos(float wrapPosX)
 {
-	ImGui::PushTextWrapPos(wrapPosX);
+    ImGui::PushTextWrapPos(wrapPosX);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void pop_text_wrap_pos()
 {
-	ImGui::PopTextWrapPos();
+    ImGui::PopTextWrapPos();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_button_repeat(bool repeat)
 {
-	ImGui::PushButtonRepeat(repeat);
+    ImGui::PushButtonRepeat(repeat);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void pop_button_repeat()
 {
-	ImGui::PopButtonRepeat();
+    ImGui::PopButtonRepeat();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void begin_group()
 {
-	ImGui::BeginGroup();
+    ImGui::BeginGroup();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void end_group()
 {
-	ImGui::EndGroup();
+    ImGui::EndGroup();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void separator()
 {
-	ImGui::Separator();
+    ImGui::Separator();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -346,21 +343,21 @@ static void spacing()
 
 static void dummy(PDVec2 size)
 {
-	ImGui::Dummy(ImVec2(size.x, size.y));
+    ImGui::Dummy(ImVec2(size.x, size.y));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void indent()
 {
-	ImGui::Indent();
+    ImGui::Indent();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void un_indent()
 {
-	ImGui::Unindent();
+    ImGui::Unindent();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,7 +378,7 @@ static void next_column()
 
 static int get_column_index()
 {
-	return ImGui::GetColumnIndex();
+    return ImGui::GetColumnIndex();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -409,7 +406,7 @@ static float get_column_width(int columnIndex)
 
 static int get_columns_count()
 {
-	return ImGui::GetColumnsCount();
+    return ImGui::GetColumnsCount();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -425,14 +422,14 @@ static PDVec2 get_cursor_pos()
 
 static float get_cursor_pos_x()
 {
-	return ImGui::GetCursorPosX();
+    return ImGui::GetCursorPosX();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static float get_cursor_pos_y()
 {
-	return ImGui::GetCursorPosY();
+    return ImGui::GetCursorPosY();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -469,7 +466,7 @@ static PDVec2 get_cursor_screen_pos()
 
 static void set_cursor_screen_pos(PDVec2 pos)
 {
-	ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y));
+    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -483,7 +480,7 @@ static void align_first_text_height_to_widgets()
 
 static float get_text_line_height()
 {
-	return ImGui::GetTextLineHeight();
+    return ImGui::GetTextLineHeight();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -497,63 +494,63 @@ static float get_text_line_height_with_spacing()
 
 static float get_items_line_height_with_spacing()
 {
-	return ImGui::GetItemsLineHeightWithSpacing();
+    return ImGui::GetItemsLineHeightWithSpacing();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_id_str(const char* strId)
 {
-	ImGui::PushID(strId);
+    ImGui::PushID(strId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_id_str_range(const char* strBegin, const char* strEnd)
 {
-	ImGui::PushID(strBegin, strEnd);
+    ImGui::PushID(strBegin, strEnd);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_id_ptr(const void* ptrId)
 {
-	ImGui::PushID(ptrId);
+    ImGui::PushID(ptrId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void push_id_int(const int intId)
 {
-	ImGui::PushID(intId);
+    ImGui::PushID(intId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void pop_id()
 {
-	ImGui::PopID();
+    ImGui::PopID();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static PDID get_id_str(const char* strId)
 {
-	return (PDID)ImGui::GetID(strId);
+    return (PDID)ImGui::GetID(strId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static PDID get_id_str_range(const char* strBegin, const char* strEnd)
 {
-	return (PDID)ImGui::GetID(strBegin, strEnd);
+    return (PDID)ImGui::GetID(strBegin, strEnd);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static PDID get_id_ptr(const void* ptrId)
 {
-	return (PDID)ImGui::GetID(ptrId);
+    return (PDID)ImGui::GetID(ptrId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -770,7 +767,7 @@ static bool combo2(const char* label, int* currentItem, const char* itemsSeparat
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool combo3(const char* label, int* currentItem, bool(*itemsGetter)(void* data, int idx, const char** out_text), void* data, int itemsCount, int heightInItems)
+static bool combo3(const char* label, int* currentItem, bool (*itemsGetter)(void* data, int idx, const char** out_text), void* data, int itemsCount, int heightInItems)
 {
     return ImGui::Combo(label, currentItem, itemsGetter, data, itemsCount, heightInItems);
 }
@@ -814,7 +811,7 @@ static void plot_lines(const char* label, const float* values, int valuesCount, 
 
 static void plot_lines2(const char* label, float (*valuesGetter)(void* data, int idx), void* data, int valuesCount, int valuesOffset, const char* overlayText, float scaleMin, float scaleMax, PDVec2 graphSize)
 {
-	ImGui::PlotLines(label, valuesGetter, data, valuesCount, valuesOffset, overlayText, scaleMin, scaleMax, ImVec2(graphSize.x, graphSize.y)); 
+    ImGui::PlotLines(label, valuesGetter, data, valuesCount, valuesOffset, overlayText, scaleMin, scaleMax, ImVec2(graphSize.x, graphSize.y));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -837,8 +834,7 @@ static PDUISCInterface* sc_input_text(const char* label, float xSize, float ySiz
 {
     ImScEditor* ed = ImGui::ScInputText(label, xSize, ySize, callback, user_data);
 
-    if (!ed->userData)
-    {
+    if (!ed->userData) {
         PDUISCInterface* funcs = (PDUISCInterface*)malloc(sizeof(PDUISCInterface));
         funcs->send_command = scSendCommand;
         funcs->update = scUpdate;
@@ -988,8 +984,7 @@ static bool drag_int4(const char* label, int v[4], float vSpeed, int vMin, int v
 
 typedef void (*InputCallback)(PDUIInputTextCallbackData*);
 
-struct PDInputTextUserData
-{
+struct PDInputTextUserData {
     InputCallback callback;
     void* user_data;
 };
@@ -1252,9 +1247,9 @@ static bool list_box(const char* label, int* currentItem, const char** items, in
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool list_box2(const char* label, int* currentItem, bool(*itemsGetter)(void* data, int idx, const char** out_text), void* data, int itemsCount, int heightInItems)
+static bool list_box2(const char* label, int* currentItem, bool (*itemsGetter)(void* data, int idx, const char** out_text), void* data, int itemsCount, int heightInItems)
 {
-	return ImGui::ListBox(label, currentItem, itemsGetter, data, itemsCount, heightInItems);
+    return ImGui::ListBox(label, currentItem, itemsGetter, data, itemsCount, heightInItems);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1557,7 +1552,7 @@ static bool is_any_item_active()
 
 static PDVec2 get_item_rect_min()
 {
-	ImVec2 t = ImGui::GetItemRectMin();
+    ImVec2 t = ImGui::GetItemRectMin();
     PDVec2 r = { t.x, t.y };
     return r;
 }
@@ -1721,10 +1716,10 @@ static bool is_key_released(int key_index)
 
 static bool is_key_down_id(uint32_t keyId, int repeat)
 {
-	if (!ImGui::IsWindowFocused())
-		return false;
+    if (!ImGui::IsWindowFocused())
+        return false;
 
-	return !!InputState_isKeyDown(keyId >> 4, keyId & 0xf, repeat);
+    return !!InputState_isKeyDown(keyId >> 4, keyId & 0xf, repeat);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1833,7 +1828,7 @@ static void fill_rect(PDRect rect, PDColor color)
 
 char* buildName(const char* pluginName, int id)
 {
-	char name[1024];
+    char name[1024];
 
     sprintf(name, "%s %d ###%s%d", pluginName, id, pluginName, id);
 
@@ -1842,49 +1837,49 @@ char* buildName(const char* pluginName, int id)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDUI s_uiFuncs[] = 
+static PDUI s_uiFuncs[] =
 {
-	// Windows
+    // Windows
 
-	set_title,
+    set_title,
     get_window_size,
     get_window_pos,
     begin_child,
     end_child,
 
-	get_scroll_y,
-	get_scroll_max_y,
-	set_scroll_y,
-	set_scroll_here,
-	set_scroll_from_pos_y,
-	set_keyboard_focus_here,
+    get_scroll_y,
+    get_scroll_max_y,
+    set_scroll_y,
+    set_scroll_here,
+    set_scroll_from_pos_y,
+    set_keyboard_focus_here,
 
-	// Parameters stacks (shared)
-	
-	push_font,
-	pop_font,
-	push_style_color,
-	pop_style_color,
-	push_style_var,
-	push_style_varVec,
-	pop_style_var,
+    // Parameters stacks (shared)
 
-	// Parameters stacks (current window)
+    push_font,
+    pop_font,
+    push_style_color,
+    pop_style_color,
+    push_style_var,
+    push_style_varVec,
+    pop_style_var,
+
+    // Parameters stacks (current window)
 
     push_item_width,
     pop_item_width,
-	calc_item_width,
-	push_allow_keyboard_focus,
-	pop_allow_keyboard_focus,
-	push_text_wrap_pos,
-	pop_text_wrap_pos,
-	push_button_repeat,
-	pop_button_repeat,
+    calc_item_width,
+    push_allow_keyboard_focus,
+    pop_allow_keyboard_focus,
+    push_text_wrap_pos,
+    pop_text_wrap_pos,
+    push_button_repeat,
+    pop_button_repeat,
 
-	// Layout
+    // Layout
 
-	begin_group,
-	end_group,
+    begin_group,
+    end_group,
     separator,
     same_line,
     spacing,
@@ -1905,212 +1900,212 @@ static PDUI s_uiFuncs[] =
     set_cursor_pos_x,
     set_cursor_pos_y,
     get_cursor_screen_pos,
-	set_cursor_screen_pos,
+    set_cursor_screen_pos,
     align_first_text_height_to_widgets,
     get_text_line_height,
     get_text_line_height_with_spacing,
     get_items_line_height_with_spacing,
 
-	// ID scopes
-	// If you are creating widgets in a loop you most likely want to push a unique identifier so PDUI can differentiate them
-	// You can also use "##extra" within your widget name to distinguish them from each others (see 'Programmer Guide')
+    // ID scopes
+    // If you are creating widgets in a loop you most likely want to push a unique identifier so PDUI can differentiate them
+    // You can also use "##extra" within your widget name to distinguish them from each others (see 'Programmer Guide')
 
-	push_id_str,
-	push_id_str_range,
+    push_id_str,
+    push_id_str_range,
     push_id_ptr,
     push_id_int,
     pop_id,
-	get_id_str,
-	get_id_str_range,
-	get_id_ptr,
+    get_id_str,
+    get_id_str_range,
+    get_id_ptr,
 
     // Widgets
 
-	text,
-	text_v,
-	text_colored,
-	text_colored_v,
-	text_disabled,
-	text_disabledV,
-	text_wrapped,
-	text_wrapped_v,
-	text_unformatted,
-	label_text,
-	label_textV,
-	bullet,
-	bullet_text,
-	bullet_text_v,
-	button,
-	small_button,
-	invisible_button,
-	image,
-	image_button,
-	collapsing_header,
-	checkbox,
-	checkbox_flags,
-	radio_buttonBool,
-	radio_button,
-	combo,
-	combo2,
-	combo3,
-	color_button,
-	color_edit3,
-	color_edit4,
-	color_edit_mode,
-	plot_lines,
-	plot_lines2,
-	plot_histogram,
-	plot_histogram2,
+    text,
+    text_v,
+    text_colored,
+    text_colored_v,
+    text_disabled,
+    text_disabledV,
+    text_wrapped,
+    text_wrapped_v,
+    text_unformatted,
+    label_text,
+    label_textV,
+    bullet,
+    bullet_text,
+    bullet_text_v,
+    button,
+    small_button,
+    invisible_button,
+    image,
+    image_button,
+    collapsing_header,
+    checkbox,
+    checkbox_flags,
+    radio_buttonBool,
+    radio_button,
+    combo,
+    combo2,
+    combo3,
+    color_button,
+    color_edit3,
+    color_edit4,
+    color_edit_mode,
+    plot_lines,
+    plot_lines2,
+    plot_histogram,
+    plot_histogram2,
 
-	// Widgets: Scintilla text interface
-	sc_input_text,
+    // Widgets: Scintilla text interface
+    sc_input_text,
 
-	// Widgets: Sliders (tip: ctrl+click on a slider to input text)
-	slider_float,
-	slider_float2,
-	slider_float3,
-	slider_float4,
-	slider_angle,
-	slider_int,
-	slider_int2,
-	slider_int3,
-	slider_int4,
-	vslider_float,
-	vslider_int,
+    // Widgets: Sliders (tip: ctrl+click on a slider to input text)
+    slider_float,
+    slider_float2,
+    slider_float3,
+    slider_float4,
+    slider_angle,
+    slider_int,
+    slider_int2,
+    slider_int3,
+    slider_int4,
+    vslider_float,
+    vslider_int,
 
-	// Widgets: Drags (tip: ctrl+click on a drag box to input text)
-	drag_float,
-	drag_float2,
-	drag_float3,
-	drag_float4,
-	drag_int,
-	drag_int2,
-	drag_int3,
-	drag_int4,
+    // Widgets: Drags (tip: ctrl+click on a drag box to input text)
+    drag_float,
+    drag_float2,
+    drag_float3,
+    drag_float4,
+    drag_int,
+    drag_int2,
+    drag_int3,
+    drag_int4,
 
-	// Widgets: Input
-	input_text,
-	input_text_multiline,
-	input_float,
-	input_float2,
-	input_float3,
-	input_float4,
-	input_int,
-	input_int2,
-	input_int3,
-	input_int4,
+    // Widgets: Input
+    input_text,
+    input_text_multiline,
+    input_float,
+    input_float2,
+    input_float3,
+    input_float4,
+    input_int,
+    input_int2,
+    input_int3,
+    input_int4,
 
-	// Widgets: Trees
-	tree_node,
-	tree_node_str,
-	tree_node_ptr,
-	tree_node_str_v,
-	tree_node_ptr_v,
-	tree_push_str,
-	tree_push_ptr,
-	tree_pop,
-	set_next_tree_node_opened,
+    // Widgets: Trees
+    tree_node,
+    tree_node_str,
+    tree_node_ptr,
+    tree_node_str_v,
+    tree_node_ptr_v,
+    tree_push_str,
+    tree_push_ptr,
+    tree_pop,
+    set_next_tree_node_opened,
 
-	// Widgets: Selectable / Lists
-	selectable,
-	selectable_ex,
-	list_box,
-	list_box2,
-	list_box_header,
-	list_box_header2,
-	list_box_footer,
+    // Widgets: Selectable / Lists
+    selectable,
+    selectable_ex,
+    list_box,
+    list_box2,
+    list_box_header,
+    list_box_header2,
+    list_box_footer,
 
-	// Tooltip
-	set_tooltip,
-	set_tooltipV,
-	begin_tooltip,
-	end_tooltip,
+    // Tooltip
+    set_tooltip,
+    set_tooltipV,
+    begin_tooltip,
+    end_tooltip,
 
-	// Widgets: Menus
-	begin_main_menu_bar,
-	end_main_menu_bar,
-	begin_menuBar,
-	end_menu_bar,
-	begin_menu,
-	end_menu,
-	menu_item,
-	menu_item_ptr,
+    // Widgets: Menus
+    begin_main_menu_bar,
+    end_main_menu_bar,
+    begin_menuBar,
+    end_menu_bar,
+    begin_menu,
+    end_menu,
+    menu_item,
+    menu_item_ptr,
 
-	// Popup
-	open_popup,
-	begin_popup,
-	begin_popup_modal,
-	begin_popup_context_item,
-	begin_popup_context_window,
-	begin_popup_context_void,
-	end_popup,
-	close_current_popup,
+    // Popup
+    open_popup,
+    begin_popup,
+    begin_popup_modal,
+    begin_popup_context_item,
+    begin_popup_context_window,
+    begin_popup_context_void,
+    end_popup,
+    close_current_popup,
 
-	// Widgets: value() Helpers. Output single value in "name: value" format
-	value_bool,
-	value_int,
-	value_u_int,
-	value_float,
-	color,
+    // Widgets: value() Helpers. Output single value in "name: value" format
+    value_bool,
+    value_int,
+    value_u_int,
+    value_float,
+    color,
 
-	// Logging: all text output from interface is redirected to tty/file/clipboard. Tree nodes are automatically opened.
-	log_to_tty,
-	log_to_file,
-	log_to_clipboard,
-	log_finish,
-	log_buttons,
-	//logText,
+    // Logging: all text output from interface is redirected to tty/file/clipboard. Tree nodes are automatically opened.
+    log_to_tty,
+    log_to_file,
+    log_to_clipboard,
+    log_finish,
+    log_buttons,
+    //logText,
 
-	// Utilities
-	is_item_hovered,
-	is_item_hovered_rect,
-	is_item_active,
-	is_item_visible,
-	is_any_item_hovered,
-	is_any_item_active,
-	get_item_rect_min,
-	get_item_rect_max,
-	get_item_rect_size,
-	is_window_hovered,
-	is_window_focused,
-	is_root_window_focused,
-	is_root_window_or_any_child_focused,
-	is_rect_visible,
-	is_pos_hovering_any_window,
-	get_time,
-	get_frame_count,
-	get_style_col_name,
-	calc_item_rect_closest_point,
-	calc_text_size,
-	calc_list_clipping,
+    // Utilities
+    is_item_hovered,
+    is_item_hovered_rect,
+    is_item_active,
+    is_item_visible,
+    is_any_item_hovered,
+    is_any_item_active,
+    get_item_rect_min,
+    get_item_rect_max,
+    get_item_rect_size,
+    is_window_hovered,
+    is_window_focused,
+    is_root_window_focused,
+    is_root_window_or_any_child_focused,
+    is_rect_visible,
+    is_pos_hovering_any_window,
+    get_time,
+    get_frame_count,
+    get_style_col_name,
+    calc_item_rect_closest_point,
+    calc_text_size,
+    calc_list_clipping,
 
-	begin_childFrame,
-	end_child_frame,
+    begin_childFrame,
+    end_child_frame,
 
-	color_convert_rg_bto_hsv,
-	color_convert_hs_vto_rgb,
-	is_key_down,
-	is_key_pressed,
-	is_key_released,
+    color_convert_rg_bto_hsv,
+    color_convert_hs_vto_rgb,
+    is_key_down,
+    is_key_pressed,
+    is_key_released,
 
-	is_key_down_id,
-	is_mouse_down,
-	is_mouse_clicked,
-	is_mouse_double_clicked,
-	is_mouse_released,
-	is_mouse_hovering_window,
-	is_mouse_hovering_any_window,
-	is_mouse_hovering_rect,
-	is_mouse_dragging,
-	get_mouse_pos,
-	get_mouse_drag_delta,
-	reset_mouse_drag_delta,
-	get_mouse_cursor,
-	set_mouse_cursor,
+    is_key_down_id,
+    is_mouse_down,
+    is_mouse_clicked,
+    is_mouse_double_clicked,
+    is_mouse_released,
+    is_mouse_hovering_window,
+    is_mouse_hovering_any_window,
+    is_mouse_hovering_rect,
+    is_mouse_dragging,
+    get_mouse_pos,
+    get_mouse_drag_delta,
+    reset_mouse_drag_delta,
+    get_mouse_cursor,
+    set_mouse_cursor,
 
 /*
 
-	text,
+    text,
     text_colored,
     text_wrapped,
     input_text,
@@ -2123,7 +2118,7 @@ static PDUI s_uiFuncs[] =
     selectable,
 
     // Misc
-    
+
     // Mouse
 
     get_mouse_pos,
@@ -2145,7 +2140,7 @@ static PDUI s_uiFuncs[] =
     push_style_varV,
     push_style_varF,
     pop_style_var,
-*/
+ */
 
     // Rendering
 
@@ -2157,11 +2152,11 @@ static PDUI s_uiFuncs[] =
 
 void BgfxPluginUI::init(ViewPluginInstance* pluginInstance)
 {
-	PrivateData* data = 0;
+    PrivateData* data = 0;
 
     PDUI* uiInstance = &pluginInstance->ui;
 
-	*uiInstance = *s_uiFuncs;
+    *uiInstance = *s_uiFuncs;
 
     uiInstance->private_data = alloc_zero(sizeof(PrivateData));
 
@@ -2170,7 +2165,7 @@ void BgfxPluginUI::init(ViewPluginInstance* pluginInstance)
     data->name = buildName(pluginInstance->plugin->name, pluginInstance->count);
     data->window = 0;
     data->showWindow = true;
-    data->title = 0; 
+    data->title = 0;
 
     pluginInstance->name = data->name;
 }
@@ -2180,122 +2175,120 @@ void BgfxPluginUI::init(ViewPluginInstance* pluginInstance)
 
 void updateWindowSize(void* user_data, int x, int y, int width, int height)
 {
-	ViewPluginInstance* instance = (ViewPluginInstance*)user_data;
+    ViewPluginInstance* instance = (ViewPluginInstance*)user_data;
 
-	instance->rect.x = x;
-	instance->rect.y = y;
-	instance->rect.width = width;
-	instance->rect.height = height;
+    instance->rect.x = x;
+    instance->rect.y = y;
+    instance->rect.width = width;
+    instance->rect.height = height;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void setCursorStyle(DockSysCursor cursor)
 {
-	switch (cursor)
-	{
-		case DockSysCursor_SizeHorizontal : Cunsor_setType(CursorType_SizeHorizontal); break;
-		case DockSysCursor_SizeVertical : Cunsor_setType(CursorType_SizeVertical); break;
-		default : Cunsor_setType(CursorType_Default); break;
-	}
+    switch (cursor) {
+        case DockSysCursor_SizeHorizontal:
+            Cunsor_setType(CursorType_SizeHorizontal); break;
+        case DockSysCursor_SizeVertical:
+            Cunsor_setType(CursorType_SizeVertical); break;
+        default:
+            Cunsor_setType(CursorType_Default); break;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: Move this code?
-	
+
 static void saveUserData(struct json_t* item, void* user_data)
 {
-	ViewPluginInstance* view = (ViewPluginInstance*)user_data;
+    ViewPluginInstance* view = (ViewPluginInstance*)user_data;
 
-	if (!view->plugin)
-		return;
+    if (!view->plugin)
+        return;
 
     PDSaveState saveFuncs;
     PluginIO_initSaveJson(&saveFuncs);
 
-	PluginData* pluginData = PluginHandler_getPluginData(view->plugin);
+    PluginData* pluginData = PluginHandler_getPluginData(view->plugin);
 
-	assert(pluginData);
+    assert(pluginData);
 
-	const char* pluginName = view->plugin->name;
-	const char* filename = pluginData->filename;
+    const char* pluginName = view->plugin->name;
+    const char* filename = pluginData->filename;
 
-	json_object_set_new(item, "plugin_name", json_string(pluginName));
-	json_object_set_new(item, "plugin_file", json_string(filename));
+    json_object_set_new(item, "plugin_name", json_string(pluginName));
+    json_object_set_new(item, "plugin_file", json_string(filename));
 
-	PDViewPlugin* viewPlugin = (PDViewPlugin*)pluginData->plugin;
+    PDViewPlugin* viewPlugin = (PDViewPlugin*)pluginData->plugin;
 
-	if (!viewPlugin->saveState)
-		return;
+    if (!viewPlugin->saveState)
+        return;
 
-	json_t* array = json_array();
+    json_t* array = json_array();
 
-	saveFuncs.privData = array;
+    saveFuncs.privData = array;
 
-	viewPlugin->saveState(view->userData, &saveFuncs);
+    viewPlugin->saveState(view->userData, &saveFuncs);
 
-	json_object_set_new(item, "plugin_data", array);
+    json_object_set_new(item, "plugin_data", array);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void* loadUserData(struct json_t* item)
 {
-	ViewPluginInstance* view = 0;
+    ViewPluginInstance* view = 0;
 
-	const char* pluginName = json_string_value(json_object_get(item, "plugin_name"));
-	const char* filename = json_string_value(json_object_get(item, "plugin_file"));
+    const char* pluginName = json_string_value(json_object_get(item, "plugin_name"));
+    const char* filename = json_string_value(json_object_get(item, "plugin_file"));
 
-	// if this is the case we have no plugin created (empty window)
+    // if this is the case we have no plugin created (empty window)
 
-	if (!strcmp(pluginName, "") && !strcmp(filename, ""))
-	{
-		view = (ViewPluginInstance*)alloc_zero(sizeof(ViewPluginInstance));
-	}
-	else
-	{
-		PDLoadState loadFuncs;
-		PluginIO_initLoadJson(&loadFuncs);
+    if (!strcmp(pluginName, "") && !strcmp(filename, "")) {
+        view = (ViewPluginInstance*)alloc_zero(sizeof(ViewPluginInstance));
+    }else {
+        PDLoadState loadFuncs;
+        PluginIO_initLoadJson(&loadFuncs);
 
-		PluginData* pluginData = PluginHandler_findPlugin(0, filename, pluginName, true);
+        PluginData* pluginData = PluginHandler_findPlugin(0, filename, pluginName, true);
 
-		if (!pluginData)
-			view = (ViewPluginInstance*)alloc_zero(sizeof(ViewPluginInstance));
-		else
-			view = g_pluginUI->createViewPlugin(pluginData);
+        if (!pluginData)
+            view = (ViewPluginInstance*)alloc_zero(sizeof(ViewPluginInstance));
+        else
+            view = g_pluginUI->createViewPlugin(pluginData);
 
-		PDViewPlugin* viewPlugin = (PDViewPlugin*)pluginData->plugin;
+        PDViewPlugin* viewPlugin = (PDViewPlugin*)pluginData->plugin;
 
-		json_t* pluginJsonData = json_object_get(item, "plugin_data");
+        json_t* pluginJsonData = json_object_get(item, "plugin_data");
 
-		if (pluginJsonData && viewPlugin && viewPlugin->loadState)
-		{
-			SessionLoadState loadState = { pluginJsonData, (int)json_array_size(pluginJsonData), 0 };
-			loadFuncs.privData = &loadState;
-			viewPlugin->loadState(view->userData, &loadFuncs);
-		}
-	}
+        if (pluginJsonData && viewPlugin && viewPlugin->loadState) {
+            SessionLoadState loadState = { pluginJsonData, (int)json_array_size(pluginJsonData), 0 };
+            loadFuncs.privData = &loadState;
+            viewPlugin->loadState(view->userData, &loadFuncs);
+        }
+    }
 
-	// TODO: Fi this: assuming one session
+    // TODO: Fi this: assuming one session
 
     Session** sessions = Session_getSessions();
 
     assert(sessions);
     assert(sessions[0]);
 
-	Session_addViewPlugin(sessions[0], view);
+    Session_addViewPlugin(sessions[0], view);
 
-	return view;
+    return view;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static DockSysCallbacks s_dockSysCallbacks =
 {
-	updateWindowSize,
-	setCursorStyle,
-	saveUserData,
-	loadUserData,
+    updateWindowSize,
+    setCursorStyle,
+    saveUserData,
+    loadUserData,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2305,10 +2298,10 @@ PluginUI::State BgfxPluginUI::updateInstance(ViewPluginInstance* instance, PDRea
     PDUI* uiInstance = &instance->ui;
     PrivateData* data = (PrivateData*)uiInstance->private_data;
 
-	float x = (float)instance->rect.x;
-	float y = (float)instance->rect.y;
-	float w = (float)instance->rect.width;
-	float h = (float)instance->rect.height;
+    float x = (float)instance->rect.x;
+    float y = (float)instance->rect.y;
+    float w = (float)instance->rect.width;
+    float h = (float)instance->rect.height;
 
     ImGui::SetNextWindowPos(ImVec2(x, y));
     ImGui::SetNextWindowSize(ImVec2(w - s_borderSize, h - s_borderSize));
@@ -2318,13 +2311,12 @@ PluginUI::State BgfxPluginUI::updateInstance(ViewPluginInstance* instance, PDRea
     char title[1024];
 
     if (!data->title)
-   		strcpy(title, data->name);
-	else
-	{
-		sprintf(title, "%s %d - %s###%s%d", 
-				instance->plugin->name, instance->count, 
-				data->title, instance->plugin->name, instance->count);
-	}
+        strcpy(title, data->name);
+    else{
+        sprintf(title, "%s %d - %s###%s%d",
+                instance->plugin->name, instance->count,
+                data->title, instance->plugin->name, instance->count);
+    }
 
     ImGui::Begin(title, &data->showWindow, ImVec2(0, 0), true, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
@@ -2381,8 +2373,7 @@ void BgfxPluginUI::setStatusTextNoFormat(const char* text)
 
 static void updateDock(UIDockingGrid* grid)
 {
-    switch (UIDock_getSizingState(grid))
-    {
+    switch (UIDock_getSizingState(grid)) {
         case UIDockSizerDir_None:
         {
             Cunsor_setType(CursorType_Default);
@@ -2421,16 +2412,16 @@ static void updateDocking(Session* session)
     int mx = (int)state->mousePos.x;
     int my = (int)state->mousePos.y;
 
-	struct ViewPluginInstance* view = Session_getViewAt(session, mx, my, 0); 
+    struct ViewPluginInstance* view = Session_getViewAt(session, mx, my, 0);
 
-	docksys_set_mouse(view, mx, my, state->mouseDown[0]);
+    docksys_set_mouse(view, mx, my, state->mouseDown[0]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BgfxPluginUI::preUpdate()
 {
-	const float deltaTime = 1.0f / 60.f; // TODO: Calc correct dt
+    const float deltaTime = 1.0f / 60.f; // TODO: Calc correct dt
 
     bgfx::setViewRect(0, 0, 0, (uint16_t)s_context.width, (uint16_t)s_context.height);
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0xf01010ff, 1.0f, 0);
@@ -2441,13 +2432,12 @@ void BgfxPluginUI::preUpdate()
 
     Session** sessions = Session_getSessions();
 
-    for (int i = 0; i < array_size(sessions); ++i)
-    {
+    for (int i = 0; i < array_size(sessions); ++i) {
         Session* session = sessions[i];
-		updateDocking(session);
+        updateDocking(session);
     }
 
-	docksys_update();
+    docksys_update();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2497,8 +2487,8 @@ static PosColorVertex* fill_rectBorder(PosColorVertex* verts, IntRect* rect, uin
 
 static void renderBorders(Session* session)
 {
-	int count = 0;
-	ViewPluginInstance** views = Session_getViewPlugins(session, &count);
+    int count = 0;
+    ViewPluginInstance** views = Session_getViewPlugins(session, &count);
 
     bgfx::TransientVertexBuffer tvb;
 
@@ -2512,12 +2502,11 @@ static void renderBorders(Session* session)
     const uint32_t colorDefalut = (0x40 << 16) | (0x40 << 8) | 0x40;
     const uint32_t colorHigh = (0x60 << 16) | (0x60 << 8) | 0x60;
 
-    for (int i = 0; i < count; ++i)
-    {
-    	IntRect t = views[i]->rect; 
+    for (int i = 0; i < count; ++i) {
+        IntRect t = views[i]->rect;
 
-    	IntRect t0 = {{{ t.x + t.width - s_borderSize, t.y, s_borderSize, t.height }}}; 
-    	IntRect t1 = {{{ t.x, t.y + t.height - s_borderSize, t.width, s_borderSize }}}; 
+        IntRect t0 = {{{ t.x + t.width - s_borderSize, t.y, s_borderSize, t.height }}};
+        IntRect t1 = {{{ t.x, t.y + t.height - s_borderSize, t.width, s_borderSize }}};
 
         verts = fill_rectBorder(verts, &t0, colorDefalut);
         verts = fill_rectBorder(verts, &t1, colorDefalut);
@@ -2540,8 +2529,7 @@ void BgfxPluginUI::postUpdate()
 
     Session** sessions = Session_getSessions();
 
-    for (int i = 0; i < array_size(sessions); ++i)
-    {
+    for (int i = 0; i < array_size(sessions); ++i) {
         Session* session = sessions[i];
         renderBorders(session);
     }
@@ -2553,10 +2541,10 @@ void BgfxPluginUI::postUpdate()
 
 void BgfxPluginUI::create(void* windowHandle, int width, int height)
 {
-	docksys_set_callbacks(&s_dockSysCallbacks);
+    docksys_set_callbacks(&s_dockSysCallbacks);
 
 #ifdef PRODBG_WIN
-	bgfx::winSetHwnd((HWND)windowHandle);
+    bgfx::winSetHwnd((HWND)windowHandle);
 #endif
     bgfx::init();
     bgfx::reset((uint32_t)width, (uint32_t)height);
@@ -2566,8 +2554,8 @@ void BgfxPluginUI::create(void* windowHandle, int width, int height)
     s_context.width = width;
     s_context.height = height;
 
-	Service_register(&g_serviceMessageFuncs, PDMESSAGEFUNCS_GLOBAL);
-	Service_register(&g_dialogFuncs, PDDIALOGS_GLOBAL);
+    Service_register(&g_serviceMessageFuncs, PDMESSAGEFUNCS_GLOBAL);
+    Service_register(&g_dialogFuncs, PDDIALOGS_GLOBAL);
 
     Cursor_init();
 }
@@ -2606,8 +2594,8 @@ void ProDBG_setMouseState(int button, int state)
 
 void ProDBG_setScroll(float x, float y)
 {
-	(void)x;
-	IMGUI_setScroll(y);
+    (void)x;
+    IMGUI_setScroll(y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2663,8 +2651,7 @@ void ProDBG_setWindowSize(int width, int height)
 
     Session** sessions = Session_getSessions();
 
-    for (int i = 0; i < array_size(sessions); ++i)
-    {
+    for (int i = 0; i < array_size(sessions); ++i) {
         Session* session = sessions[i];
         docksys_update_size(width, height - (int)g_pluginUI->getStatusBarSize());
     }

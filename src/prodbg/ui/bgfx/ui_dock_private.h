@@ -10,16 +10,14 @@ const int g_sizerSnapSize = 8; // TODO: Move to settings
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum UIDockType
-{
+enum UIDockType {
     UIDockType_Docked,
     UIDockType_Floating,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum UIDockSide
-{
+enum UIDockSide {
     UIDockSide_Top,
     UIDockSide_Bottom,
     UIDockSide_Right,
@@ -33,8 +31,7 @@ struct UIDock;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct UIDockSizer
-{
+struct UIDockSizer {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     inline void addDock(UIDock* dock)
@@ -52,15 +49,13 @@ struct UIDockSizer
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct UIDock
-{
+struct UIDock {
     inline UIDock(ViewPluginInstance* inView) :
         topSizer(0), bottomSizer(0), rightSizer(0), leftSizer(0), view(inView), type(UIDockType_Docked), id(-1)
     {
     }
 
-    enum
-    {
+    enum {
         Top,
         Bottom,
         Right,
@@ -68,10 +63,8 @@ struct UIDock
         Sizers_Count,
     };
 
-    union
-    {
-        struct
-        {
+    union {
+        struct {
             UIDockSizer* topSizer;
             UIDockSizer* bottomSizer;
             UIDockSizer* rightSizer;
@@ -89,8 +82,7 @@ struct UIDock
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum UIDockState
-{
+enum UIDockState {
     UIDockState_None,
     UIDockState_HoverSizer,
     UIDockState_DragSizer,
@@ -101,16 +93,14 @@ enum UIDockState
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum UIDockStatus
-{
+enum UIDockStatus {
     UIDockStatus_ok,
     UIDockStatus_fail,
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct OverlayData
-{
+struct OverlayData {
     IntRect rect;
     uint32_t color;
     bool enabled;
@@ -121,8 +111,7 @@ struct OverlayData
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct UIDockingGrid
-{
+struct UIDockingGrid {
     UIDockingGrid() : state(UIDockState_None)
     {
         prevDragPos = { 0.0f, 0.0f };

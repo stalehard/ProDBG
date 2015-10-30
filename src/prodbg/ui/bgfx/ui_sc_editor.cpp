@@ -70,8 +70,7 @@ bool htmlToColour(ColourDesired& colour, const char* html)
         ++start;
 
     const size_t size = strlen(start);
-    if (size == 6)
-    {
+    if (size == 6) {
         // 8 bits per channel
         char* end;
         char parse[3];
@@ -96,9 +95,7 @@ bool htmlToColour(ColourDesired& colour, const char* html)
         long result = r | (g << 8) | (b << 16) | (0xFF << 24);
         colour.Set(result);
         return true;
-    }
-    else if (size == 3)
-    {
+    }else if (size == 3) {
         // 4 bits per channel
         char* end;
         char parse[2];
@@ -253,8 +250,7 @@ static const char cppKeyWords[] =
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // GW-WIP: For now we directly parse and translate from Eclipse color themes.
 
-class ScEclipseTheme
-{
+class ScEclipseTheme {
 public:
     ScEclipseTheme();
     ~ScEclipseTheme();
@@ -309,8 +305,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ScEditor : public ScintillaBase
-{
+struct ScEditor : public ScintillaBase {
 private:
     int m_width;
     int m_height;
@@ -348,15 +343,12 @@ public:
         unsigned int lineNumber = (unsigned int)LineFromLocation(caretPosition);
         std::vector<unsigned int>::iterator iter = find(m_breakpointLines.begin(), m_breakpointLines.end(), lineNumber);
 
-        if (iter != m_breakpointLines.end())
-        {
+        if (iter != m_breakpointLines.end()) {
             // Breakpoint already exists
             m_breakpointLines.erase(iter);
             SendCommand(SCI_MARKERDELETE, lineNumber /* line number */, 0 /* marker id */);
-        }
-        else
-        {
-        	printf("marker add %d\n", lineNumber);
+        }else {
+            printf("marker add %d\n", lineNumber);
             // Breakpoint added
             m_breakpointLines.push_back(lineNumber);
             SendCommand(SCI_MARKERADD, lineNumber /* line number */, 0 /* marker id */);
@@ -392,8 +384,7 @@ public:
 
     char* GetTextRange(int startPosition, int endPosition)
     {
-        if (endPosition < startPosition)
-        {
+        if (endPosition < startPosition) {
             int temp = startPosition;
             startPosition = endPosition;
             endPosition = temp;
@@ -439,24 +430,18 @@ public:
     void HandleInput()
     {
         // TODO: Would be better to decouple ImGui key values here and abstract it into a prodbg api instead
-        if (IsKeyPressedMap(ImGuiKey_DownArrow, true))
-        {
-        	ImGui::SetScrollY(ImGui::GetScrollY() + 23); 
+        if (IsKeyPressedMap(ImGuiKey_DownArrow, true)) {
+            ImGui::SetScrollY(ImGui::GetScrollY() + 23);
             Editor::KeyDown(SCK_DOWN /*SCK_NEXT*/, false, false, false);
-        }
-        else if (IsKeyPressedMap(ImGuiKey_UpArrow, true))
-        {
-        	ImGui::SetScrollY(ImGui::GetScrollY() - 23); 
+        }else if (IsKeyPressedMap(ImGuiKey_UpArrow, true)) {
+            ImGui::SetScrollY(ImGui::GetScrollY() - 23);
             Editor::KeyDown(SCK_UP /*SCK_PRIOR*/, false, false, false);
-        }
-        else if (IsKeyPressedMap(ImGuiKey_V, false))
-        {
+        }else if (IsKeyPressedMap(ImGuiKey_V, false)) {
             ToggleBreakpoint();
         }
 
         ImGuiIO& io = ImGui::GetIO();
-        if (ImGui::IsMouseClicked(0))
-        {
+        if (ImGui::IsMouseClicked(0)) {
             // Left mouse button click
             Point pt = Point::FromInts((int)io.MouseClickedPos[0].x, (int)io.MouseClickedPos[0].y);
 
@@ -465,8 +450,7 @@ public:
 
             int wordStart;
             int wordEnd;
-            if (char* result = GetWordFromPosition(position, wordStart, wordEnd))
-            {
+            if (char* result = GetWordFromPosition(position, wordStart, wordEnd)) {
                 char resultText[256];
                 sprintf(resultText, "Word [%s] is %s\n", IsComment(position) ? "comment" : "normal", result);
             #if BX_PLATFORM_OSX
@@ -493,37 +477,30 @@ public:
         int xPos = xOffset;
         int pixels;
 
-        if (wheelEvent.wheelAxis == PDWHEEL_AXIS_HORIZONTAL)
-        {
+        if (wheelEvent.wheelAxis == PDWHEEL_AXIS_HORIZONTAL) {
             m_wheelHRotation += wheelEvent.rotation * (wheelEvent.columnsPerRotation * vs.spaceWidth);
             pixels = m_wheelHRotation / wheelEvent.wheelDelta;
             m_wheelHRotation -= pixels * wheelEvent.wheelDelta;
-            if (pixels != 0)
-            {
+            if (pixels != 0) {
                 xPos += pixels;
                 PRectangle rcText = GetTextRectangle();
                 if (xPos > scrollWidth - (int)rcText.Width())
                     xPos = scrollWidth - (int)rcText.Width();
                 HorizontalScrollTo(xPos);
             }
-        }
-        else if (wheelEvent.keyFlags & PDKEY_CTRL)
-        {
+        }else if (wheelEvent.keyFlags & PDKEY_CTRL) {
             if (wheelEvent.rotation > 0)
                 KeyCommand(SCI_ZOOMIN);
             else
                 KeyCommand(SCI_ZOOMOUT);
-        }
-        else
-        {
+        }else {
             short delta = wheelEvent.wheelDelta;
             if (!delta)
                 delta = 120;
             m_wheelVRotation += wheelEvent.rotation;
             lines = m_wheelVRotation / delta;
             m_wheelVRotation -= lines * delta;
-            if (lines != 0)
-            {
+            if (lines != 0) {
                 bool isPageScroll = (wheelEvent.keyFlags & PDKEY_SHIFT);
                 if (isPageScroll)
                     lines = lines * LinesOnScreen();  // lines is either +1 or -1
@@ -542,8 +519,7 @@ public:
         PRectangle rcPaint = GetClientRectangle();
 
         AutoSurface surfaceWindow(this);
-        if (surfaceWindow)
-        {
+        if (surfaceWindow) {
             Paint(surfaceWindow, rcPaint);
             surfaceWindow->Release();
         }
@@ -639,14 +615,14 @@ public:
         SetFocusState(true);
         CaretSetPeriod(0);
 
-           size_t textSize = 0;
-           const char* text = static_cast<const char*>(File_loadToMemory("examples/fake_6502/fake6502_main.c", &textSize, 0));
-           assert(text);
+        size_t textSize = 0;
+        const char* text = static_cast<const char*>(File_loadToMemory("examples/fake_6502/fake6502_main.c", &textSize, 0));
+        assert(text);
 
-           SendCommand(SCI_ADDTEXT, textSize,
+        SendCommand(SCI_ADDTEXT, textSize,
                     reinterpret_cast<sptr_t>(static_cast<const char*>(text)));
 
-           free((void*)text);
+        free((void*)text);
 
         SendCommand(SCI_MARKERADD, 0, 0);
         SendCommand(SCI_MARKERADD, 1, 0);
@@ -704,8 +680,7 @@ public:
     virtual void CreateCallTipWindow(PRectangle rc) override
     {
         (void)rc;
-        if (!ct.wCallTip.Created())
-        {
+        if (!ct.wCallTip.Created()) {
             //ct.wCallTip = new CallTip(stc, &ct, this);
             ct.wCallTip = AllocateWindowImpl();
             ct.wDraw = ct.wCallTip;
@@ -790,22 +765,21 @@ public:
 
     sptr_t SendCommand(unsigned int iMessage, uptr_t wParam = 0, sptr_t lParam = 0)
     {
-		// Handle our messages first and the fallback on default path
+        // Handle our messages first and the fallback on default path
 
-    	switch (iMessage)
-		{
-			case SCN_TOGGLE_BREAKPOINT:
-			{
-				ToggleBreakpoint();
-				return 0;
-			}
+        switch (iMessage) {
+            case SCN_TOGGLE_BREAKPOINT:
+            {
+                ToggleBreakpoint();
+                return 0;
+            }
 
-			case SCN_GETCURRENT_LINE:
-			{
-				Point caretPosition = PointMainCaret();
-				return (sptr_t)LineFromLocation(caretPosition);
-			}
-		}
+            case SCN_GETCURRENT_LINE:
+            {
+                Point caretPosition = PointMainCaret();
+                return (sptr_t)LineFromLocation(caretPosition);
+            }
+        }
 
         return WndProc(iMessage, wParam, lParam);
     }
@@ -849,7 +823,7 @@ void ImScEditor::HandleInput()
 {
     ScEditor* editor = (ScEditor*)privateData;
     if (editor)
-    	editor->HandleInput();
+        editor->HandleInput();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

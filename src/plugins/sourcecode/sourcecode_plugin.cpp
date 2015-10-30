@@ -11,8 +11,7 @@ static const char* s_pluginName = "Source Code View";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct SourceCodeData
-{
+struct SourceCodeData {
     char filename[4096];
     int line;
     bool requestFiles;
@@ -77,13 +76,13 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
     SourceCodeData* user_data = (SourceCodeData*)malloc(sizeof(SourceCodeData));
     memset(user_data, 0, sizeof(SourceCodeData));
 
-	s_settings = (PDSettingsFuncs*)serviceFunc(PDSETTINGS_GLOBAL);
+    s_settings = (PDSettingsFuncs*)serviceFunc(PDSETTINGS_GLOBAL);
 
-	user_data->fastOpenKey = s_settings->getShortcut(s_pluginName, "fast_open");
-	user_data->toggleBreakpointKey = s_settings->getShortcut(s_pluginName, "toggle_breakpoint");
+    user_data->fastOpenKey = s_settings->getShortcut(s_pluginName, "fast_open");
+    user_data->toggleBreakpointKey = s_settings->getShortcut(s_pluginName, "toggle_breakpoint");
 
-	printf("fastOpenKey 0x%x\n", user_data->fastOpenKey);
-	printf("toggleBreakpointKey  0x%x\n", user_data->toggleBreakpointKey);
+    printf("fastOpenKey 0x%x\n", user_data->fastOpenKey);
+    printf("toggleBreakpointKey  0x%x\n", user_data->toggleBreakpointKey);
 
     user_data->requestFiles = false;
     user_data->hasFiles = false;
@@ -102,8 +101,7 @@ static void destroyInstance(void* user_data)
 
 static void setSourceCodeFile(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, SourceCodeData* data, const char* filename, uint32_t line)
 {
-    if (strcmp(filename, data->filename))
-    {
+    if (strcmp(filename, data->filename)) {
         size_t size = 0;
         void* fileData = readFileFromDisk(filename, &size);
 
@@ -111,15 +109,12 @@ static void setSourceCodeFile(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, Sourc
 
         PDUI_set_title(uiFuncs, filename);
 
-        if (fileData)
-		{
+        if (fileData) {
             PDUI_SCSendCommand(sourceFuncs, SCI_CLEARALL, 0, 0);
             PDUI_SCSendCommand(sourceFuncs, SCI_ADDTEXT, size, (intptr_t)fileData);
-		}
-        else
-		{
+        }else {
             printf("Sourcecode_plugin: Unable to load %s\n", filename);
-		}
+        }
 
         free(fileData);
 
@@ -147,7 +142,7 @@ static void setExceptionLocation(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, So
     if (PDRead_findU32(inEvents, &line, "line", 0) == PDReadStatus_notFound)
         return;
 
-	setSourceCodeFile(uiFuncs, sourceFuncs, data, filename, line);
+    setSourceCodeFile(uiFuncs, sourceFuncs, data, filename, line);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,15 +152,13 @@ static void updateKeyboard(SourceCodeData* data, PDUISCInterface* sourceFuncs, P
     (void)data;
     (void)uiFuncs;
 
-    if (uiFuncs->is_key_down_id(data->fastOpenKey, 0))
-	{
-		printf("do fast open\n");
-	}
+    if (uiFuncs->is_key_down_id(data->fastOpenKey, 0)) {
+        printf("do fast open\n");
+    }
 
-	if (uiFuncs->is_key_down_id(data->toggleBreakpointKey, 0))
-	{
-    	PDUI_SCSendCommand(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
-	}
+    if (uiFuncs->is_key_down_id(data->toggleBreakpointKey, 0)) {
+        PDUI_SCSendCommand(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -175,18 +168,18 @@ static void toggleBreakpointCurrentLine(PDUISCInterface* sourceFuncs, SourceCode
     (void)data;
     (void)writer;
 
-	PDUI_SCSendCommand(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
+    PDUI_SCSendCommand(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
 
-	uint32_t currentLine = (uint32_t)PDUI_SCSendCommand(sourceFuncs, SCN_GETCURRENT_LINE, 0, 0);
+    uint32_t currentLine = (uint32_t)PDUI_SCSendCommand(sourceFuncs, SCN_GETCURRENT_LINE, 0, 0);
 
-	printf("currentLine %d\n", currentLine);
+    printf("currentLine %d\n", currentLine);
 
-	// TODO: Currenty we don't handly if we set breakpoints on a line we can't
+    // TODO: Currenty we don't handly if we set breakpoints on a line we can't
 
-	PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
-	PDWrite_string(writer, "filename", data->filename);
-	PDWrite_u32(writer, "line", currentLine);
-	PDWrite_eventEnd(writer);
+    PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
+    PDWrite_string(writer, "filename", data->filename);
+    PDWrite_u32(writer, "line", currentLine);
+    PDWrite_eventEnd(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,10 +193,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     SourceCodeData* data = (SourceCodeData*)user_data;
     PDUISCInterface* sourceFuncs = uiFuncs->sc_input_text("test", 800, 700, 0, 0);
 
-    while ((event = PDRead_getEvent(inEvents)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(inEvents)) != 0) {
+        switch (event) {
             case PDEventType_setExceptionLocation:
             {
                 setExceptionLocation(uiFuncs, sourceFuncs, data, inEvents);
@@ -211,17 +202,17 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
                 break;
             }
 
-			case PDEventType_setSourceCodeFile:
-			{
-				const char* filename;
+            case PDEventType_setSourceCodeFile:
+            {
+                const char* filename;
 
-    			if (PDRead_findString(inEvents, &filename, "filename", 0) == PDReadStatus_notFound)
-    				break;
+                if (PDRead_findString(inEvents, &filename, "filename", 0) == PDReadStatus_notFound)
+                    break;
 
-				setSourceCodeFile(uiFuncs, sourceFuncs, data, filename, 0);
+                setSourceCodeFile(uiFuncs, sourceFuncs, data, filename, 0);
 
-				break;
-			}
+                break;
+            }
 
             case PDEventType_toggleBreakpointCurrentLine:
             {
@@ -229,13 +220,13 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
                 break;
             }
 
-			case PDEventType_setSourceFiles:
-			{
-				// TODO: Store the files
+            case PDEventType_setSourceFiles:
+            {
+                // TODO: Store the files
 
                 data->hasFiles = true;
-				break;
-			}
+                break;
+            }
         }
     }
 
@@ -249,11 +240,10 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     PDWrite_eventBegin(writer, PDEventType_getExceptionLocation);
     PDWrite_eventEnd(writer);
 
-    if (!data->hasFiles && data->requestFiles)
-	{
-		PDWrite_eventBegin(writer, PDEventType_getSourceFiles);
-		PDWrite_eventEnd(writer);
-	}
+    if (!data->hasFiles && data->requestFiles) {
+        PDWrite_eventBegin(writer, PDEventType_getSourceFiles);
+        PDWrite_eventEnd(writer);
+    }
 
     return 0;
 }
@@ -262,7 +252,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
 static PDViewPlugin plugin =
 {
-	"Source Code View",
+    "Source Code View",
     createInstance,
     destroyInstance,
     update,
@@ -275,10 +265,10 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-{
-	registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
-}
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
+    {
+        registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
+    }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

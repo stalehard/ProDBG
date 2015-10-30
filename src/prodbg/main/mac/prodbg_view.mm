@@ -271,31 +271,29 @@ static int translateKey(unsigned int key)
 
 - (void)flagsChanged:(NSEvent *)event
 {
-	bool release = false;
+    bool release = false;
     const unsigned int modifierFlags = [event modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     const int key = translateKey([event keyCode]);
     const int mods = getModifierFlags(modifierFlags);
 
-	InputState* state = InputState_getState();
+    InputState* state = InputState_getState();
 
-    if (modifierFlags == state->modifierFlags)
-    {
+    if (modifierFlags == state->modifierFlags) {
         if (state->keysDown[key])
             release = true;
         else
             release = false;
-    }
-    else if (modifierFlags > state->modifierFlags)
+    }else if (modifierFlags > state->modifierFlags)
         release = false;
     else
         release = true;
 
     state->modifierFlags = modifierFlags;
 
-	if (release)
-    	ProDBG_keyUp(key, mods);
+    if (release)
+        ProDBG_keyUp(key, mods);
     else
-    	ProDBG_keyDown(key, mods);
+        ProDBG_keyDown(key, mods);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,7 +318,7 @@ static int translateKey(unsigned int key)
 -(void) viewWillMoveToWindow:(NSWindow*)newWindow
 {
     NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self frame]
-                                    options: (NSTrackingInVisibleRect |NSTrackingMouseMoved | NSTrackingActiveAlways) owner:self userInfo:nil];
+                                    options: (NSTrackingInVisibleRect | NSTrackingMouseMoved | NSTrackingActiveAlways) owner:self userInfo:nil];
     [self addTrackingArea:trackingArea];
     (void)newWindow;
 }
@@ -359,10 +357,10 @@ static int translateKey(unsigned int key)
 
 - (void)scrollWheel:(NSEvent *)event
 {
-	float x = (float)[event deltaX];
-	float y = (float)[event deltaY];
-	//int flags = getModifierFlags([theEvent modifierFlags]);
-	ProDBG_setScroll(x, y);
+    float x = (float)[event deltaX];
+    float y = (float)[event deltaY];
+    //int flags = getModifierFlags([theEvent modifierFlags]);
+    ProDBG_setScroll(x, y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -414,27 +412,21 @@ void buildSubMenu(NSMenu* menu, PDMenuItem menuDesc[], int idOffset)
     PDMenuItem* desc = &menuDesc[0];
     //[menu removeAllItems];
 
-    while (desc->name)
-    {
+    while (desc->name) {
         NSString* name = [NSString stringWithUTF8String: desc->name];
 
         int menuId = desc->id + idOffset;
 
-        if (menuId == PRODBG_MENU_SEPARATOR)
-        {
+        if (menuId == PRODBG_MENU_SEPARATOR) {
             [menu addItem:[NSMenuItem separatorItem]];
-        }
-        else if (menuId == PRODBG_MENU_SUB_MENU)
-        {
+        }else if (menuId == PRODBG_MENU_SUB_MENU) {
             NSMenuItem* newItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:name action:NULL keyEquivalent:@""];
             NSMenu* newMenu = [[NSMenu allocWithZone:[NSMenu menuZone]] initWithTitle:name];
             [newItem setSubmenu:newMenu];
             [newMenu release];
             [menu addItem:newItem];
             [newItem release];
-        }
-        else
-        {
+        }else {
             int mask = 0;
             NSMenuItem* newItem = [[NSMenuItem alloc] initWithTitle:name action:@selector(onMenuPress:) keyEquivalent:@""];
             [newItem setTag:(menuId)];
@@ -450,12 +442,10 @@ void buildSubMenu(NSMenu* menu, PDMenuItem menuDesc[], int idOffset)
 
             NSString* key = 0;
 
-            if (desc->key >= 256)
-            {
+            if (desc->key >= 256) {
                 unichar c = 0;
 
-                switch (desc->key)
-                {
+                switch (desc->key) {
                     case PRODBG_KEY_F1:
                         c = NSF1FunctionKey; break;
                     case PRODBG_KEY_F2:
@@ -483,21 +473,16 @@ void buildSubMenu(NSMenu* menu, PDMenuItem menuDesc[], int idOffset)
                 }
 
                 key = [NSString stringWithCharacters:&c length:1];
-            }
-            else
-            {
+            }else {
                 key = [NSString stringWithFormat:@"%c", desc->key];
             }
 
             assert(key);
 
-            if (key)
-            {
+            if (key) {
                 [newItem setKeyEquivalentModifierMask: mask];
                 [newItem setKeyEquivalent:key];
-            }
-            else
-            {
+            }else {
                 fprintf(stderr, "Unable to map keyboard shortcut for %s\n", desc->name);
             }
 
@@ -563,8 +548,7 @@ PDMenuItem* buildPluginsMenu(PluginData** plugins, int count)
 {
     PDMenuItem* menu = (PDMenuItem*)alloc_zero(sizeof(PDMenuItem) * (count + 1)); // + 1 as array needs to end with zeros
 
-    for (int i = 0; i < count; ++i)
-    {
+    for (int i = 0; i < count; ++i) {
         PluginData* pluginData = plugins[i];
         PDPluginBase* pluginBase = (PDPluginBase*)pluginData->plugin;
         PDMenuItem* entry = &menu[i];
@@ -578,8 +562,7 @@ PDMenuItem* buildPluginsMenu(PluginData** plugins, int count)
 
         // TODO: Only shortcuts for the first range but we should really have this in a config instead.
 
-        if (i < 10)
-        {
+        if (i < 10) {
             entry->id = PRODBG_MENU_PLUGIN_START + i;
             entry->key = '1' + i;
         }
@@ -606,8 +589,7 @@ static void buildPopupSubmenu(NSMenu* popupMenu, const char* inName, PDMenuItem*
     [newMenu addItem:startItem];
     [newMenu addItem:[NSMenuItem separatorItem]];
 
-    for (int i = 0; i < count; ++i)
-    {
+    for (int i = 0; i < count; ++i) {
         pluginsMenu[i].key = 0;
         pluginsMenu[i].id = (uint32_t)i | idMask;
     }

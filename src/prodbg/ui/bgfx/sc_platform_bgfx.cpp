@@ -120,8 +120,7 @@ int GetClipboardTextUTF8(char* text, size_t len)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class SurfaceImpl : public Surface
-{
+class SurfaceImpl : public Surface {
 public:
     SurfaceImpl();
     virtual ~SurfaceImpl();
@@ -176,8 +175,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct stbtt_Font
-{
+struct stbtt_Font {
     stbtt_fontinfo fontinfo;
     stbtt_bakedchar cdata[96]; // ASCII 32..126 is 95 glyphs
     bgfx::TextureHandle ftex;
@@ -232,8 +230,7 @@ void Font::Create(const FontParameters& fp)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ImageData
-{
+struct ImageData {
     bgfx::TextureHandle tex;
     float scalex, scaley;
     bool initialised;
@@ -380,14 +377,14 @@ void SurfaceImpl::InitPixMap(int width, int height, Surface* surface_, WindowID 
 
 void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsigned char* pixelsImage)
 {
-	// For some reason using bgfx dircetly doesn't work anymore.
-	// This is a temporary work-around to show something at least.
+    // For some reason using bgfx dircetly doesn't work anymore.
+    // This is a temporary work-around to show something at least.
 
     s_drawList->AddDrawCmd();
     s_drawList->AddRectFilled(ImVec2(rc.left + s_pos.x, rc.top + s_pos.y),
                               ImVec2(rc.right + s_pos.x, rc.bottom + s_pos.y - 2), 0xaa889900);
 
-	return;
+    return;
 /*
     ImageData image;
     memset(&image, 0x0, sizeof(image));
@@ -452,16 +449,16 @@ void SurfaceImpl::DrawRGBAImage(PRectangle rc, int width, int height, const unsi
     vb[5].color = 0xffffffff;
 
     bgfx::setState(0
-                   | BGFX_STATE_RGB_WRITE
-                   | BGFX_STATE_ALPHA_WRITE
+ | BGFX_STATE_RGB_WRITE
+ | BGFX_STATE_ALPHA_WRITE
                    // | BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA)
-                   | BGFX_STATE_MSAA);
+ | BGFX_STATE_MSAA);
 
     //UIRender_posTexColor(&tvb, 0, 6, image.tex);
     UIRender_posColor(&tvb, 0, 6);
 
     bgfx::destroyTexture(image.tex); // GW-TODO: Lol
-*/
+ */
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -474,7 +471,7 @@ static void fillRectangle(PRectangle rc, ColourDesired b)
 
     s_drawList->AddDrawCmd();
     s_drawList->AddRectFilled(ImVec2(rc.left + s_pos.x, rc.top + s_pos.y),
-                             ImVec2(rc.right + s_pos.x, rc.bottom + s_pos.y), back);
+                              ImVec2(rc.right + s_pos.x, rc.bottom + s_pos.y), back);
     /*
        bgfx::TransientVertexBuffer tvb;
 
@@ -623,8 +620,7 @@ void SurfaceImpl::Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back)
 
 void Font::Release()
 {
-    if (fid)
-    {
+    if (fid) {
         free(((stbtt_Font*)fid)->fontinfo.data);
         delete (stbtt_Font*)fid;
     }
@@ -751,8 +747,7 @@ void SurfaceImpl::MeasureWidths(Font& font_, const char* s, int len, float* posi
     (void)font_;
     //stbtt_Font* realFont = (stbtt_Font*)font_.GetID();
 
-    while (len--)
-    {
+    while (len--) {
         int advance;
 
         const ImFont::Glyph* glyph = s_imFont->FindGlyph((unsigned short)*s++);
@@ -930,8 +925,7 @@ Surface* Surface::Allocate(int technology)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct WindowImpl
-{
+struct WindowImpl {
     WindowImpl()
     {
         show = false;
@@ -962,8 +956,7 @@ inline WindowImpl* GetWindow(WindowID id) { return (WindowImpl*)id; }
 
 void Window::Destroy()
 {
-    if (wid)
-    {
+    if (wid) {
         Show(false);
         delete GetWindow(wid);
     }
@@ -1098,8 +1091,7 @@ void Menu::Show(Point pt, Window& w)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class ListBoxImpl : public ListBox
-{
+class ListBoxImpl : public ListBox {
 private:
     int lineHeight;
     bool unicodeMode;

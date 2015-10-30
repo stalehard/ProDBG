@@ -24,38 +24,35 @@ InputState* InputState_getState()
 
 void InputState_update(float deltaTime)
 {
-	InputState* state = &s_inputState;
-	state->deltaTime = deltaTime;
+    InputState* state = &s_inputState;
+    state->deltaTime = deltaTime;
 
-    for (uint32_t i = 0; i < sizeof_array(state->keyDownDuration); ++i)
-	{
-		const bool keyDown = state->keysDown[i]; 
-		const float keyDownDur = state->keyDownDuration[i];
+    for (uint32_t i = 0; i < sizeof_array(state->keyDownDuration); ++i) {
+        const bool keyDown = state->keysDown[i];
+        const float keyDownDur = state->keyDownDuration[i];
         state->keyDownDuration[i] = keyDown ? (keyDownDur < 0.0f ? 0.0f : keyDownDur + deltaTime) : -1.0f;
-	}
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int InputState_isKeyDown(int key, uint32_t modifiers, int repeat)
 {
-	InputState* state = &s_inputState;
+    InputState* state = &s_inputState;
 
-	assert(key >= 0 && key < (int)sizeof_array(state->keyDownDuration));
+    assert(key >= 0 && key < (int)sizeof_array(state->keyDownDuration));
 
     const float t = state->keyDownDuration[key];
 
     if (t == 0.0f && state->modifiers == modifiers)
         return true;
 
-    if (repeat && t > KeyRepeatDelay)
-    {
+    if (repeat && t > KeyRepeatDelay) {
         float delay = KeyRepeatDelay, rate = KeyRepeatRate;
-        if ((fmodf(t - delay, rate) > rate*0.5f) != (fmodf(t - delay - state->deltaTime, rate) > rate*0.5f))
-		{
-			if (state->modifiers == modifiers)
-            	return true;
-		}
+        if ((fmodf(t - delay, rate) > rate * 0.5f) != (fmodf(t - delay - state->deltaTime, rate) > rate * 0.5f)) {
+            if (state->modifiers == modifiers)
+                return true;
+        }
     }
 
     return false;

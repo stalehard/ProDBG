@@ -5,8 +5,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct LocalsData
-{
+struct LocalsData {
     int dummy;
 };
 
@@ -47,8 +46,7 @@ static void showInUI(LocalsData* data, PDReader* reader, PDUI* uiFuncs)
     uiFuncs->text("Value"); uiFuncs->next_column();
     uiFuncs->text("Type"); uiFuncs->next_column();
 
-    while (PDRead_getNextEntry(reader, &it))
-    {
+    while (PDRead_getNextEntry(reader, &it)) {
         const char* name = "";
         const char* value = "";
         const char* type = "";
@@ -69,10 +67,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 {
     uint32_t event = 0;
 
-    while ((event = PDRead_getEvent(inEvents)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(inEvents)) != 0) {
+        switch (event) {
             case PDEventType_setLocals:
             {
                 showInUI((LocalsData*)user_data, inEvents, uiFuncs);

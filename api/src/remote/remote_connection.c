@@ -50,8 +50,7 @@ static void sleepMs(int ms)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct RemoteConnection
-{
+typedef struct RemoteConnection {
     enum RemoteConnectionType type;
 
     int serverSocket;     // used when having a listener socket
@@ -98,14 +97,12 @@ static int createListner(RemoteConnection* conn, int port)
     sin.sin_addr.s_addr = INADDR_ANY;
     sin.sin_port = htons((unsigned short)port);
 
-    if (setsockopt(conn->serverSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int)) == -1)
-    {
+    if (setsockopt(conn->serverSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int)) == -1) {
         perror("setsockopt");
         return 0;
     }
 
-    if (-1 == bind(conn->serverSocket, (struct sockaddr*)&sin, sizeof(sin)))
-    {
+    if (-1 == bind(conn->serverSocket, (struct sockaddr*)&sin, sizeof(sin))) {
         perror("bind");
         return 0;
     }
@@ -121,8 +118,7 @@ static int createListner(RemoteConnection* conn, int port)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct RemoteConnection* RemoteConnection_create(enum RemoteConnectionType type, int port)
-{
+struct RemoteConnection* RemoteConnection_create(enum RemoteConnectionType type, int port){
     RemoteConnection* conn = 0;
 
 #if defined(_WIN32)
@@ -137,10 +133,8 @@ struct RemoteConnection* RemoteConnection_create(enum RemoteConnectionType type,
     conn->serverSocket = INVALID_SOCKET;
     conn->socket = INVALID_SOCKET;
 
-    if (type == RemoteConnectionType_Listener)
-    {
-        if (!createListner(conn, port))
-        {
+    if (type == RemoteConnectionType_Listener) {
+        if (!createListner(conn, port)) {
             free(conn);
             return 0;
         }
@@ -162,14 +156,12 @@ int RemoteConnection_connect(RemoteConnection* conn, const char* address, int po
 
     he = gethostbyname(address);
 
-    if (!he)
-    {
+    if (!he) {
         printf("Failed to get hostname\n");
         return 0;
     }
 
-    for (ap = he->h_addr_list; *ap; ++ap)
-    {
+    for (ap = he->h_addr_list; *ap; ++ap) {
     #ifndef _WIN32
         sa.sin_family = (sa_family_t)he->h_addrtype;
     #else
@@ -190,8 +182,7 @@ int RemoteConnection_connect(RemoteConnection* conn, const char* address, int po
         sock = INVALID_SOCKET;
     }
 
-    if (sock == INVALID_SOCKET)
-    {
+    if (sock == INVALID_SOCKET) {
         printf("No socket to connect to\n");
         return 0;
     }
@@ -234,8 +225,7 @@ static int clientConnect(RemoteConnection* conn, struct sockaddr_in* host)
 
     conn->socket = (int)accept(conn->serverSocket, (struct sockaddr*)&hostTemp, (socklen_t*)&hostSize);
 
-    if (INVALID_SOCKET == conn->socket)
-    {
+    if (INVALID_SOCKET == conn->socket) {
         perror("accept");
         printf("Unable to accept connection..\n");
         return 0;
@@ -276,8 +266,7 @@ void RemoteConnection_updateListner(RemoteConnection* conn)
 
     // look for new clients
 
-    if (select(conn->serverSocket + 1, &fds, NULL, NULL, &timeout) > 0)
-    {
+    if (select(conn->serverSocket + 1, &fds, NULL, NULL, &timeout) > 0) {
         if (clientConnect(conn, &client))
             printf("Connected to %s\n", inet_ntoa(client.sin_addr));
     }
@@ -308,8 +297,7 @@ int RemoteConnection_recv(RemoteConnection* conn, char* buffer, int length, int 
 
     ret = (int)recv(conn->socket, buffer, (size_t)length, flags);
 
-    if (ret <= 0)
-    {
+    if (ret <= 0) {
         printf("recv %d %d\n", ret, length);
         RemoteConnection_disconnect(conn);
         return 0;
@@ -327,8 +315,7 @@ int RemoteConnection_send(RemoteConnection* conn, const void* buffer, int length
     if (!RemoteConnection_connected(conn))
         return 0;
 
-    if ((ret = (int)send(conn->socket, buffer, (size_t)length, flags)) != (int)length)
-    {
+    if ((ret = (int)send(conn->socket, buffer, (size_t)length, flags)) != (int)length) {
         RemoteConnection_disconnect(conn);
         return 0;
     }
@@ -346,8 +333,7 @@ int RemoteConnection_sendStream(RemoteConnection* conn, const unsigned char* buf
 
     //printf("Going to send stream of size %d\n", size);
 
-    while (size != 0)
-    {
+    while (size != 0) {
         uint32_t sizeLeft = size > 1024 ? 1024 : size;
 
         int sent = RemoteConnection_send(conn, buffer, sizeLeft, 0);
@@ -372,8 +358,7 @@ unsigned char* RemoteConnection_recvStream(RemoteConnection* conn, unsigned char
     uint8_t* retBuffer = outputBuffer;
     uint8_t ownBuffer = 0;
 
-    if (!outputBuffer)
-    {
+    if (!outputBuffer) {
         outputBuffer = retBuffer = malloc(size);
         memset(outputBuffer, 0xcd, size);
         ownBuffer = 1;
@@ -390,16 +375,14 @@ unsigned char* RemoteConnection_recvStream(RemoteConnection* conn, unsigned char
     //printf("about to get data (expected size %d)\n", size);
     //printf("filling buffer %p\n", outputBuffer);
 
-    while (size != 0)
-    {
+    while (size != 0) {
         uint32_t currSize = size > 1024 ? 1024 : size;
 
         int ret = RemoteConnection_recv(conn, (char*)outputBuffer, currSize, 0);
 
         //printf("got size %d (%d)\n", ret, currSize);
 
-        if (ret <= 0)
-        {
+        if (ret <= 0) {
             printf("Lost connection or error :(\n");
 
             if (ownBuffer)
@@ -460,7 +443,7 @@ int RemoteConnection_sendFormat(struct RemoteConnection* conn, const char* forma
 
 int RemoteConnection_sendFormatRecv(unsigned char* dest, int bufferSize, struct RemoteConnection* conn, int timeOut, const char* format, ...)
 {
-	int i = 0;
+    int i = 0;
     va_list ap;
     char buffer[2048];
 
@@ -476,17 +459,15 @@ int RemoteConnection_sendFormatRecv(unsigned char* dest, int bufferSize, struct 
         return 0;
 
     if (RemoteConnection_send(conn, buffer, len, 0) != len)
-    	return 0;
+        return 0;
 
     int res = 0;
     int lenCount = 0;
 
-    for (i = 0; i < timeOut; ++i)
-    {
+    for (i = 0; i < timeOut; ++i) {
         bool gotData = false;
 
-        while (RemoteConnection_pollRead(conn))
-        {
+        while (RemoteConnection_pollRead(conn)) {
             res = RemoteConnection_recv(conn, (char*)dest, bufferSize - lenCount, 0);
 
             if (res == 0)

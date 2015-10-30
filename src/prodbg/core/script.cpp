@@ -86,8 +86,7 @@ int Script_executeCall(ScriptState* scriptState, ScriptCallState* callState)
     assert(callState);
 
     int result = lua_pcall(scriptState, callState->inputCount, callState->outputCount, 0);
-    if (result != 0)
-    {
+    if (result != 0) {
         const char* error = lua_tostring(scriptState, -1);
         (void)error;
         return result;

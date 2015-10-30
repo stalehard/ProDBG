@@ -7,8 +7,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct ReaderData
-{
+typedef struct ReaderData {
     uint8_t* data;
     uint8_t* dataStart;
     uint8_t* dataEnd;
@@ -23,8 +22,7 @@ typedef struct ReaderData
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-union Convert
-{
+union Convert {
     double dv;
     float fv;
     uint64_t u32;
@@ -130,14 +128,12 @@ static uint32_t readGetEvent(struct PDReader* reader)
     uint8_t type;
     uint8_t* data;
 
-    if (!rData->data)
-    {
+    if (!rData->data) {
         log_debug("no data");
         return 0;
     }
 
-    if (rData->nextEvent >= rData->dataEnd)
-    {
+    if (rData->nextEvent >= rData->dataEnd) {
         log_debug("rData->nextEvent %p >= rData->dataEnd %p\n", rData->nextEvent, rData->dataEnd);
         return 0;
     }
@@ -151,16 +147,14 @@ static uint32_t readGetEvent(struct PDReader* reader)
 
     // make sure we actually have some data to process
 
-    if (data >= rData->dataEnd)
-    {
+    if (data >= rData->dataEnd) {
         log_debug("data %p >= rData->dataEnd %p\n", data, rData->dataEnd);
         return 0;
     }
 
     type = *data;
 
-    if (type != PDReadType_event)
-    {
+    if (type != PDReadType_event) {
         log_debug("Unable to read event as type is wrong (expected %d but got %d) all read operations will now fail.\n",
                   PDReadType_event, type);
         return 0;
@@ -202,8 +196,7 @@ static const char* typeTable[] =
 
 static uint8_t* findIdByRange(const char* id, uint8_t* start, uint8_t* end)
 {
-    while (start < end)
-    {
+    while (start < end) {
         uint32_t size;
         uint8_t typeId = getU8(start);
 
@@ -214,15 +207,12 @@ static uint8_t* findIdByRange(const char* id, uint8_t* start, uint8_t* end)
 
         // data is a special case as it has 32-bit size instead of 64k
 
-        if (typeId == PDReadType_data || typeId == PDReadType_array)
-        {
+        if (typeId == PDReadType_data || typeId == PDReadType_array) {
             size = getU32(start + 1);
 
             if (!strcmp((char*)start + 5, id))
                 return start;
-        }
-        else
-        {
+        }else {
             size = getU16(start + 1);
 
             //log_debug("current string - %s searching for - %s\n", (char*)start + 3, id);
@@ -248,13 +238,10 @@ static uint8_t* findId(struct PDReader* reader, const char* id, PDReaderIterator
 
     // if iterator is 0 we search the event stream,
 
-    if (it == 0)
-    {
+    if (it == 0) {
         // if no iterater we will just search the whole event
         return findIdByRange(id, rData->data, rData->nextEvent);
-    }
-    else
-    {
+    }else {
         // serach within the event but skip 7 bytes ahead to not read the event itself
         uint32_t dataOffset = it >> 32LL;
         uint32_t size = it & 0xffffffffLL;
@@ -410,8 +397,7 @@ static uint32_t readFindData(struct PDReader* reader, void** data, uint64_t* siz
     int idLength;
 
     uint8_t* dataPtr = findId(reader, id, it);
-    if (!dataPtr)
-    {
+    if (!dataPtr) {
         printf("%s:%d\n", __FILE__, __LINE__);
         return PDReadStatus_notFound;
     }
@@ -440,8 +426,7 @@ static uint32_t readFindArray(struct PDReader* reader, PDReaderIterator* arrayIt
     ReaderData* rData = (ReaderData*)reader->data;
 
     const uint8_t* dataPtr = findId(reader, id, it);
-    if (!dataPtr)
-    {
+    if (!dataPtr) {
         return PDReadStatus_notFound;
     }
 
@@ -480,8 +465,7 @@ static int32_t readNextEntry(struct PDReader* reader, PDReaderIterator* arrayIt)
     uint32_t size = it & 0xffffffffLL;
     uint8_t* entryStart = rData->dataStart + offset + size;
 
-    if ((type = *entryStart) != PDReadType_arrayEntry)
-    {
+    if ((type = *entryStart) != PDReadType_arrayEntry) {
         log_info("No arrayEntry found at %p (found %d) but expected %d\n", entryStart, type, PDReadType_arrayEntry);
         return -1;
     }
@@ -505,20 +489,16 @@ static void readDumpData(struct PDReader* reader)
     int eventId;
     ReaderData* rData = (ReaderData*)reader->data;
 
-    while ((eventId = PDRead_getEvent(reader)) != 0)
-    {
+    while ((eventId = PDRead_getEvent(reader)) != 0) {
         log_info("{ = event %d - (start %p end %p)\n", eventId, rData->data, rData->nextEvent);
 
-        while (rData->data < rData->nextEvent)
-        {
+        while (rData->data < rData->nextEvent) {
             uint8_t type = *(uint8_t*)rData->data;
             uint32_t size = getU16(rData->data + 1);
             const char* idOffset = (const char*)rData->data + 3;
 
-            if (type < PDReadType_count)
-            {
-                if (type == PDReadType_array)
-                {
+            if (type < PDReadType_count) {
+                if (type == PDReadType_array) {
                     // need to handle array here, now just grab the correct size and idOffset
 
                     size = getU32(rData->data + 1);

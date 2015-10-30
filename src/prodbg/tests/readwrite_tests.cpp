@@ -427,8 +427,7 @@ void testArrayRead(void**)
 
     // make sure we actually found the array here before we try to do some more stuff
 
-    if (arrayIter)
-    {
+    if (arrayIter) {
         int8_t s8;
         uint8_t u8;
         int16_t s16;

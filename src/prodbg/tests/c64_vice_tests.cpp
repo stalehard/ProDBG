@@ -19,8 +19,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct CPUState
-{
+struct CPUState {
     uint16_t pc;
     uint8_t a;
     uint8_t x;
@@ -30,8 +29,7 @@ struct CPUState
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum
-{
+enum {
     CPUState_maskA = 1 << 0,
     CPUState_maskX = 1 << 1,
     CPUState_maskY = 1 << 2,
@@ -92,26 +90,25 @@ bool getMemory(void* dest, int* len, uint16_t inAddress, int readLength)
     PDReader* reader = s_session->reader;
     PDBinaryReader_initStream(reader, PDBinaryWriter_getData(s_session->currentWriter), PDBinaryWriter_getSize(s_session->currentWriter));
 
-	uint32_t event;
+    uint32_t event;
 
-	while ((event = PDRead_getEvent(reader)) != 0)
-	{
-		uint8_t* data;
-		uint64_t dataSize;
-		uint64_t address;
+    while ((event = PDRead_getEvent(reader)) != 0) {
+        uint8_t* data;
+        uint64_t dataSize;
+        uint64_t address;
 
-		if (event != PDEventType_setMemory)
-			continue;
+        if (event != PDEventType_setMemory)
+            continue;
 
-		assert_true(PDRead_findU64(reader, &address, "address", 0) & PDReadStatus_ok);
-		assert_true((PDRead_findData(reader, (void**)&data, &dataSize, "data", 0) & PDReadStatus_typeMask) == PDReadType_data);
+        assert_true(PDRead_findU64(reader, &address, "address", 0) & PDReadStatus_ok);
+        assert_true((PDRead_findData(reader, (void**)&data, &dataSize, "data", 0) & PDReadStatus_typeMask) == PDReadType_data);
 
-		memcpy(dest, data, dataSize);
+        memcpy(dest, data, dataSize);
 
-		*len = (int)dataSize;
+        *len = (int)dataSize;
 
-		return true;
-	}
+        return true;
+    }
 
     return false;
 }
@@ -125,8 +122,7 @@ static void updateRegisters(CPUState* cpuState, PDReader* reader)
     if (PDRead_findArray(reader, &it, "registers", 0) == PDReadStatus_notFound)
         return;
 
-    while (PDRead_getNextEntry(reader, &it))
-    {
+    while (PDRead_getNextEntry(reader, &it)) {
         const char* name = "";
         uint16_t regValue;
 
@@ -150,20 +146,18 @@ static void updateRegisters(CPUState* cpuState, PDReader* reader)
 
 bool handleEvents(CPUState* cpuState, Session* session)
 {
-	uint32_t event = 0;
+    uint32_t event = 0;
 
-	PDReader* reader = session->reader;
+    PDReader* reader = session->reader;
 
-	PDBinaryReader_initStream(reader, PDBinaryWriter_getData(session->currentWriter), PDBinaryWriter_getSize(session->currentWriter));
+    PDBinaryReader_initStream(reader, PDBinaryWriter_getData(session->currentWriter), PDBinaryWriter_getSize(session->currentWriter));
 
-	while ((event = PDRead_getEvent(reader)) != 0)
-	{
-		if (event == PDEventType_setRegisters)
-		{
-			updateRegisters(cpuState, reader);
-			return true;
-		}
-	}
+    while ((event = PDRead_getEvent(reader)) != 0) {
+        if (event == PDEventType_setRegisters) {
+            updateRegisters(cpuState, reader);
+            return true;
+        }
+    }
 
     return false;
 }
@@ -233,11 +227,11 @@ static void test_c64_vice_connect(void**)
 
 void test_c64_vice_start_executable(void**)
 {
-	const char* prgFile = "/Users/danielcollin/code/ProDBG/examples/c64_vice/test.prg";
+    const char* prgFile = "/Users/danielcollin/code/ProDBG/examples/c64_vice/test.prg";
 
     PDWriter* writer = s_session->currentWriter;
     PDWrite_eventBegin(writer, PDEventType_setExecutable);
-    PDWrite_string(writer, "filename", prgFile); 
+    PDWrite_string(writer, "filename", prgFile);
     PDWrite_eventEnd(writer);
     PDBinaryWriter_finalize(writer);
 
@@ -314,8 +308,7 @@ void test_c64_vice_step_cpu(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Assembly
-{
+struct Assembly {
     uint16_t address;
     const char* text;
 };
@@ -351,8 +344,7 @@ void test_c64_vice_get_disassembly(void**)
 
     uint32_t event;
 
-    while ((event = PDRead_getEvent(reader)) != 0)
-    {
+    while ((event = PDRead_getEvent(reader)) != 0) {
         if (event != PDEventType_setDisassembly)
             continue;
 
@@ -362,8 +354,7 @@ void test_c64_vice_get_disassembly(void**)
 
         int i = 0;
 
-        while (PDRead_getNextEntry(reader, &it))
-        {
+        while (PDRead_getNextEntry(reader, &it)) {
             uint64_t address;
             const char* text;
 
@@ -390,11 +381,11 @@ void test_c64_vice_get_memory(void**)
     uint8_t dest[sizeof(read_memory) + 1];
     int dataSize = 0;
 
-	assert_true(getMemory(dest, &dataSize, 0x080e, 14)); 
+    assert_true(getMemory(dest, &dataSize, 0x080e, 14));
 
-	assert_true(dataSize >= 14);
+    assert_true(dataSize >= 14);
 
-	assert_memory_equal(dest, read_memory, sizeof_array(read_memory));
+    assert_memory_equal(dest, read_memory, sizeof_array(read_memory));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -404,10 +395,8 @@ static bool getExceptionLocation(PDReader* reader, uint64_t* address, CPUState* 
     uint32_t event;
     bool foundException = false;
 
-    while ((event = PDRead_getEvent(reader)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(reader)) != 0) {
+        switch (event) {
             case PDEventType_setRegisters:
             {
                 if (cpuState)
@@ -436,8 +425,7 @@ static void stepToPC(uint64_t pc)
     // first we step the CPU se we have the PC at known position, we try to step 10 times
     // and if we don't get the correct PC with in that time we fail the test
 
-    for (int i = 0; i < 10; ++i)
-    {
+    for (int i = 0; i < 10; ++i) {
         CPUState state;
 
         Session_action(s_session, PDAction_step);
@@ -462,16 +450,14 @@ static void waitForBreak(uint64_t breakAddress, const CPUState* cpuState, uint64
 
     //printf("wait for break $%llx\n", breakAddress);
 
-    for (int i = 0; i < 12; ++i)
-    {
+    for (int i = 0; i < 12; ++i) {
         uint64_t address = 0;
 
         PDReader* reader = s_session->reader;
 
         PDBinaryReader_initStream(reader, PDBinaryWriter_getData(s_session->currentWriter), PDBinaryWriter_getSize(s_session->currentWriter));
 
-        if (getExceptionLocation(reader, &address, &outState))
-        {
+        if (getExceptionLocation(reader, &address, &outState)) {
             if (checkMask & CPUState_maskA)
                 assert_true(cpuState->a == outState.a);
             if (checkMask & CPUState_maskX)
@@ -584,17 +570,17 @@ void test_c64_vice_breakpoint_cond(void**)
 
 void test_c64_vice_callstack(void**)
 {
-	uint32_t event;
+    uint32_t event;
     PDReaderIterator it;
 
-	uint16_t refCallstack[] =
-	{
-		0xe112 + 2, // (2) e112
-		0xa562 + 4, // (4) a562
-		0xa483 + 6, // (6) a483
-		0xa677 + 8, // (8) a677
-		0xe39a + 10, // (10) e39a
-	};
+    uint16_t refCallstack[] =
+    {
+        0xe112 + 2, // (2) e112
+        0xa562 + 4, // (4) a562
+        0xa483 + 6, // (6) a483
+        0xa677 + 8, // (8) a677
+        0xe39a + 10, // (10) e39a
+    };
 
     PDWriter* writer = s_session->currentWriter;
 
@@ -604,35 +590,32 @@ void test_c64_vice_callstack(void**)
 
     Session_update(s_session);
 
-	PDReader* reader = s_session->reader;
+    PDReader* reader = s_session->reader;
 
-	PDBinaryReader_initStream(reader, PDBinaryWriter_getData(s_session->currentWriter), PDBinaryWriter_getSize(s_session->currentWriter));
+    PDBinaryReader_initStream(reader, PDBinaryWriter_getData(s_session->currentWriter), PDBinaryWriter_getSize(s_session->currentWriter));
 
-    while ((event = PDRead_getEvent(reader)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(reader)) != 0) {
+        switch (event) {
             case PDEventType_setCallstack:
             {
-				if (PDRead_findArray(reader, &it, "callstack", 0) == PDReadStatus_notFound)
-					return;
+                if (PDRead_findArray(reader, &it, "callstack", 0) == PDReadStatus_notFound)
+                    return;
 
-				int callstackSize = sizeof_array(refCallstack);
-				int count = 0;
+                int callstackSize = sizeof_array(refCallstack);
+                int count = 0;
 
-				while (PDRead_getNextEntry(reader, &it))
-				{
-					uint16_t address;
+                while (PDRead_getNextEntry(reader, &it)) {
+                    uint16_t address;
 
-        			PDRead_findU16(reader, &address, "address", it);
+                    PDRead_findU16(reader, &address, "address", it);
 
-        			assert_true(count < callstackSize);
-        			assert_int_equal(refCallstack[count], address);
+                    assert_true(count < callstackSize);
+                    assert_int_equal(refCallstack[count], address);
 
-					count++;
-				}
+                    count++;
+                }
 
-				return;
+                return;
             }
         }
     }
@@ -643,39 +626,39 @@ void test_c64_vice_callstack(void**)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
-static void test_c64_vice_set_memory(void**)
-{
-	uint8_t data[16];
-	uint8_t dataWrite[16];
-	bool dataEqual = true;
+   static void test_c64_vice_set_memory(void**)
+   {
+    uint8_t data[16];
+    uint8_t dataWrite[16];
+    bool dataEqual = true;
 
-	getMemory
+    getMemory
 
-	assert_true(getMemory(data, 0x1000, sizeof_array(data)));
+    assert_true(getMemory(data, 0x1000, sizeof_array(data)));
 
-	for (int i = 0; i < sizeof_array(data); ++i)
-	{
-		dataWrite[i] = (uint8_t)i;
-		if (dataWrite[i] != data[i])
-			dataEqual = false;
-	}
+    for (int i = 0; i < sizeof_array(data); ++i)
+    {
+        dataWrite[i] = (uint8_t)i;
+        if (dataWrite[i] != data[i])
+            dataEqual = false;
+    }
 
-	// make sure the data we read is not the same as the one we are going to write. This is a bit ugly as
-	// we assume the C64 memory at 0x1000 doesn't contain the current pattern but should be fine for our use
+    // make sure the data we read is not the same as the one we are going to write. This is a bit ugly as
+    // we assume the C64 memory at 0x1000 doesn't contain the current pattern but should be fine for our use
 
-	assert_false(dataEqual);
+    assert_false(dataEqual);
 
-	// write down the data
+    // write down the data
 
-	assert_true(writeMemory(0x01000, data, sizeof_array(data)));
-}
-*/
+    assert_true(writeMemory(0x01000, data, sizeof_array(data)));
+   }
+ */
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int main()
 {
-	Core_init();
+    Core_init();
 
     const UnitTest tests[] =
     {

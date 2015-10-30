@@ -120,8 +120,7 @@ void Dialog_showColorPicker(uint32_t* color)
     ColorDelegate* colorDelegate = [[ColorDelegate alloc] init];
     [theColorPanel setDelegate : colorDelegate];
     NSModalSession session = [NSApp beginModalSessionForWindow:theColorPanel];
-    for (;;)
-    {
+    for (;;) {
         [NSApp runModalSession : session];
 
         //If the color panel is closed, return the font panel modal loop

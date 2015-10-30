@@ -7,8 +7,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Location
-{
+struct Location {
     char* filename;
     char* address;
     int line;
@@ -16,8 +15,7 @@ struct Location
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Breakpoint
-{
+struct Breakpoint {
     Location location;
     char* condition;
     int32_t id;
@@ -28,8 +26,7 @@ struct Breakpoint
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct BreakpointsData
-{
+struct BreakpointsData {
     BreakpointsData() : addressSize(2), maxPath(8192) {}
 
     std::list<Breakpoint*> breakpoints;
@@ -117,10 +114,8 @@ void toogleBreakpointFileLine(BreakpointsData* data, PDReader* reader)
     if (!filename)
         return;
 
-    for (auto i = data->breakpoints.begin(); i != data->breakpoints.end(); ++i)
-    {
-        if ((*i)->location.line == (int)line && !strcmp((*i)->location.filename, filename))
-        {
+    for (auto i = data->breakpoints.begin(); i != data->breakpoints.end(); ++i) {
+        if ((*i)->location.line == (int)line && !strcmp((*i)->location.filename, filename)) {
             destroyBreakpoint(*i);
             data->breakpoints.erase(i);
             return;
@@ -150,10 +145,8 @@ void toggleBreakpointAddress(BreakpointsData* data, PDReader* reader)
     if (PDRead_findString(reader, &address, "address", 0) == PDReadStatus_notFound)
         return;
 
-    for (auto i = data->breakpoints.begin(); i != data->breakpoints.end(); ++i)
-    {
-        if (!strcmp((*i)->location.address, address))
-        {
+    for (auto i = data->breakpoints.begin(); i != data->breakpoints.end(); ++i) {
+        if (!strcmp((*i)->location.address, address)) {
             destroyBreakpoint(*i);
             data->breakpoints.erase(i);
             return;
@@ -180,10 +173,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     BreakpointsData* data = (BreakpointsData*)user_data;
 
-    while ((event = PDRead_getEvent(inEvents)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(inEvents)) != 0) {
+        switch (event) {
             case PDEventType_setBreakpoint:
             {
                 toogleBreakpointFileLine(data, inEvents);
@@ -198,10 +189,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
                 PDRead_findU64(inEvents, &address, "address", 0);
                 PDRead_findU32(inEvents, &id, "id", 0);
 
-                for (Breakpoint* bp : data->breakpoints)
-                {
-                    if ((uint64_t)strtol(bp->location.address, 0, 16) == address)
-                    {
+                for (Breakpoint* bp : data->breakpoints) {
+                    if ((uint64_t)strtol(bp->location.address, 0, 16) == address) {
                         bp->pendingCount = 0;       // breakpoint accepted
                         printf("bp view: updated breakpoint with id %d (was %d)\n", id, bp->id);
                         bp->id = (int)id;
@@ -216,8 +205,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     uiFuncs->text("");
 
-    if (uiFuncs->button("Add Breakpoint", { 0.0f, 0.0f } ))
-    {
+    if (uiFuncs->button("Add Breakpoint", { 0.0f, 0.0f } )) {
         Breakpoint* bp = createBreakpoint(data);
         data->breakpoints.push_back(bp);
     }
@@ -229,8 +217,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     uiFuncs->text("Condition"); uiFuncs->next_column();
     uiFuncs->text(""); uiFuncs->next_column();
 
-    for (auto& i : data->breakpoints)
-    {
+    for (auto& i : data->breakpoints) {
         Breakpoint* bp = i;
         bool needUpdate = false;
 
@@ -239,14 +226,11 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
         //if (uiFuncs->checkbox("Enabled", &bp->enabled))
         //	needUpdate = true;
 
-        if (bp->location.filename)
-        {
+        if (bp->location.filename) {
             uiFuncs->input_text("##filename", bp->location.filename, (int)data->maxPath, 0, 0, 0);
-        }
-        else
-        {
+        }else {
             if (uiFuncs->input_text("##address", bp->location.address, (int)data->maxPath,
-                                   PDUIInputTextFlags_CharsHexadecimal | PDUIInputTextFlags_EnterReturnsTrue, 0, 0))
+                                    PDUIInputTextFlags_CharsHexadecimal | PDUIInputTextFlags_EnterReturnsTrue, 0, 0))
                 needUpdate = true;
         }
 
@@ -262,8 +246,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
         uiFuncs->next_column();
 
-        if (needUpdate)
-        {
+        if (needUpdate) {
             // TODO: Add support for file/line
 
             PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
@@ -280,8 +263,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
             printf("Sending breakpint\n");
         }
 
-        if (uiFuncs->button("Delete", {0.0f, 0.0f}))
-        {
+        if (uiFuncs->button("Delete", {0.0f, 0.0f})) {
             PDWrite_eventBegin(writer, PDEventType_deleteBreakpoint);
             PDWrite_u32(writer, "id", (uint32_t)bp->id);
             PDWrite_eventEnd(writer);
@@ -295,8 +277,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     // Delete breakpoints that have been marked delete
 
-    for (auto i = data->breakpoints.begin(); i != data->breakpoints.end(); ++i)
-    {
+    for (auto i = data->breakpoints.begin(); i != data->breakpoints.end(); ++i) {
         Breakpoint* bp = *i;
 
         if (bp->pendingCount > 1)

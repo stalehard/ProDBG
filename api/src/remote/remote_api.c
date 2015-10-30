@@ -28,8 +28,7 @@ static PDReader* s_reader;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum
-{
+enum {
     BlockSize = 1024,
 };
 
@@ -66,8 +65,7 @@ int PDRemote_create(struct PDBackendPlugin* plugin, int waitForConnection)
 
     waitForConnection *= 1000; // count in ms
 
-    while (waitForConnection > 0)
-    {
+    while (waitForConnection > 0) {
         PDRemote_update(100);
 
         if (RemoteConnection_isConnected(s_conn))
@@ -97,22 +95,16 @@ int PDRemote_update(int sleepTime)
 
     // Check if we have some data on the incoming connection
 
-    if (RemoteConnection_pollRead(s_conn))
-    {
+    if (RemoteConnection_pollRead(s_conn)) {
         uint8_t cmd[4];
 
-        if (RemoteConnection_recv(s_conn, (char*)&cmd, 4, 0))
-        {
-            if (cmd[0] & (1 << 7))
-            {
+        if (RemoteConnection_recv(s_conn, (char*)&cmd, 4, 0)) {
+            if (cmd[0] & (1 << 7)) {
                 action = (cmd[2] << 8) | cmd[3];
-            }
-            else
-            {
+            }else {
                 recvSize  = ((cmd[0] & 0x3f) << 24) | (cmd[1] << 16) | (cmd[2] << 8) | cmd[3];
 
-                if ((recvData = RemoteConnection_recvStream(s_conn, 0, recvSize)) == 0)
-                {
+                if ((recvData = RemoteConnection_recvStream(s_conn, 0, recvSize)) == 0) {
                     printf("Unable to get data from stream\n");
                     free(recvData);
                     recvData = 0;
@@ -138,8 +130,7 @@ int PDRemote_update(int sleepTime)
 
     // make sure to only send data if we have something to send (4 is only the size with no data)
 
-    if (size > 4 && RemoteConnection_isConnected(s_conn))
-    {
+    if (size > 4 && RemoteConnection_isConnected(s_conn)) {
         RemoteConnection_sendStream(s_conn, data);
     }
 

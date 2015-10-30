@@ -26,8 +26,7 @@ static const char* s_pluginTypes[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum
-{
+enum {
     PRODBG_VIEW_PLUGIN,
     PRODBG_BACKEND_PLUGIN,
     PRODBG_PLUGIN_COUNT,
@@ -84,8 +83,7 @@ static PluginData* findPlugin(PluginData** plugins, const char* pluginFile, cons
 {
     int count = array_size(plugins);
 
-    for (int i = 0; i < count; ++i)
-    {
+    for (int i = 0; i < count; ++i) {
         PluginData* pluginData = plugins[i];
         PDPluginBase* base = (PDPluginBase*)pluginData->plugin;
 
@@ -102,8 +100,7 @@ static PluginData* findPluginAll(const char* pluginFile, const char* pluginName)
 {
     PluginData* plugin = 0;
 
-    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i)
-    {
+    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
         if ((plugin = findPlugin(s_plugins[i], pluginFile, pluginName)))
             return plugin;
     }
@@ -115,12 +112,10 @@ static PluginData* findPluginAll(const char* pluginFile, const char* pluginName)
 
 PluginData* PluginHandler_findPluginByFilename(const char* filename)
 {
-    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i)
-    {
+    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
         int count = array_size(s_plugins[i]);
 
-        for (int t = 0; t < count; ++t)
-        {
+        for (int t = 0; t < count; ++t) {
             PluginData* pluginData = s_plugins[i][t];
 
             if (string_find_string(pluginData->fullFilename, filename, 0) != STRING_NPOS)
@@ -137,12 +132,10 @@ static void removePlugin(PluginData* pluginData)
 {
     // Remove the plugin data
 
-    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i)
-    {
+    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
         int count = array_size(s_plugins[i]);
 
-        for (int t = 0; t < count; ++t)
-        {
+        for (int t = 0; t < count; ++t) {
             PluginData* plugin = s_plugins[i][t];
 
             if (pluginData != plugin)
@@ -188,8 +181,7 @@ PluginData* PluginHandler_reloadPlugin(PluginData* pluginData)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct PluginPrivateData
-{
+struct PluginPrivateData {
     const char* name;
     const char* fullFilename;
     object_t lib;
@@ -203,10 +195,8 @@ static void registerPlugin(const char* type, void* plugin, void* private_data)
 
     const char* filename = privData->name;
 
-    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i)
-    {
-        if (strstr(type, s_pluginTypes[i]))
-        {
+    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
+        if (strstr(type, s_pluginTypes[i])) {
             if (findPlugin(s_plugins[i], filename, ((PDPluginBase*)plugin)->name))
                 return;
 
@@ -267,15 +257,13 @@ bool PluginHandler_addPlugin(const char* basePath, const char* plugin)
 
     lib = library_load(filename);
 
-    if (!library_valid(lib))
-    {
+    if (!library_valid(lib)) {
         // TODO: Show error message
         pd_error("Unable to open %s\n", filename);
         goto error;
     }
 
-    if (!(function = library_symbol(lib, "InitPlugin")))
-    {
+    if (!(function = library_symbol(lib, "InitPlugin"))) {
         // TODO: Show error message
         pd_error("Unable to find InitPlugin function in plugin %s\n", filename);
         goto error;
@@ -305,12 +293,10 @@ void PluginHandler_unloadAllPlugins()
 {
     // TODO: Actually unload everything
 
-    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i)
-    {
+    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
         int count = array_size(s_plugins[i]);
 
-        for (int t = 0; t < count; ++t)
-        {
+        for (int t = 0; t < count; ++t) {
             PluginData* plugin = s_plugins[i][t];
             library_unload(plugin->lib);
             free((void*)plugin->fullFilename);
@@ -374,8 +360,7 @@ static PluginData* getPluginData(PluginData** plugins, void* plugin)
 {
     int count = array_size(plugins);
 
-    for (int i = 0; i < count; ++i)
-    {
+    for (int i = 0; i < count; ++i) {
         if (plugins[i]->plugin == plugin)
             return plugins[i];
     }
@@ -389,8 +374,7 @@ PluginData* PluginHandler_getPluginData(void* plugin)
 {
     PluginData* data = 0;
 
-    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i)
-    {
+    for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
         if ((data = getPluginData(s_plugins[i], plugin)))
             return data;
     }

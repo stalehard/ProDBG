@@ -949,8 +949,7 @@ void fill_rect(uint32_t* buffer, PDGRect rect, int width, uint32_t color)
 {
     buffer += (rect.y * width) + rect.x;
 
-    for (int y = 0; y < rect.height; ++y)
-    {
+    for (int y = 0; y < rect.height; ++y) {
         for (int x = 0; x < rect.width; ++x)
             buffer[x] = color;
 
@@ -998,22 +997,17 @@ void fillSizer(uint32_t* buffer, UIDockSizer* sizer, int width)
     rect.width = (int)sizer->rect.width;
     rect.height = (int)sizer->rect.height;
 
-    if (sizer->dir == UIDockSizerDir_Horz)
-    {
+    if (sizer->dir == UIDockSizerDir_Horz) {
         rect.y -= g_sizerSize / 2;
         rect.height = g_sizerSize;
 
         fill_rect(buffer, rect, width, MFB_RGB(255, 0, 0));
-    }
-    else if (sizer->dir == UIDockSizerDir_Vert)
-    {
+    }else if (sizer->dir == UIDockSizerDir_Vert) {
         rect.x -= g_sizerSize / 2;
         rect.width = g_sizerSize;
 
         fill_rect(buffer, rect, width, MFB_RGB(0, 255, 0));
-    }
-    else
-    {
+    }else {
         assert(false);
     }
 }
@@ -1029,14 +1023,12 @@ void displayGrid(UIDockingGrid* grid, IntRect rect)
 
     //drawBuffer += 20 * rect.height;
 
-    if (!mfb_open("test_breaking_delete", (int)rect.width, (int)rect.height + 24))
-    {
+    if (!mfb_open("test_breaking_delete", (int)rect.width, (int)rect.height + 24)) {
         free(drawBuffer);
         return;
     }
 
-    for (;;)
-    {
+    for (;;) {
         int i = 0;
 
         for (UIDock* dock : grid->docks)
@@ -1099,8 +1091,7 @@ void test_strange_breakage(void**)
     // ui_dock.deleteView("Disassembly 2")
     // ui_dock.deleteView("Locals 3")
 
-    enum
-    {
+    enum {
         Disassembly0,
         Locals0,
         Callstack0,

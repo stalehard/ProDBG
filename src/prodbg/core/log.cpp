@@ -21,8 +21,7 @@ void pd_log(int logLevel, const char* filename, int line, const char* format, ..
     if (logLevel < s_log_level)
         return;
 
-    switch (logLevel)
-    {
+    switch (logLevel) {
         case LOG_DEBUG:
             printf("%s:%d DEBUG ", filename, line); break;
         case LOG_INFO:

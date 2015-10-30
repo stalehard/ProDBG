@@ -59,10 +59,8 @@ static void test_dbgeng(void** state)
     uint32_t event;
     bool foundCallstack = false;
 
-    while ((event = PDRead_getEvent(reader)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(reader)) != 0) {
+        switch (event) {
             case PDEventType_setCallstack:
             {
                 foundCallstack = true;

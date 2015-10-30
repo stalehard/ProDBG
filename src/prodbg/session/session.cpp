@@ -32,8 +32,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum
-{
+enum {
     ReadWriteBufferSize = 2 * 1024 * 1024,
 };
 
@@ -77,14 +76,12 @@ void fileUpdateCallback(void* userData, const char* file, int type)
 
     int sessionCount = array_size(s_sessions);
 
-    for (int i = 0; i < sessionCount; ++i)
-    {
+    for (int i = 0; i < sessionCount; ++i) {
         Session* session = s_sessions[i];
 
         int viewPluginCount = array_size(session->viewPlugins);
 
-        for (int p = 0; p < viewPluginCount; ++p)
-        {
+        for (int p = 0; p < viewPluginCount; ++p) {
             ViewPluginInstance* instance = session->viewPlugins[p];
             PDViewPlugin* instancePlugin = instance->plugin;
 
@@ -101,7 +98,7 @@ void Session_globalInit(bool reloadPlugins)
     if (!reloadPlugins)
         return;
 
-	//init_logging();
+    //init_logging();
 
     FileMonitor_addPath(OBJECT_DIR, LIB_EXT, fileUpdateCallback, 0);
 }
@@ -126,8 +123,7 @@ void Session_destroy(Session* session)
 {
     int count = array_size(s_sessions);
 
-    for (int i = 0; i < count; ++i)
-    {
+    for (int i = 0; i < count; ++i) {
         if (s_sessions[i] != session)
             continue;
 
@@ -175,8 +171,7 @@ static void commonInit(Session* s)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Session* Session_create()
-{
+struct Session* Session_create(){
     Session* s = new Session;
 
     g_pluginUI->setStatusText("Not running");
@@ -192,18 +187,18 @@ struct Session* Session_create()
 
 void Session_createDockingGrid(Session* session, int width, int height)
 {
-	(void)session;
-	(void)width;
-	(void)height;
+    (void)session;
+    (void)width;
+    (void)height;
 
-	docksys_create(0, 0, width, height);
+    docksys_create(0, 0, width, height);
 
-	session->i3_dock_grid = 0; //docksys_create_workspace("test_ws");
+    session->i3_dock_grid = 0; //docksys_create_workspace("test_ws");
 
     //tree_open_con(NULL, NULL);
-	//tree_split(focused, HORIZ);
+    //tree_split(focused, HORIZ);
 
-	printf("cerated dock grid %p\n", session->i3_dock_grid);
+    printf("cerated dock grid %p\n", session->i3_dock_grid);
 
 #if 0
     IntRect rect = {{{ 0, 0, width, height }}};
@@ -216,23 +211,23 @@ void Session_createDockingGrid(Session* session, int width, int height)
 
 bool Session_loadLayout(Session* session, const char* filename, int width, int height)
 {
-	(void)session;
-	(void)filename;
-	(void)width;
-	(void)height;
-	/*
-    UIDockingGrid* grid = UIDock_loadLayout(filename, width, height);
+    (void)session;
+    (void)filename;
+    (void)width;
+    (void)height;
+    /*
+       UIDockingGrid* grid = UIDock_loadLayout(filename, width, height);
 
-    if (!grid)
+       if (!grid)
         return false;
 
-    session->uiDockingGrid = grid;
+       session->uiDockingGrid = grid;
 
-    // TODO: Fix me
+       // TODO: Fix me
 
-    for (UIDock* dock : grid->docks)
+       for (UIDock* dock : grid->docks)
         Session_addViewPlugin(session, dock->view);
-    */
+     */
 
     return true;
 }
@@ -245,14 +240,11 @@ Session* Session_startRemote(Session* s, const char* target, int port)
 
     struct RemoteConnection* conn = RemoteConnection_create(RemoteConnectionType_Connect, port);
 
-    if (!RemoteConnection_connect(conn, target, port))
-    {
+    if (!RemoteConnection_connect(conn, target, port)) {
         pd_info("Unable to connect to %s:%d", target, port);
         RemoteConnection_destroy(conn);
         return s;
-    }
-    else
-    {
+    }else {
         s->connection = conn;
     }
 
@@ -295,16 +287,14 @@ Session* Session_startLocal(Session* s, PDBackendPlugin* backend, const char* fi
 
     // Set the executable if we have any
 
-    if (filename)
-    {
+    if (filename) {
         PDWrite_eventBegin(s->currentWriter, PDEventType_setExecutable);
         PDWrite_string(s->currentWriter, "filename", filename);
         PDWrite_eventEnd(s->currentWriter);
 
         // Add existing breakpoints
 
-        for (auto i = s->breakpoints.begin(), end = s->breakpoints.end(); i != end; ++i)
-        {
+        for (auto i = s->breakpoints.begin(), end = s->breakpoints.end(); i != end; ++i) {
             PDWrite_eventBegin(s->currentWriter, PDEventType_setBreakpoint);
             PDWrite_string(s->currentWriter, "filename", (*i)->filename);
             PDWrite_u32(s->currentWriter, "line", (unsigned int)(*i)->line);
@@ -336,10 +326,8 @@ Session* Session_createLocal(PDBackendPlugin* backend, const char* filename)
 
 static const char* getStateName(int state)
 {
-    if (state < PDDebugState_count && state >= 0)
-    {
-        switch (state)
-        {
+    if (state < PDDebugState_count && state >= 0) {
+        switch (state) {
             case PDDebugState_noTarget:
                 return "No target";
             case PDDebugState_running:
@@ -366,10 +354,8 @@ static void doToggleBreakpoint(Session* s, PDReader* reader)
     PDRead_findString(reader, &filename, "filename", 0);
     PDRead_findU32(reader, &line, "line", 0);
 
-    for (auto i = s->breakpoints.begin(), end = s->breakpoints.end(); i != end; ++i)
-    {
-        if ((*i)->line == (int)line && !strcmp((*i)->filename, filename))
-        {
+    for (auto i = s->breakpoints.begin(), end = s->breakpoints.end(); i != end; ++i) {
+        if ((*i)->line == (int)line && !strcmp((*i)->filename, filename)) {
             free((void*)(*i)->filename);
             s->breakpoints.erase(i);
             return;
@@ -391,13 +377,11 @@ static void toggleBreakpoint(Session* s, PDReader* reader)
 {
     uint32_t event;
 
-    while ((event = PDRead_getEvent(reader)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(reader)) != 0) {
+        switch (event) {
             case PDEventType_setBreakpoint:
             {
-            	printf("session breakpoint\n");
+                printf("session breakpoint\n");
                 doToggleBreakpoint(s, reader);
                 break;
             }
@@ -439,10 +423,8 @@ static void updateScript(Session* s, PDReader* reader)
 {
     uint32_t event;
 
-    while ((event = PDRead_getEvent(reader)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(reader)) != 0) {
+        switch (event) {
             case PDEventType_executeConsole:
             {
                 executeCommand(s, reader);
@@ -483,11 +465,10 @@ static void updateLocal(Session* s, PDAction action)
     PDBinaryReader_initStream(s->reader, PDBinaryWriter_getData(s->prevWriter), reqDataSize);
     PDBinaryWriter_reset(s->currentWriter);
 
-    if (backend)
-    {
+    if (backend) {
         s->state = backend->plugin->update(backend->userData, action, s->reader, s->currentWriter);
-		if (g_pluginUI)
-			g_pluginUI->setStatusText("%s Backend: %s", backend->plugin->name, getStateName(s->state));
+        if (g_pluginUI)
+            g_pluginUI->setStatusText("%s Backend: %s", backend->plugin->name, getStateName(s->state));
     }
 
     int len = array_size(s->viewPlugins);
@@ -495,14 +476,12 @@ static void updateLocal(Session* s, PDAction action)
     PDBinaryReader_initStream(s->reader, PDBinaryWriter_getData(s->prevWriter), PDBinaryWriter_getSize(s->prevWriter));
     PDBinaryReader_reset(s->reader);
 
-    for (int i = 0; i < len; ++i)
-    {
+    for (int i = 0; i < len; ++i) {
         struct ViewPluginInstance* p = s->viewPlugins[i];
         PluginUI::State state = g_pluginUI->updateInstance(p, s->reader, s->currentWriter);
 
-        if (state == PluginUI::CloseView)
-        {
-			docksys_close_con(p);
+        if (state == PluginUI::CloseView) {
+            docksys_close_con(p);
             p->markDeleted = true;
         }
 
@@ -520,10 +499,8 @@ const char* getBackendState(PDReader* reader)
     uint32_t state;
     const char* retState = "Unknown";
 
-    while ((event = PDRead_getEvent(reader)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(reader)) != 0) {
+        switch (event) {
             case PDEventType_setStatus:
             {
                 PDRead_findU32(reader, &state, "state", 0);
@@ -553,16 +530,14 @@ static void updateRemote(Session* s, PDAction action)
 
     PDBinaryReader_reset(s->reader);
 
-    if (RemoteConnection_pollRead(s->connection))
-    {
+    if (RemoteConnection_pollRead(s->connection)) {
         int totalSize = 0;
         uint8_t cmd[4];
         uint8_t* outputBuffer;
 
         // TODO: Make this a bit less hardcoded (cmd decode)
 
-        if (RemoteConnection_recv(s->connection, (char*)&cmd, 4, 0))
-        {
+        if (RemoteConnection_recv(s->connection, (char*)&cmd, 4, 0)) {
             totalSize = (((int)(cmd[0])) << 24) | (((int)(cmd[1])) << 16) | (((int)(cmd[2])) << 8) | ((int)(cmd[3]));
 
             outputBuffer = RemoteConnection_recvStream(s->connection, 0, totalSize);
@@ -573,14 +548,12 @@ static void updateRemote(Session* s, PDAction action)
 
     int len = array_size(s->viewPlugins);
 
-    for (int i = 0; i < len; ++i)
-    {
+    for (int i = 0; i < len; ++i) {
         struct ViewPluginInstance* p = s->viewPlugins[i];
         PluginUI::State state = g_pluginUI->updateInstance(p, s->reader, s->currentWriter);
 
-        if (state == PluginUI::CloseView)
-        {
-			docksys_close_con(p);
+        if (state == PluginUI::CloseView) {
+            docksys_close_con(p);
             p->markDeleted = true;
         }
 
@@ -595,10 +568,8 @@ static void updateRemote(Session* s, PDAction action)
     s->currentWriter = s->prevWriter;
     s->prevWriter = temp;
 
-    if (PDBinaryWriter_getSize(s->prevWriter) > 4)
-    {
-        if (PDBinaryWriter_getSize(s->prevWriter) > 4 && RemoteConnection_isConnected(s->connection))
-        {
+    if (PDBinaryWriter_getSize(s->prevWriter) > 4) {
+        if (PDBinaryWriter_getSize(s->prevWriter) > 4 && RemoteConnection_isConnected(s->connection)) {
             RemoteConnection_sendStream(s->connection, PDBinaryWriter_getData(s->prevWriter));
         }
     }
@@ -613,12 +584,10 @@ static void updateMarkedDelete(Session* s)
 {
     int count = array_size(s->viewPlugins);
 
-    for (int i = 0; i < count; ++i)
-    {
+    for (int i = 0; i < count; ++i) {
         struct ViewPluginInstance* p = s->viewPlugins[i];
 
-        if (p->markDeleted)
-        {
+        if (p->markDeleted) {
             Session_removeViewPlugin(s, p);
             count = array_size(s->viewPlugins);
         }
@@ -629,8 +598,7 @@ static void updateMarkedDelete(Session* s)
 
 void Session_update(Session* s)
 {
-    switch (s->type)
-    {
+    switch (s->type) {
         case Session_Null:
         case Session_Local:
         {
@@ -655,14 +623,10 @@ void Session_action(Session* s, PDAction action)
     if (!s)
         return;
 
-    if (s->type == Session_Local)
-    {
+    if (s->type == Session_Local) {
         updateLocal(s, action);
-    }
-    else
-    {
-        if (RemoteConnection_isConnected(s->connection))
-        {
+    }else {
+        if (RemoteConnection_isConnected(s->connection)) {
             uint8_t command[4];
             command[0] = 1 << 7; // action tag
             command[1] = 0;
@@ -690,16 +654,13 @@ bool Session_removeViewPlugin(Session* session, struct ViewPluginInstance* plugi
     if (count == 0)
         return true;
 
-    if (count == 1)
-    {
+    if (count == 1) {
         array_pop(session->viewPlugins);
         return true;
     }
 
-    for (int i = 0; i < count; ++i)
-    {
-        if (session->viewPlugins[i] == plugin)
-        {
+    for (int i = 0; i < count; ++i) {
+        if (session->viewPlugins[i] == plugin) {
             array_erase(session->viewPlugins, i);
             return true;
         }
@@ -710,8 +671,7 @@ bool Session_removeViewPlugin(Session* session, struct ViewPluginInstance* plugi
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ViewPluginInstance** Session_getViewPlugins(struct Session* session, int* count)
-{
+struct ViewPluginInstance** Session_getViewPlugins(struct Session* session, int* count){
     *count = array_size(session->viewPlugins);
     return session->viewPlugins;
 }
@@ -766,20 +726,17 @@ SessionStatus Session_onMenu(Session* session, int eventId)
 {
     int count = 0;
 
-    if (session->backend)
-    {
+    if (session->backend) {
         PluginData* pluginData = session->backend->pluginData;
 
-        if (pluginData->menuStart >= eventId && eventId < pluginData->menuEnd)
-        {
+        if (pluginData->menuStart >= eventId && eventId < pluginData->menuEnd) {
             return SessionStatus_ok;
         }
     }
 
     PluginData** plugins = PluginHandler_getBackendPlugins(&count);
 
-    for (int i = 0; i < count; ++i)
-    {
+    for (int i = 0; i < count; ++i) {
         PluginData* pluginData = plugins[i];
 
         PDBackendPlugin* plugin = (PDBackendPlugin*)pluginData->plugin;
@@ -792,14 +749,12 @@ SessionStatus Session_onMenu(Session* session, int eventId)
 
         // See if this event is own by this plugin
 
-        if (pluginData->menuStart <= eventId && eventId < pluginData->menuEnd)
-        {
+        if (pluginData->menuStart <= eventId && eventId < pluginData->menuEnd) {
             PDBackendInstance* backend = session->backend;
 
             // Create a backend of this type if we don't have a backend already for the session
 
-            if (!backend)
-            {
+            if (!backend) {
                 backend = (PDBackendInstance*)alloc_zero(sizeof(struct PDBackendInstance));
                 backend->plugin = plugin;
                 backend->pluginData = pluginData;
@@ -824,23 +779,20 @@ SessionStatus Session_onMenu(Session* session, int eventId)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Con* Session_getDockingGrid(struct Session* session)
-{
+struct Con* Session_getDockingGrid(struct Session* session){
     //return session->uiDockingGrid;
     return session->i3_dock_grid;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ViewPluginInstance* Session_getViewAt(struct Session* session, int x, int y, int border)
-{
-	int count = 0;
+struct ViewPluginInstance* Session_getViewAt(struct Session* session, int x, int y, int border){
+    int count = 0;
 
-	ViewPluginInstance** instances = Session_getViewPlugins(session, &count);
+    ViewPluginInstance** instances = Session_getViewPlugins(session, &count);
 
-	for (int i = 0; i < count; ++i)
-	{
-        IntRect rect = instances[i]->rect; 
+    for (int i = 0; i < count; ++i) {
+        IntRect rect = instances[i]->rect;
 
         const int x0 = rect.x;
         const int y0 = rect.y;
@@ -848,7 +800,7 @@ struct ViewPluginInstance* Session_getViewAt(struct Session* session, int x, int
         const int y1 = (rect.height + y0) - border;
 
         if ((x >= x0 && x < x1) && (y >= y0 && y < y1))
-        	return instances[i]; 
+            return instances[i];
     }
 
     return 0;

@@ -34,15 +34,12 @@ void processEvents()
 {
     bool exit = false;
 
-    while (!exit)
-    {
-        if (XPending(s_display))
-        {
+    while (!exit) {
+        if (XPending(s_display)) {
             XEvent event;
             XNextEvent(s_display, &event);
 
-            switch (event.type)
-            {
+            switch (event.type) {
                 case Expose:
                     break;
 

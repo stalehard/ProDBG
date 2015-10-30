@@ -118,8 +118,7 @@ static int g_intValue = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct IntAddData
-{
+struct IntAddData {
     int newValue;
     int oldValue;
 };
@@ -206,16 +205,14 @@ void fileNotifaction(void* user_data, const char* file, int type)
 {
     assert_true(user_data == &s_user_data_1);
 
-    if (s_checkPhase == 0)
-    {
+    if (s_checkPhase == 0) {
         assert_string_equal(file, s_filename);
         assert_int_equal(type, FOUNDATIONEVENT_FILE_CREATED);
         s_checkPhase = 1;
         return;
     }
 
-    if (s_checkPhase == 1)
-    {
+    if (s_checkPhase == 1) {
         assert_string_equal(file, s_filename);
         assert_int_equal(type, FOUNDATIONEVENT_FILE_MODIFIED);
         s_checkPhase = 2;
@@ -231,8 +228,7 @@ void fileNotifaction2(void* user_data, const char* file, int type)
 {
     assert_true(user_data == &s_user_data_2);
 
-    if (s_checkPhase == 2)
-    {
+    if (s_checkPhase == 2) {
         assert_string_equal(file, s_filename_2);
         assert_int_equal(type, FOUNDATIONEVENT_FILE_CREATED);
         s_checkPhase = 3;
@@ -246,22 +242,19 @@ void fileNotifaction3(void* user_data, const char* file, int type)
 {
     assert_true(user_data == &s_user_data_3);
 
-    if (s_checkPhase == 3 && strcmp(file, s_filename_3) == 0)
-    {
+    if (s_checkPhase == 3 && strcmp(file, s_filename_3) == 0) {
         assert_int_equal(type, FOUNDATIONEVENT_FILE_CREATED);
         s_checkPhase = 4;
         return;
     }
 
-    if (s_checkPhase == 4 && strcmp(file, s_filename_4) == 0)
-    {
+    if (s_checkPhase == 4 && strcmp(file, s_filename_4) == 0) {
         assert_int_equal(type, FOUNDATIONEVENT_FILE_CREATED);
         s_checkPhase = 5;
         return;
     }
 
-    if (s_checkPhase == 5  && strcmp(file, s_filename_5) == 0)
-    {
+    if (s_checkPhase == 5  && strcmp(file, s_filename_5) == 0) {
         assert_int_equal(type, FOUNDATIONEVENT_FILE_CREATED);
         s_checkPhase = 6;
         return;
@@ -440,7 +433,7 @@ void test_settings(void**)
     assert_int_equal((key >> 4), PDKEY_ESCAPE);
 
     key = Settings_getShortcut("Source Code View", "f_key");
-    assert_int_equal((key & 0xf), 0); 
+    assert_int_equal((key & 0xf), 0);
     assert_int_equal((key >> 4), PDKEY_F4);
 
     Settings_destroy();

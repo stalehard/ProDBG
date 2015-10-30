@@ -8,15 +8,14 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct CustomRegsData
-{
+typedef struct CustomRegsData {
     uint8_t regs[0x30];
     bool hasMemory;
     bool requestMemory;
     uint64_t location;
 } CustomRegsData;
 
-static PDColor s_colorRed = PDUI_COLOR(255, 0, 0, 0); 
+static PDColor s_colorRed = PDUI_COLOR(255, 0, 0, 0);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -105,8 +104,7 @@ static void drawSpritBits(PDUI* uiFuncs, const char* registerText, uint8_t reg, 
 {
     uiFuncs->text(registerText); uiFuncs->next_column();
 
-    for (int i = 0; i < 8; ++i)
-    {
+    for (int i = 0; i < 8; ++i) {
         char t0[16];
         char t1[256];
 
@@ -126,8 +124,7 @@ static void drawd018(PDUI* uiFuncs, uint8_t value, uint8_t bitmapMode)
 {
     uiFuncs->text("$d018 - Memory setup"); uiFuncs->next_column();
 
-    if (!bitmapMode)
-    {
+    if (!bitmapMode) {
         uint32_t v = (value >> 1) & 0x7;
         uint32_t address = (v * 0x800);
 
@@ -145,9 +142,7 @@ static void drawd018(PDUI* uiFuncs, uint8_t value, uint8_t bitmapMode)
         uiFuncs->text_colored(s_colorRed, "%02d ($%02x) - $%04x-$%04x", v, v, address, address + 0x3ff);
         uiFuncs->same_line(0, -1);
         uiFuncs->text("(Pointer to screen memory, relative to VIC bank)");
-    }
-    else
-    {
+    }else {
         uint32_t v = (value >> 3) & 0x1;
         uint32_t address = (v * 0x2000);
 
@@ -228,8 +223,7 @@ static void showUI(CustomRegsData* data, PDUI* uiFuncs)
 
     uint8_t* regs = (uint8_t*)&data->regs;
 
-    for (uint32_t i = 0; i < 8; ++i)
-    {
+    for (uint32_t i = 0; i < 8; ++i) {
         printSpriteX(uiFuncs, regs[(i * 2) + i], i, regs[0x10]);
         printSpriteY(uiFuncs, regs[(i * 2) + i], i);
         uiFuncs->separator();
@@ -386,18 +380,15 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
 
     data->requestMemory = false;
 
-    while ((event = PDRead_getEvent(reader)) != 0)
-    {
-        switch (event)
-        {
+    while ((event = PDRead_getEvent(reader)) != 0) {
+        switch (event) {
             case PDEventType_setExceptionLocation:
             {
                 uint64_t location = 0;
 
                 PDRead_findU64(reader, &location, "address", 0);
 
-                if (location != data->location)
-                {
+                if (location != data->location) {
                     data->location = location;
                     data->requestMemory = true;
                 }
@@ -416,8 +407,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
 
     showUI(data, uiFuncs);
 
-    if (data->requestMemory)
-    {
+    if (data->requestMemory) {
         PDWrite_eventBegin(writer, PDEventType_getMemory);
         PDWrite_u64(writer, "address_start", 0xd000);
         PDWrite_u64(writer, "size", 0x30);

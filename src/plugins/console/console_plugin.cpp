@@ -20,8 +20,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ConsoleData
-{
+struct ConsoleData {
     ConsoleData() : historyPos(0), scrollToBottom(0)
     {
         memset(inputBuffer, 0, sizeof(inputBuffer));
@@ -71,10 +70,8 @@ static void execCommand(ConsoleData* consoleData, const char* commandLine)
 
     // Insert history. First find match and delete it, so it can be pushed to the back.
     consoleData->historyPos = -1;
-    for (int i = int(consoleData->history.size()) - 1; i >= 0; --i)
-    {
-        if (strcasecmp(consoleData->history[(size_t)i], commandLine) == 0)
-        {
+    for (int i = int(consoleData->history.size()) - 1; i >= 0; --i) {
+        if (strcasecmp(consoleData->history[(size_t)i], commandLine) == 0) {
             free(consoleData->history[(size_t)i]);
             consoleData->history.erase(consoleData->history.begin() + i);
             break;
@@ -85,35 +82,22 @@ static void execCommand(ConsoleData* consoleData, const char* commandLine)
 
     // Process the command
 
-    if (strcasecmp(commandLine, "clear") == 0)
-    {
+    if (strcasecmp(commandLine, "clear") == 0) {
         clearLog(consoleData);
-    }
-    else if (strcasecmp(commandLine, "help") == 0)
-    {
+    }else if (strcasecmp(commandLine, "help") == 0) {
         addLog(consoleData, "Commands:");
         for (size_t i = 0; i < consoleData->commands.size(); i++)
             addLog(consoleData, "- %s", consoleData->commands[i]);
-    }
-    else if (strcasecmp(commandLine, "history") == 0)
-    {
+    }else if (strcasecmp(commandLine, "history") == 0) {
         for (size_t i = consoleData->history.size() >= 10 ? consoleData->history.size() - 10 : 0; i < consoleData->history.size(); i++)
             addLog(consoleData, "%3d: %s\n", i, consoleData->history[i]);
-    }
-    else if (strcasecmp(commandLine, "testText") == 0) // TODO: Temp for testing
-    {
+    }else if (strcasecmp(commandLine, "testText") == 0) {  // TODO: Temp for testing
         addLog(consoleData, "Some text\nSome more text\nDisplay very important message here!\n");
-    }
-    else if (strcasecmp(commandLine, "testError") == 0) // TODO: Temp for testing
-    {
+    }else if (strcasecmp(commandLine, "testError") == 0) {  // TODO: Temp for testing
         addLog(consoleData, "[Error] Something went wrong!\n");
-    }
-    else if (strcasecmp(commandLine, "testScript") == 0) // TODO: Temp for testing
-    {
+    }else if (strcasecmp(commandLine, "testScript") == 0) {  // TODO: Temp for testing
         consoleData->scripts.push_back((char*)"print(\"Hello ProDBG Lua World!\")");
-    }
-    else
-    {
+    }else {
         addLog(consoleData, "Unknown command: '%s'\n", commandLine);
     }
 }
@@ -129,8 +113,7 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
     std::vector<const char*> candidates;
     const char* wordEnd = nullptr;
     const char* wordStart = nullptr;
-    switch (data->event_key)
-    {
+    switch (data->event_key) {
         default:
             break;
 
@@ -140,8 +123,7 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
             // Locate beginning of current word
             wordEnd = data->buf + data->cursor_pos;
             wordStart = wordEnd;
-            while (wordStart > data->buf)
-            {
+            while (wordStart > data->buf) {
                 const char c = wordStart[-1];
                 if (c == ' ' || c == '\t' || c == ',' || c == ';')
                     break;
@@ -150,35 +132,27 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
 
             // Build a list of candidates
 
-            for (size_t i = 0; i < consoleData->commands.size(); ++i)
-			{
+            for (size_t i = 0; i < consoleData->commands.size(); ++i) {
                 if (strncasecmp(consoleData->commands[i], wordStart, (size_t)(int(wordEnd - wordStart))) == 0)
                     candidates.push_back(consoleData->commands[i]);
-			}
+            }
 
-            if (candidates.size() == 0)
-            {
+            if (candidates.size() == 0) {
                 // No match
                 addLog(consoleData, "No match for \"%.*s\"!\n", wordEnd - wordStart, wordStart);
-            }
-            else if (candidates.size() == 1)
-            {
+            }else if (candidates.size() == 1) {
                 // Single match. Delete the beginning of the word and replace it entirely so we've got nice casing
 
                 data->delete_chars(data, int(wordStart - data->buf), int(wordEnd - wordStart));
                 data->insert_chars(data, data->cursor_pos, candidates[0], 0);
                 data->insert_chars(data, data->cursor_pos, " ", 0);
-            }
-            else
-            {
+            }else {
                 // Multiple matches. Complete as much as we can, so inputing "C" will complete to "CL" and display "CLEAR" and "CLASSIFY"
                 int matchLen = int(wordEnd - wordStart);
-                while (true)
-                {
+                while (true) {
                     int c = 0;
                     bool allCandidatesMatches = true;
-                    for (size_t i = 0; i < candidates.size() && allCandidatesMatches; i++)
-                    {
+                    for (size_t i = 0; i < candidates.size() && allCandidatesMatches; i++) {
                         if (i == 0)
                             c = toupper(candidates[i][matchLen]);
                         else if (c != toupper(candidates[i][matchLen]))
@@ -191,8 +165,7 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
                     matchLen++;
                 }
 
-                if (matchLen > 0)
-                {
+                if (matchLen > 0) {
                     data->delete_chars(data, int(wordStart - data->buf), int(wordEnd - wordStart));
                     data->insert_chars(data, data->cursor_pos, candidates[0], candidates[0] + matchLen);
                 }
@@ -211,25 +184,20 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
         case PDKEY_DOWN:
         {
             const int prevHistoryPos = consoleData->historyPos;
-            if (data->event_key == PDKEY_UP)
-            {
+            if (data->event_key == PDKEY_UP) {
                 if (consoleData->historyPos == -1)
                     consoleData->historyPos = int(consoleData->history.size()) - 1;
                 else if (consoleData->historyPos > 0)
                     consoleData->historyPos--;
-            }
-            else if (data->event_key == PDKEY_DOWN)
-            {
-                if (consoleData->historyPos != -1)
-                {
+            }else if (data->event_key == PDKEY_DOWN) {
+                if (consoleData->historyPos != -1) {
                     if (++consoleData->historyPos >= int(consoleData->history.size()))
                         consoleData->historyPos = -1;
                 }
             }
 
             // TODO: A better implementation would preserve the data on the current input line along with cursor position
-            if (prevHistoryPos != consoleData->historyPos)
-            {
+            if (prevHistoryPos != consoleData->historyPos) {
                 strcpy(data->buf, (consoleData->historyPos >= 0) ? consoleData->history[(size_t)consoleData->historyPos] : "");
                 data->buf_dirty = true;
                 data->cursor_pos = data->selection_start = data->selection_end = int(strlen(data->buf));
@@ -310,8 +278,7 @@ static void showInUI(ConsoleData* consoleData, PDReader* reader, PDUI* uiFuncs)
     uiFuncs->begin_child("ScrollingRegion", spacing, false, PDUIWindowFlags(0));
     uiFuncs->push_style_varVec(PDUIStyleVar_ItemSpacing, itemSpacing); // Tighten spacing
 
-    for (size_t i = 0; i < consoleData->items.size(); i++)
-    {
+    for (size_t i = 0; i < consoleData->items.size(); i++) {
         const char* item = consoleData->items[i];
         //if (!filter.PassFilter(item))
         //    continue;
@@ -334,8 +301,7 @@ static void showInUI(ConsoleData* consoleData, PDReader* reader, PDUI* uiFuncs)
 
     // Command Line
 
-    if (uiFuncs->input_text("Input", consoleData->inputBuffer, sizeof(consoleData->inputBuffer), PDUIInputTextFlags_EnterReturnsTrue | PDUIInputTextFlags_CallbackCompletion | PDUIInputTextFlags_CallbackHistory, &textEditCallbackStub, (void*)consoleData))
-    {
+    if (uiFuncs->input_text("Input", consoleData->inputBuffer, sizeof(consoleData->inputBuffer), PDUIInputTextFlags_EnterReturnsTrue | PDUIInputTextFlags_CallbackCompletion | PDUIInputTextFlags_CallbackHistory, &textEditCallbackStub, (void*)consoleData)) {
         char* inputEnd = consoleData->inputBuffer + strlen(consoleData->inputBuffer);
 
         while (inputEnd > consoleData->inputBuffer && inputEnd[-1] == ' ')
@@ -379,8 +345,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     showInUI(consoleData, inEvents, uiFuncs);
 
 
-    for (size_t i = 0; i < consoleData->scripts.size(); ++i)
-    {
+    for (size_t i = 0; i < consoleData->scripts.size(); ++i) {
         PDWrite_eventBegin(outEvents, PDEventType_executeConsole);
         PDWrite_string(outEvents, "command", consoleData->scripts[i]);   // TODO: Remove me
         PDWrite_eventEnd(outEvents);

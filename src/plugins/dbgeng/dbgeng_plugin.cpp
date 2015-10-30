@@ -6,8 +6,7 @@
 #include <Dbgeng.h>
 #include <string>
 
-struct DbgEngPlugin : public DebugBaseEventCallbacks
-{
+struct DbgEngPlugin : public DebugBaseEventCallbacks {
     PDDebugState state = PDDebugState_noTarget;
     bool hasValidTarget = false;
 
@@ -134,8 +133,7 @@ STDMETHODIMP DbgEngPlugin::LoadModule(THIS_
 STDMETHODIMP DbgEngPlugin::SessionStatus(THIS_
                                          IN ULONG Status)
 {
-    switch (Status)
-    {
+    switch (Status) {
         case DEBUG_SESSION_ACTIVE:
             printf("DbgEngPlugin: SessionStatus DEBUG_SESSION_ACTIVE\n");
             break;
@@ -171,8 +169,7 @@ static void updateDbgEngEvent(DbgEngPlugin* plugin, PDWriter* writer)
 {
     HRESULT hr = plugin->debugControl->WaitForEvent(DEBUG_WAIT_DEFAULT, 100);
 
-    if (hr == S_FALSE)
-    {
+    if (hr == S_FALSE) {
         // WaitForEvent timeout occurred
         return;
     }
@@ -186,19 +183,15 @@ void onRun(DbgEngPlugin* plugin)
 {
     printf("DbgEngPlugin: onRun\n");
 
-    if (plugin->state == PDDebugState_noTarget)
-    {
+    if (plugin->state == PDDebugState_noTarget) {
         assert(!plugin->targetName.empty());
 
         HRESULT hr = plugin->debugClient->CreateProcess(0, PSTR(plugin->targetName.c_str()), DEBUG_ONLY_THIS_PROCESS);
         assert(SUCCEEDED(hr));
 
-        if (!SUCCEEDED(hr))
-        {
+        if (!SUCCEEDED(hr)) {
             printf("Error: could not create process '%s'\n", plugin->targetName.c_str());
-        }
-        else
-        {
+        }else {
             printf("Valid target %s\n", plugin->targetName.c_str());
         }
 
@@ -247,8 +240,7 @@ static void doAction(DbgEngPlugin* plugin, PDAction action)
 {
     printf("DbgEngPlugin: doAction\n");
 
-    switch (action)
-    {
+    switch (action) {
         case PDAction_stop:
             onStop(plugin); break;
         case PDAction_break:
@@ -289,8 +281,7 @@ static void setCallstack(DbgEngPlugin* plugin, PDWriter* writer)
     PDWrite_eventBegin(writer, PDEventType_setCallstack);
     PDWrite_arrayBegin(writer, "callstack");
 
-    for (ULONG i = 0; i < framesFilled; ++i)
-    {
+    for (ULONG i = 0; i < framesFilled; ++i) {
         const DEBUG_STACK_FRAME& frame = frames[i];
 
         PDWrite_arrayEntryBegin(writer);
@@ -312,8 +303,7 @@ static void setExecutable(DbgEngPlugin* plugin, PDReader* reader)
 
     PDRead_findString(reader, &filename, "filename", 0);
 
-    if (!filename)
-    {
+    if (!filename) {
         printf("Unable to find filename which is required when starting a LLDB debug session\n");
         return;
     }
@@ -386,12 +376,10 @@ static void processEvents(DbgEngPlugin* plugin, PDReader* reader, PDWriter* writ
 
     PDEventType event;
 
-    while ((event = (PDEventType)PDRead_getEvent(reader)))
-    {
+    while ((event = (PDEventType)PDRead_getEvent(reader))) {
         printf("DbgEngPlugin: %d Got event %s\n", (int)event, eventTypes[event]);
 
-        switch (event)
-        {
+        switch (event) {
             case PDEventType_getExceptionLocation:
                 setExceptionLocation(plugin, writer); break;
             case PDEventType_getCallstack:
@@ -432,14 +420,12 @@ void destroyInstance(void* user_data)
 {
     DbgEngPlugin* plugin = reinterpret_cast<DbgEngPlugin*>(user_data);
 
-    if (plugin->debugControl)
-    {
+    if (plugin->debugControl) {
         plugin->debugControl->Release();
         plugin->debugControl = nullptr;
     }
 
-    if (plugin->debugClient)
-    {
+    if (plugin->debugClient) {
         plugin->debugClient->Release();
         plugin->debugClient = nullptr;
     }
@@ -457,8 +443,7 @@ static PDDebugState update(void* user_data, PDAction action, PDReader* reader, P
 
     doAction(plugin, action);
 
-    if (plugin->state == PDDebugState_running)
-    {
+    if (plugin->state == PDDebugState_running) {
         updateDbgEngEvent(plugin, writer);
     }
 

@@ -132,8 +132,7 @@ static PluginData s_pluginData = { &s_dummyPlugin, PD_VIEW_API_VERSION, "", 0 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Session* createSession()
-{
+struct Session* createSession(){
     struct Session* session = Session_create();
 
     assert_non_null(session);
@@ -269,8 +268,7 @@ static void session_save_plugin_state(void**)
 
         json_t* root = json_load_file(filename, 0, &error);
 
-        if (!root || !json_is_object(root))
-        {
+        if (!root || !json_is_object(root)) {
             printf("JSON: Unable to open %s for read\n", filename);
             return;
         }
