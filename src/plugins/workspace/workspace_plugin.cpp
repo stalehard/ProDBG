@@ -100,7 +100,7 @@ static void recursiveDrawTree(DirEntry* entry, PDUI* uiFuncs, PDWriter* writer)
 	{
 		DirEntry* dir = entry->dirs[i];
 
-		if (uiFuncs->tree_nodeStr(dir->directoryName, dir->directoryName))
+		if (uiFuncs->tree_node_str(dir->directoryName, dir->directoryName))
 		{
 			recursiveDrawTree(dir, uiFuncs, writer);
 			uiFuncs->tree_pop();

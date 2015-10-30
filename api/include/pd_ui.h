@@ -329,12 +329,12 @@ typedef struct PDUI
 	void (*text_colored)(const PDColor col, const char* fmt, ...);
 	void (*text_colored_v)(const PDColor col, const char* fmt, va_list args);
 	void (*text_disabled)(const char* fmt, ...);
-	void (*text_disabledV)(const char* fmt, va_list args);
+	void (*text_disabled_v)(const char* fmt, va_list args);
 	void (*text_wrapped)(const char* fmt, ...);
 	void (*text_wrapped_v)(const char* fmt, va_list args);
 	void (*text_unformatted)(const char* text, const char* text_end);
 	void (*label_text)(const char* label, const char* fmt, ...);
-	void (*label_textV)(const char* label, const char* fmt, va_list args);
+	void (*label_text_v)(const char* label, const char* fmt, va_list args);
 	void (*bullet)();
 	void (*bullet_text)(const char* fmt, ...);
 	void (*bullet_text_v)(const char* fmt, va_list args);
@@ -400,10 +400,10 @@ typedef struct PDUI
 
 	// Widgets: Trees
 	bool (*tree_node)(const char* str_label_id);
-	bool (*tree_nodeStr)(const char* strId, const char* fmt, ...);
-	bool (*tree_nodePtr)(const void* ptrId, const char* fmt, ...);
-	bool (*tree_nodeStrV)(const char* strId, const char* fmt, va_list args);
-	bool (*tree_nodePtrV)(const void* ptrId, const char* fmt, va_list args);
+	bool (*tree_node_str)(const char* strId, const char* fmt, ...);
+	bool (*tree_node_ptr)(const void* ptrId, const char* fmt, ...);
+	bool (*tree_node_str_v)(const char* strId, const char* fmt, va_list args);
+	bool (*tree_node_ptr_v)(const void* ptrId, const char* fmt, va_list args);
 	void (*tree_push_str)(const char* strId);
 	void (*tree_push_ptr)(const void* ptrId);
 	void (*tree_pop)();
@@ -420,7 +420,7 @@ typedef struct PDUI
 
 	// Tooltip
 	void (*set_tooltip)(const char* fmt, ...);
-	void (*set_tooltipV)(const char* fmt, va_list args);
+	void (*set_tooltip_v)(const char* fmt, va_list args);
 	void (*begin_tooltip)();
 	void (*end_tooltip)();
 
@@ -437,8 +437,8 @@ typedef struct PDUI
 	// Popup
 	void (*open_popup)(const char* strId);
 	bool (*begin_popup)(const char* strId);
-	bool (*begin_popupModal)(const char* name, bool* p_opened, PDUIWindowFlags extraFlags);
-	bool (*begin_popupContextItem)(const char* strId, int mouse_button);
+	bool (*begin_popup_modal)(const char* name, bool* p_opened, PDUIWindowFlags extraFlags);
+	bool (*begin_popup_context_item)(const char* strId, int mouse_button);
 	bool (*begin_popup_context_window)(bool also_over_items, const char* strId, int mouse_button);
 	bool (*begin_popupContext_void)(const char* strId, int mouse_button);
 	void (*end_popup)();

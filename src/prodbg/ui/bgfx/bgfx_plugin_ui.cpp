@@ -1161,7 +1161,7 @@ static bool tree_node(const char* str_label_id)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool tree_nodeStr(const char* strId, const char* fmt, ...)
+static bool tree_node_str(const char* strId, const char* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -1175,7 +1175,7 @@ static bool tree_nodeStr(const char* strId, const char* fmt, ...)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool tree_nodePtr(const void* ptrId, const char* fmt, ...)
+static bool tree_node_ptr(const void* ptrId, const char* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -1189,14 +1189,14 @@ static bool tree_nodePtr(const void* ptrId, const char* fmt, ...)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool tree_nodeStrV(const char* strId, const char* fmt, va_list args)
+static bool tree_node_str_v(const char* strId, const char* fmt, va_list args)
 {
     return ImGui::TreeNodeV(strId, fmt, args);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool tree_nodePtrV(const void* ptrId, const char* fmt, va_list args)
+static bool tree_node_ptr_v(const void* ptrId, const char* fmt, va_list args)
 {
     return ImGui::TreeNodeV(ptrId, fmt, args);
 }
@@ -1362,7 +1362,7 @@ static bool menu_item(const char* label, const char* shortcut, bool selected, bo
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool menu_itemPtr(const char* label, const char* shortcut, bool* p_selected, bool enabled)
+static bool menu_item_ptr(const char* label, const char* shortcut, bool* p_selected, bool enabled)
 {
     return ImGui::MenuItem(label, shortcut, p_selected, enabled);
 }
@@ -1383,14 +1383,14 @@ static bool begin_popup(const char* strId)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool begin_popupModal(const char* name, bool* p_opened, PDUIWindowFlags extraFlags)
+static bool begin_popup_modal(const char* name, bool* p_opened, PDUIWindowFlags extraFlags)
 {
     return ImGui::BeginPopupModal(name, p_opened, extraFlags);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool begin_popupContextItem(const char* strId, int mouse_button)
+static bool begin_popup_context_item(const char* strId, int mouse_button)
 {
     return ImGui::BeginPopupContextItem(strId, mouse_button);
 }
@@ -1404,7 +1404,7 @@ static bool begin_popup_context_window(bool also_over_items, const char* strId, 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool begin_popupContext_void(const char* strId, int mouse_button)
+static bool begin_popup_context_void(const char* strId, int mouse_button)
 {
     return ImGui::BeginPopupContextVoid(strId, mouse_button);
 }
@@ -2002,10 +2002,10 @@ static PDUI s_uiFuncs[] =
 
 	// Widgets: Trees
 	tree_node,
-	tree_nodeStr,
-	tree_nodePtr,
-	tree_nodeStrV,
-	tree_nodePtrV,
+	tree_node_str,
+	tree_node_ptr,
+	tree_node_str_v,
+	tree_node_ptr_v,
 	tree_push_str,
 	tree_push_ptr,
 	tree_pop,
@@ -2034,15 +2034,15 @@ static PDUI s_uiFuncs[] =
 	begin_menu,
 	end_menu,
 	menu_item,
-	menu_itemPtr,
+	menu_item_ptr,
 
 	// Popup
 	open_popup,
 	begin_popup,
-	begin_popupModal,
-	begin_popupContextItem,
+	begin_popup_modal,
+	begin_popup_context_item,
 	begin_popup_context_window,
-	begin_popupContext_void,
+	begin_popup_context_void,
 	end_popup,
 	close_current_popup,
 
