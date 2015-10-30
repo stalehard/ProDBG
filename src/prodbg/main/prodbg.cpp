@@ -103,11 +103,11 @@ uint32_t findMenuIdRange(PDMenu* menu)
 
     while (menu->name)
     {
-        PDMenuItem* menuItems = menu->items;
+        PDMenuItem* menu_items = menu->items;
 
-        while (menuItems->name)
+        while (menu_items->name)
         {
-            const uint16_t id = menuItems->id;
+            const uint16_t id = menu_items->id;
 
             if (id > idEnd)
                 idEnd = id;
@@ -115,7 +115,7 @@ uint32_t findMenuIdRange(PDMenu* menu)
             if (id < idStart)
                 idStart = id;
 
-            menuItems++;
+            menu_items++;
         }
 
         menu++;

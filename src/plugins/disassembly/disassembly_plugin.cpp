@@ -44,23 +44,23 @@ struct DissassemblyData
 static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 {
     (void)serviceFunc;
-    DissassemblyData* userData = new DissassemblyData;
-    userData->location = 0;
-    userData->pc = 0;
-    userData->locationSize = 0;
-    userData->requestDisassembly = false;
+    DissassemblyData* user_data = new DissassemblyData;
+    user_data->location = 0;
+    user_data->pc = 0;
+    user_data->locationSize = 0;
+    user_data->requestDisassembly = false;
 
     (void)uiFuncs;
     (void)serviceFunc;
 
-    return userData;
+    return user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-    delete (DissassemblyData*)userData;
+    delete (DissassemblyData*)user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -193,20 +193,20 @@ void renderUI(DissassemblyData* data, PDUI* uiFuncs)
     if (!(block = findBlockWithPC(data, data->pc)))
         return;
 
-    PDVec2 size = uiFuncs->getWindowSize();
+    PDVec2 size = uiFuncs->get_window_size();
 
     for (Line& line : block->lines)
     {
         if (line.address == data->pc)
         {
             PDRect rect;
-            PDVec2 pos = uiFuncs->getCursorPos();
+            PDVec2 pos = uiFuncs->get_cursor_pos();
             rect.x = pos.x;
             rect.y = pos.y;
             rect.width = size.x;
             rect.height = 14;
-            uiFuncs->fillRect(rect, PDUI_COLOR(200, 0, 0, 127));
-            uiFuncs->setScrollHere(0.5f);
+            uiFuncs->fill_rect(rect, PDUI_COLOR(200, 0, 0, 127));
+            uiFuncs->set_scroll_here(0.5f);
         }
 
         uiFuncs->text("0x%04x %s", (uint64_t)line.address, line.text);
@@ -237,11 +237,11 @@ static void updateRegisters(DissassemblyData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
 {
     uint32_t event;
 
-    DissassemblyData* data = (DissassemblyData*)userData;
+    DissassemblyData* data = (DissassemblyData*)user_data;
 
     data->requestDisassembly = false;
 
@@ -311,9 +311,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
     {
-        registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+        registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

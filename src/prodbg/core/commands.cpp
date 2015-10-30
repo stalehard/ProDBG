@@ -83,7 +83,7 @@ static void execCommand(CommandEntry* entry)
     else
     {
         CommandList_addEntry(&s_undoStack, entry);
-        entry->command.exec(entry->command.userData);
+        entry->command.exec(entry->command.user_data);
     }
 
     CommandList_clear(&s_redoStack);
@@ -91,24 +91,24 @@ static void execCommand(CommandEntry* entry)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void execMultiCommand(void* userData)
+static void execMultiCommand(void* user_data)
 {
     CommandEntry* entry;
-    struct MultiCommandData* data = (struct MultiCommandData*)userData;
+    struct MultiCommandData* data = (struct MultiCommandData*)user_data;
 
     for (entry = data->list.first; entry; entry = entry->next)
-        entry->command.exec(entry->command.userData);
+        entry->command.exec(entry->command.user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void undoMultiCommand(void* userData)
+static void undoMultiCommand(void* user_data)
 {
     CommandEntry* entry;
-    struct MultiCommandData* data = (struct MultiCommandData*)userData;
+    struct MultiCommandData* data = (struct MultiCommandData*)user_data;
 
     for (entry = data->list.first; entry; entry = entry->next)
-        entry->command.undo(entry->command.userData);
+        entry->command.undo(entry->command.user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -155,7 +155,7 @@ void Commands_undo()
 
     CommandList_addEntry(&s_redoStack, entry);
 
-    entry->command.undo(entry->command.userData);
+    entry->command.undo(entry->command.user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ void Commands_redo()
 
     CommandList_addEntry(&s_undoStack, entry);
 
-    entry->command.exec(entry->command.userData);
+    entry->command.exec(entry->command.user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ static void CommandList_delEntry(CommandList* list, CommandEntry* entry)
 {
     CommandList_unlinkEntry(list, entry);
 
-    free(entry->command.userData);
+    free(entry->command.user_data);
     free(entry);
 }
 

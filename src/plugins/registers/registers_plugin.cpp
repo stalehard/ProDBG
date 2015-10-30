@@ -34,23 +34,23 @@ struct RegistersData
 static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 {
     (void)serviceFunc;
-    RegistersData* userData = (RegistersData*)malloc(sizeof(RegistersData));
+    RegistersData* user_data = (RegistersData*)malloc(sizeof(RegistersData));
 
-    userData->maxRegisters = 256;
-    userData->registers = (Register*)malloc(sizeof(Register) * (size_t)userData->maxRegisters);
-    userData->registerCount = 0;
+    user_data->maxRegisters = 256;
+    user_data->registers = (Register*)malloc(sizeof(Register) * (size_t)user_data->maxRegisters);
+    user_data->registerCount = 0;
 
     (void)uiFuncs;
     (void)serviceFunc;
 
-    return userData;
+    return user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-    free(userData);
+    free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -141,22 +141,22 @@ static void showUI(RegistersData* data, PDUI* uiFuncs)
 {
     uiFuncs->text("");
     uiFuncs->columns(2, "registers", true);
-    uiFuncs->text("Name"); uiFuncs->nextColumn();
-    uiFuncs->text("Value"); uiFuncs->nextColumn();
+    uiFuncs->text("Name"); uiFuncs->next_column();
+    uiFuncs->text("Value"); uiFuncs->next_column();
 
     for (int i = 0; i < data->registerCount; ++i)
     {
-        uiFuncs->text(data->registers[i].name); uiFuncs->nextColumn();
-        uiFuncs->text(data->registers[i].value); uiFuncs->nextColumn();
+        uiFuncs->text(data->registers[i].name); uiFuncs->next_column();
+        uiFuncs->text(data->registers[i].value); uiFuncs->next_column();
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
 {
     uint32_t event;
-    RegistersData* data = (RegistersData*)userData;
+    RegistersData* data = (RegistersData*)user_data;
 
     (void)outEvents;
 
@@ -193,9 +193,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
     {
-        registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+        registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

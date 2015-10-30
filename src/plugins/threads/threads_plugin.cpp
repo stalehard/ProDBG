@@ -20,27 +20,27 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
     (void)serviceFunc;
     (void)uiFuncs;
 
-    ThreadsData* userData = (ThreadsData*)malloc(sizeof(ThreadsData));
+    ThreadsData* user_data = (ThreadsData*)malloc(sizeof(ThreadsData));
 
-	userData->selectedThread = 0;
-	userData->threadId = 0;
+	user_data->selectedThread = 0;
+	user_data->threadId = 0;
 
-    return userData;
+    return user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-    free(userData);
+    free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void showInUI(ThreadsData* userData, PDReader* reader, PDUI* uiFuncs)
+static void showInUI(ThreadsData* user_data, PDReader* reader, PDUI* uiFuncs)
 {
     PDReaderIterator it;
-    ThreadsData* data = (ThreadsData*)userData;
+    ThreadsData* data = (ThreadsData*)user_data;
 
     if (PDRead_findArray(reader, &it, "threads", 0) == PDReadStatus_notFound)
         return;
@@ -48,9 +48,9 @@ static void showInUI(ThreadsData* userData, PDReader* reader, PDUI* uiFuncs)
     uiFuncs->text("");
 
     uiFuncs->columns(3, "threads", true);
-    uiFuncs->text("Id"); uiFuncs->nextColumn();
-    uiFuncs->text("Name"); uiFuncs->nextColumn();
-    uiFuncs->text("Function"); uiFuncs->nextColumn();
+    uiFuncs->text("Id"); uiFuncs->next_column();
+    uiFuncs->text("Name"); uiFuncs->next_column();
+    uiFuncs->text("Function"); uiFuncs->next_column();
 
     int i = 0;
 
@@ -79,9 +79,9 @@ static void showInUI(ThreadsData* userData, PDReader* reader, PDUI* uiFuncs)
 			data->threadId = (int)id;
 		}
 
-        uiFuncs->nextColumn();
-        uiFuncs->text(name); uiFuncs->nextColumn();
-        uiFuncs->text(function); uiFuncs->nextColumn();
+        uiFuncs->next_column();
+        uiFuncs->text(name); uiFuncs->next_column();
+        uiFuncs->text(function); uiFuncs->next_column();
 
         i++;
     }
@@ -94,11 +94,11 @@ static void showInUI(ThreadsData* userData, PDReader* reader, PDUI* uiFuncs)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
 {
     uint32_t event = 0;
 
-    ThreadsData* data = (ThreadsData*)userData;
+    ThreadsData* data = (ThreadsData*)user_data;
 
     data->requestData = false;
     data->setSelectedThread = false;
@@ -109,7 +109,7 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* o
         {
             case PDEventType_setThreads:
             {
-                showInUI((ThreadsData*)userData, inEvents, uiFuncs);
+                showInUI((ThreadsData*)user_data, inEvents, uiFuncs);
                 break;
             }
 
@@ -157,9 +157,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
 {
-	registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+	registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
 }
 
 }

@@ -18,16 +18,16 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 {
     (void)serviceFunc;
     (void)uiFuncs;
-    LocalsData* userData = (LocalsData*)malloc(sizeof(LocalsData));
+    LocalsData* user_data = (LocalsData*)malloc(sizeof(LocalsData));
 
-    return userData;
+    return user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-    free(userData);
+    free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,9 +43,9 @@ static void showInUI(LocalsData* data, PDReader* reader, PDUI* uiFuncs)
     uiFuncs->text("");
 
     uiFuncs->columns(3, "callstack", true);
-    uiFuncs->text("Name"); uiFuncs->nextColumn();
-    uiFuncs->text("Value"); uiFuncs->nextColumn();
-    uiFuncs->text("Type"); uiFuncs->nextColumn();
+    uiFuncs->text("Name"); uiFuncs->next_column();
+    uiFuncs->text("Value"); uiFuncs->next_column();
+    uiFuncs->text("Type"); uiFuncs->next_column();
 
     while (PDRead_getNextEntry(reader, &it))
     {
@@ -57,15 +57,15 @@ static void showInUI(LocalsData* data, PDReader* reader, PDUI* uiFuncs)
         PDRead_findString(reader, &value, "value", it);
         PDRead_findString(reader, &type, "type", it);
 
-        uiFuncs->text(name); uiFuncs->nextColumn();
-        uiFuncs->text(value); uiFuncs->nextColumn();
-        uiFuncs->text(type); uiFuncs->nextColumn();
+        uiFuncs->text(name); uiFuncs->next_column();
+        uiFuncs->text(value); uiFuncs->next_column();
+        uiFuncs->text(type); uiFuncs->next_column();
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
 {
     uint32_t event = 0;
 
@@ -75,7 +75,7 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* o
         {
             case PDEventType_setLocals:
             {
-                showInUI((LocalsData*)userData, inEvents, uiFuncs);
+                showInUI((LocalsData*)user_data, inEvents, uiFuncs);
                 break;
             }
         }
@@ -108,9 +108,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
     {
-        registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+        registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 
 }

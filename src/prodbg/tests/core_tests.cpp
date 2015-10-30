@@ -136,16 +136,16 @@ static void doAdd(int value)
     {
         addData,
 
-        [](void* userData)
+        [](void* user_data)
         {
-            IntAddData* data = (IntAddData*)userData;
+            IntAddData* data = (IntAddData*)user_data;
             data->oldValue = g_intValue;
             g_intValue += data->newValue;
         },
 
-        [](void* userData)
+        [](void* user_data)
         {
-            IntAddData* data = (IntAddData*)userData;
+            IntAddData* data = (IntAddData*)user_data;
             g_intValue = data->oldValue;
         }
     });
@@ -196,15 +196,15 @@ static const char* s_filename_2 = 0;
 static const char* s_filename_3 = 0;
 static const char* s_filename_4 = 0;
 static const char* s_filename_5 = 0;
-static int s_userData_1 = 0;
-static int s_userData_2 = 1;
-static int s_userData_3 = 2;
+static int s_user_data_1 = 0;
+static int s_user_data_2 = 1;
+static int s_user_data_3 = 2;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void fileNotifaction(void* userData, const char* file, int type)
+void fileNotifaction(void* user_data, const char* file, int type)
 {
-    assert_true(userData == &s_userData_1);
+    assert_true(user_data == &s_user_data_1);
 
     if (s_checkPhase == 0)
     {
@@ -227,9 +227,9 @@ void fileNotifaction(void* userData, const char* file, int type)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void fileNotifaction2(void* userData, const char* file, int type)
+void fileNotifaction2(void* user_data, const char* file, int type)
 {
-    assert_true(userData == &s_userData_2);
+    assert_true(user_data == &s_user_data_2);
 
     if (s_checkPhase == 2)
     {
@@ -242,9 +242,9 @@ void fileNotifaction2(void* userData, const char* file, int type)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void fileNotifaction3(void* userData, const char* file, int type)
+void fileNotifaction3(void* user_data, const char* file, int type)
 {
-    assert_true(userData == &s_userData_3);
+    assert_true(user_data == &s_user_data_3);
 
     if (s_checkPhase == 3 && strcmp(file, s_filename_3) == 0)
     {
@@ -298,7 +298,7 @@ void test_file_notification(void**)
     fwrite(&temp, 4, 1, t);
     fclose(t);
 
-    FileMonitor_addPath(test_dir, "*", fileNotifaction, &s_userData_1);
+    FileMonitor_addPath(test_dir, "*", fileNotifaction, &s_user_data_1);
 
     thread_sleep(200);
 
@@ -325,7 +325,7 @@ void test_file_notification(void**)
 
     assert_int_equal(s_checkPhase, 2);
 
-    FileMonitor_addPath(test_dir_2, "txt", fileNotifaction2, &s_userData_2);
+    FileMonitor_addPath(test_dir_2, "txt", fileNotifaction2, &s_user_data_2);
 
     thread_sleep(1000);
 
@@ -355,7 +355,7 @@ void test_file_notification(void**)
     assert_int_equal(s_checkPhase, 3);
 
 
-    FileMonitor_addPath(test_dir_3, "bin;so", fileNotifaction3, &s_userData_3);
+    FileMonitor_addPath(test_dir_3, "bin;so", fileNotifaction3, &s_user_data_3);
 
     thread_sleep(1000);
 

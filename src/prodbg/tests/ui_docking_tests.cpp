@@ -945,7 +945,7 @@ static uint32_t s_colors[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void fillRect(uint32_t* buffer, PDGRect rect, int width, uint32_t color)
+void fill_rect(uint32_t* buffer, PDGRect rect, int width, uint32_t color)
 {
     buffer += (rect.y * width) + rect.x;
 
@@ -972,7 +972,7 @@ void fillDockFloat(uint32_t* buffer, IntRect r, int width, uint32_t color)
     rect.width = (int)(r.width - g_sizerSize / 2);
     rect.height = (int)(r.height - g_sizerSize / 2);
 
-    fillRect(buffer, rect, width, color);
+    fill_rect(buffer, rect, width, color);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -984,7 +984,7 @@ void fillDock(uint32_t* buffer, PDGRect rect, int width, uint32_t color)
     rect.width -= g_sizerSize / 2;
     rect.height -= g_sizerSize / 2;
 
-    fillRect(buffer, rect, width, color);
+    fill_rect(buffer, rect, width, color);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1003,14 +1003,14 @@ void fillSizer(uint32_t* buffer, UIDockSizer* sizer, int width)
         rect.y -= g_sizerSize / 2;
         rect.height = g_sizerSize;
 
-        fillRect(buffer, rect, width, MFB_RGB(255, 0, 0));
+        fill_rect(buffer, rect, width, MFB_RGB(255, 0, 0));
     }
     else if (sizer->dir == UIDockSizerDir_Vert)
     {
         rect.x -= g_sizerSize / 2;
         rect.width = g_sizerSize;
 
-        fillRect(buffer, rect, width, MFB_RGB(0, 255, 0));
+        fill_rect(buffer, rect, width, MFB_RGB(0, 255, 0));
     }
     else
     {

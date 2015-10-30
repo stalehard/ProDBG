@@ -184,9 +184,9 @@ unsigned int m68k_read_disassembler_32(unsigned int address)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void destroyInstance(void* userData)
+void destroyInstance(void* user_data)
 {
-	free(userData);
+	free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -472,12 +472,12 @@ static void onAction(PluginData* plugin, PDAction action, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PDDebugState update(void* userData, PDAction action, PDReader* reader, PDWriter* writer)
+PDDebugState update(void* user_data, PDAction action, PDReader* reader, PDWriter* writer)
 {
 	(void)action;
 	(void)writer;
 
-	PluginData* data = (PluginData*)userData;
+	PluginData* data = (PluginData*)user_data;
 
     onAction(data, action, writer);
 

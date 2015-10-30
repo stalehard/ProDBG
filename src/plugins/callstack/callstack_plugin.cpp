@@ -33,26 +33,26 @@ struct CallstackData
 static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 {
     (void)serviceFunc;
-    CallstackData* userData = new CallstackData;
+    CallstackData* user_data = new CallstackData;
 
-    memset(userData->filename, 0, sizeof(userData->filename));
-    userData->line = -1;
+    memset(user_data->filename, 0, sizeof(user_data->filename));
+    user_data->line = -1;
 
-    userData->location = 0;
-    userData->request = false;
-    userData->selectedFrame = 0;
+    user_data->location = 0;
+    user_data->request = false;
+    user_data->selectedFrame = 0;
 
     (void)uiFuncs;
     (void)serviceFunc;
 
-    return userData;
+    return user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-    delete (CallstackData*)userData;
+    delete (CallstackData*)user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@ static void drawText(PDUI* uiFuncs, const char* text)
     else
         uiFuncs->text("");
 
-    uiFuncs->nextColumn();
+    uiFuncs->next_column();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ static void drawTextInt(PDUI* uiFuncs, int v)
     else
         uiFuncs->text("");
 
-    uiFuncs->nextColumn();
+    uiFuncs->next_column();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,10 +185,10 @@ static void drawTextInt(PDUI* uiFuncs, int v)
 static void showUI(PDUI* uiFuncs, CallstackData* data)
 {
     uiFuncs->columns(4, "callstack", true);
-    uiFuncs->text("Address"); uiFuncs->nextColumn();
-    uiFuncs->text("Module"); uiFuncs->nextColumn();
-    uiFuncs->text("Name"); uiFuncs->nextColumn();
-    uiFuncs->text("Line"); uiFuncs->nextColumn();
+    uiFuncs->text("Address"); uiFuncs->next_column();
+    uiFuncs->text("Module"); uiFuncs->next_column();
+    uiFuncs->text("Name"); uiFuncs->next_column();
+    uiFuncs->text("Line"); uiFuncs->next_column();
 
     uint32_t i = 0;
     PDVec2 size = { 0.0f, 0.0f };
@@ -200,7 +200,7 @@ static void showUI(PDUI* uiFuncs, CallstackData* data)
 		if (uiFuncs->selectable(entry.address, data->selectedFrame == i, PDUISelectableFlags_SpanAllColumns, size))
 			data->selectedFrame = i;
 
-    	uiFuncs->nextColumn();
+    	uiFuncs->next_column();
         drawText(uiFuncs, entry.module);
         drawText(uiFuncs, entry.filename);
         drawTextInt(uiFuncs, entry.line);
@@ -214,11 +214,11 @@ static void showUI(PDUI* uiFuncs, CallstackData* data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* reader, PDWriter* writer)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* writer)
 {
     uint32_t event;
 
-    CallstackData* data = (CallstackData*)userData;
+    CallstackData* data = (CallstackData*)user_data;
 
     data->request = false;
     data->setSelectedFrame = false;
@@ -304,9 +304,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
 {
-	registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+	registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

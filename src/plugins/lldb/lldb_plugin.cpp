@@ -83,9 +83,9 @@ static uint32_t getThreadFrame(LLDBPlugin* plugin, lldb::tid_t threadId)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void destroyInstance(void* userData)
+void destroyInstance(void* user_data)
 {
-	LLDBPlugin* plugin = (LLDBPlugin*)userData;
+	LLDBPlugin* plugin = (LLDBPlugin*)user_data;
 	delete plugin;
 }
 
@@ -782,9 +782,9 @@ static void updateLLDBEvent(LLDBPlugin* plugin, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDDebugState update(void* userData, PDAction action, PDReader* reader, PDWriter* writer)
+static PDDebugState update(void* user_data, PDAction action, PDReader* reader, PDWriter* writer)
 {
-    LLDBPlugin* plugin = (LLDBPlugin*)userData;
+    LLDBPlugin* plugin = (LLDBPlugin*)user_data;
 
     processEvents(plugin, reader, writer);
 
@@ -814,9 +814,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
 {
-    registerPlugin(PD_BACKEND_API_VERSION, &plugin, privateData);
+    registerPlugin(PD_BACKEND_API_VERSION, &plugin, private_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

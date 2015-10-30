@@ -428,9 +428,9 @@ void* createInstance(ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void destroyInstance(void* userData)
+void destroyInstance(void* user_data)
 {
-    DbgEngPlugin* plugin = reinterpret_cast<DbgEngPlugin*>(userData);
+    DbgEngPlugin* plugin = reinterpret_cast<DbgEngPlugin*>(user_data);
 
     if (plugin->debugControl)
     {
@@ -449,9 +449,9 @@ void destroyInstance(void* userData)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDDebugState update(void* userData, PDAction action, PDReader* reader, PDWriter* writer)
+static PDDebugState update(void* user_data, PDAction action, PDReader* reader, PDWriter* writer)
 {
-    DbgEngPlugin* plugin = reinterpret_cast<DbgEngPlugin*>(userData);
+    DbgEngPlugin* plugin = reinterpret_cast<DbgEngPlugin*>(user_data);
 
     processEvents(plugin, reader, writer);
 
@@ -476,9 +476,9 @@ static PDBackendPlugin plugin =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern "C" PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+extern "C" PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
 {
-    registerPlugin(PD_BACKEND_API_VERSION, &plugin, privateData);
+    registerPlugin(PD_BACKEND_API_VERSION, &plugin, private_data);
 }
 
 #endif

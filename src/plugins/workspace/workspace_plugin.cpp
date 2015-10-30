@@ -100,10 +100,10 @@ static void recursiveDrawTree(DirEntry* entry, PDUI* uiFuncs, PDWriter* writer)
 	{
 		DirEntry* dir = entry->dirs[i];
 
-		if (uiFuncs->treeNodeStr(dir->directoryName, dir->directoryName))
+		if (uiFuncs->tree_nodeStr(dir->directoryName, dir->directoryName))
 		{
 			recursiveDrawTree(dir, uiFuncs, writer);
-			uiFuncs->treePop();
+			uiFuncs->tree_pop();
 		}
 	}
 
@@ -126,11 +126,11 @@ static void recursiveDrawTree(DirEntry* entry, PDUI* uiFuncs, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* reader, PDWriter* writer)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* writer)
 {
     uint32_t event = 0;
 
-    WorkspaceData* data = (WorkspaceData*)userData;
+    WorkspaceData* data = (WorkspaceData*)user_data;
 
     (void)uiFuncs;
     (void)reader;
@@ -164,28 +164,28 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* reader, PDWriter* wri
 static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 {
     (void)uiFuncs;
-    WorkspaceData* userData = (WorkspaceData*)malloc(sizeof(WorkspaceData));
-    memset(userData, 0, sizeof(WorkspaceData));
+    WorkspaceData* user_data = (WorkspaceData*)malloc(sizeof(WorkspaceData));
+    memset(user_data, 0, sizeof(WorkspaceData));
 
-    userData->app.name = "ProDBG_workspace";
-    userData->app.short_name = "ProDBG_workspace";
-    userData->app.config_dir = "ProDBG_workspace";
-    userData->app.version = foundation_version();
-    userData->app.flags = APPLICATION_UTILITY;
-    userData->app.dump_callback = 0;
+    user_data->app.name = "ProDBG_workspace";
+    user_data->app.short_name = "ProDBG_workspace";
+    user_data->app.config_dir = "ProDBG_workspace";
+    user_data->app.version = foundation_version();
+    user_data->app.flags = APPLICATION_UTILITY;
+    user_data->app.dump_callback = 0;
 
-    foundation_initialize(memory_system_malloc(), userData->app);
+    foundation_initialize(memory_system_malloc(), user_data->app);
 
 	s_dialogFuncs = (PDDialogFuncs*)serviceFunc(PDDIALOGS_GLOBAL);
 
-    return userData;
+    return user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-	WorkspaceData* data = (WorkspaceData*)userData;
+	WorkspaceData* data = (WorkspaceData*)user_data;
 
 	for (int i = 0; i < array_size(data->paths); ++i)
 		string_deallocate(data->paths[i]);
@@ -197,9 +197,9 @@ static void destroyInstance(void* userData)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int saveState(void* userData, PDSaveState* ss)
+static int saveState(void* user_data, PDSaveState* ss)
 {
-	WorkspaceData* data = (WorkspaceData*)userData;
+	WorkspaceData* data = (WorkspaceData*)user_data;
 
 	for (int i = 0; i < array_size(data->paths); ++i)
 	{
@@ -212,11 +212,11 @@ static int saveState(void* userData, PDSaveState* ss)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int loadState(void* userData, PDLoadState* ls)
+static int loadState(void* user_data, PDLoadState* ls)
 {
 	char stringData[4096];
 
-	WorkspaceData* data = (WorkspaceData*)userData;
+	WorkspaceData* data = (WorkspaceData*)user_data;
 
 	while (PDIO_readString(ls, stringData, sizeof(stringData)) != PDLoadStatus_outOfData)
 	{
@@ -255,9 +255,9 @@ int main(int, char**) { return 0; }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
 {
-	registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+	registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
 }
 
 }

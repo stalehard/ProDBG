@@ -308,7 +308,7 @@ static void loadConfig(PluginData* data, const char* filename)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void sendCommand(PluginData* data, const char* format, ...)
+static void send_command(PluginData* data, const char* format, ...)
 {
     va_list ap;
     char buffer[2048];
@@ -484,12 +484,12 @@ static bool findBreakpointById(PluginData* data, Breakpoint** breakpoint, int id
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool sendCommandGetData(PluginData* data, const char* sendCmd, ParseDataFunc parseFunc, PDReader* reader, PDWriter* writer, int maxTry)
+bool send_commandGetData(PluginData* data, const char* sendCmd, ParseDataFunc parseFunc, PDReader* reader, PDWriter* writer, int maxTry)
 {
     char* res = s_recvBuffer;
     int len = 0;
 
-    sendCommand(data, sendCmd); 
+    send_command(data, sendCmd); 
 
 	for (int i = 0; i < maxTry; ++i)
 	{
@@ -539,7 +539,7 @@ static bool delBreakpointById(PluginData* data, int32_t id)
 			char temp[1024];
 			sprintf(temp, "del %d\n", id);
 
-            sendCommandGetData(data, temp, checkForDefaultState, 0, 0, 20);
+            send_commandGetData(data, temp, checkForDefaultState, 0, 0, 20);
 
             // Swap with the last bp and decrese the count
 
@@ -647,7 +647,7 @@ static void parseMonFile(PluginData* data, const char* filename)
         if (!fgets(textLine, sizeof(textLine), f))
             break;
 
-        sendCommand(data, "%s\n", textLine);
+        send_command(data, "%s\n", textLine);
     }
 
     fclose(f);
@@ -675,7 +675,7 @@ static uint8_t* getMemoryInternal(PluginData* data, const char* tempfile, size_t
      */
 #endif
 
-    sendCommand(data, "save \"%s\" 0 %04x %04x\n", tempfile, address, addressEnd);
+    send_command(data, "save \"%s\" 0 %04x %04x\n", tempfile, address, addressEnd);
 
     // TODO: Improve this? (wait for (C: as return data back from send command)
 
@@ -710,7 +710,7 @@ static bool loadImage(PluginData* data, const char* filename)
     char* res = 0;
     int len = 0;
 
-    sendCommand(data, "load \"%s\" 0\n", filename);
+    send_command(data, "load \"%s\" 0\n", filename);
 
     sleepMs(200);
 
@@ -841,7 +841,7 @@ static void launchVICEWithConfig(PluginData* data)
         if (address != 0)
         {
             log_debug("start from %x\n", address);
-            sendCommand(data, "g %x\n", address);
+            send_command(data, "g %x\n", address);
         }
 
         return;
@@ -852,9 +852,9 @@ static void launchVICEWithConfig(PluginData* data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void destroyInstance(void* userData)
+void destroyInstance(void* user_data)
 {
-    PluginData* plugin = (PluginData*)userData;
+    PluginData* plugin = (PluginData*)user_data;
 
     if (plugin->process.pid > 0)
         uv_kill(plugin->process.pid, 2);
@@ -942,12 +942,12 @@ static void getMemory(PluginData* data, PDReader* reader, PDWriter* writer)
     // this isn't really correct but will do for now
 
     if (address == 0xdd00)
-        sendCommand(data, "bank io\n");
+        send_command(data, "bank io\n");
 
     uint8_t* memory = getMemoryInternal(data, data->tempFileFull, &readSize, (uint16_t)(address), (uint16_t)(address + size));
 
     if (address == 0xdd00)
-        sendCommand(data, "bank ram\n");
+        send_command(data, "bank ram\n");
 
     if (memory)
     {
@@ -1028,10 +1028,10 @@ static bool setExecutable(PluginData* data, PDReader* reader)
 	char temp[2048];
 	sprintf(temp, "load \"%s\" 0\n", filename);
 
-	if (!sendCommandGetData(data, temp, parseSetExecutable, reader, 0, 20))
+	if (!send_commandGetData(data, temp, parseSetExecutable, reader, 0, 20))
 		return false;
 
-	sendCommand(data, "g $%x\n", startAddress);
+	send_command(data, "g $%x\n", startAddress);
 
 	return true;
 }
@@ -1094,7 +1094,7 @@ static bool parseRegistersCall(PluginData* plugin, const char* data, int length,
 
 static bool getRegisters(PluginData* data)
 {
-	return sendCommandGetData(data, "registers\n", parseRegistersCall, 0, 0, 20); 
+	return send_commandGetData(data, "registers\n", parseRegistersCall, 0, 0, 20); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1201,7 +1201,7 @@ static bool getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer)
 
 	sprintf(temp, "disass $%04x $%04x\n", (uint16_t)addressStart, (uint16_t)(addressStart + instructionCount * 3));
 	
-	return sendCommandGetData(data, temp, parseDisassemblyCall, reader, writer, 20); 
+	return send_commandGetData(data, temp, parseDisassemblyCall, reader, writer, 20); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1277,7 +1277,7 @@ static bool setBreakpoint(PluginData* data, PDReader* reader, PDWriter* writer)
     else
         sprintf(temp, "break $%04x\n", (uint16_t)address);
 
-	return sendCommandGetData(data, temp, parseBreakpointCall, reader, writer, 20);
+	return send_commandGetData(data, temp, parseBreakpointCall, reader, writer, 20);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1383,7 +1383,7 @@ static bool setCallstack(PluginData* data, PDReader* reader, PDWriter* writer)
 {
 	log_debug("calling setCallstack\n", "");
 
-	return sendCommandGetData(data, "bt\n", parseForCallstack, reader, writer, 20);
+	return send_commandGetData(data, "bt\n", parseForCallstack, reader, writer, 20);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1442,7 +1442,7 @@ static void processEvents(PluginData* data, PDReader* reader, PDWriter* writer)
                 // adding the breakpoint we just force VICE to run again
 
                 if (data->state == PDDebugState_running)
-                    sendCommand(data, "ret\n");
+                    send_command(data, "ret\n");
 
                 break;
             }
@@ -1623,7 +1623,7 @@ bool parseOnStepCall(PluginData* plugin, const char* res, int len, PDReader* rea
 
 bool onStep(PluginData* data, PDReader* reader, PDWriter* writer)
 {
-	return sendCommandGetData(data, "z\n", parseOnStepCall, reader, writer, 20);
+	return send_commandGetData(data, "z\n", parseOnStepCall, reader, writer, 20);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1637,13 +1637,13 @@ static void onAction(PluginData* plugin, PDAction action)
 
         case PDAction_stop:
         {
-            sendCommand(plugin, "n\n");
+            send_command(plugin, "n\n");
             break;
         }
 
         case PDAction_break:
         {
-            sendCommand(plugin, "n\n");
+            send_command(plugin, "n\n");
             break;
         }
 
@@ -1651,7 +1651,7 @@ static void onAction(PluginData* plugin, PDAction action)
         {
             //if (plugin->state != PDDebugState_running)
             {
-                sendCommand(plugin, "ret\n");
+                send_command(plugin, "ret\n");
                 plugin->state = PDDebugState_running;
             }
 
@@ -1666,7 +1666,7 @@ static void onAction(PluginData* plugin, PDAction action)
 
         case PDAction_stepOver:
         {
-            sendCommand(plugin, "n\n");
+            send_command(plugin, "n\n");
             break;
         }
 
@@ -1681,9 +1681,9 @@ static void onAction(PluginData* plugin, PDAction action)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDDebugState update(void* userData, PDAction action, PDReader* reader, PDWriter* writer)
+static PDDebugState update(void* user_data, PDAction action, PDReader* reader, PDWriter* writer)
 {
-    PluginData* plugin = (PluginData*)userData;
+    PluginData* plugin = (PluginData*)user_data;
 
     plugin->hasUpdatedRegistes = false;
     plugin->hasUpdatedExceptionLocation = false;
@@ -1761,10 +1761,10 @@ static PDBackendPlugin plugin =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
 {
-    registerPlugin(PD_BACKEND_API_VERSION, &plugin, privateData);
-    registerPlugin(PD_VIEW_API_VERSION, &g_c64CustomViewPlugin, privateData);
+    registerPlugin(PD_BACKEND_API_VERSION, &plugin, private_data);
+    registerPlugin(PD_VIEW_API_VERSION, &g_c64CustomViewPlugin, private_data);
 }
 
 

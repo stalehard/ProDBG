@@ -27,34 +27,34 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
     (void)serviceFunc;
     (void)uiFuncs;
 
-    HexMemoryData* userData = (HexMemoryData*)malloc(sizeof(HexMemoryData));
-    memset(userData, 0, sizeof(sizeof(HexMemoryData)));
+    HexMemoryData* user_data = (HexMemoryData*)malloc(sizeof(HexMemoryData));
+    memset(user_data, 0, sizeof(sizeof(HexMemoryData)));
 
-    strcpy(userData->startAddress, "0x00000000");
-    strcpy(userData->endAddress, "0x00001000");
+    strcpy(user_data->startAddress, "0x00000000");
+    strcpy(user_data->endAddress, "0x00001000");
 
-    userData->sa = 0;
-    userData->ea = 0x00000fff;
+    user_data->sa = 0;
+    user_data->ea = 0x00000fff;
 
-    userData->data = (unsigned char*)malloc(1024 * 1024);
-    userData->addressSize = 2;
+    user_data->data = (unsigned char*)malloc(1024 * 1024);
+    user_data->addressSize = 2;
 
-    userData->oldData = (unsigned char*)malloc(1024 * 1024);
-    userData->addressSize = 2;
+    user_data->oldData = (unsigned char*)malloc(1024 * 1024);
+    user_data->addressSize = 2;
 
     // clear
 
-    memset(userData->data, 0xff, 1024 * 1024);
-    memset(userData->oldData, 0xff, 1024 * 1024);
+    memset(user_data->data, 0xff, 1024 * 1024);
+    memset(user_data->oldData, 0xff, 1024 * 1024);
 
-    return userData;
+    return user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-    free(userData);
+    free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
 
         // Get Hex and chars
 
-        uiFuncs->text("%s: ", addressText); uiFuncs->sameLine(0, -1);
+        uiFuncs->text("%s: ", addressText); uiFuncs->same_line(0, -1);
 
         PDColor color = PDUI_COLOR(255, 0, 0, 255); 
 
@@ -110,9 +110,9 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
             if (c == co)
                 uiFuncs->text("%02x", c);
             else
-                uiFuncs->textColored(color, "%02x", c);
+                uiFuncs->text_colored(color, "%02x", c);
 
-            uiFuncs->sameLine(0, -1);
+            uiFuncs->same_line(0, -1);
         }
 
         // print characters
@@ -131,9 +131,9 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
             if (c == co)
                 uiFuncs->text("%c", wc);
             else
-                uiFuncs->textColored(color, "%c", wc);
+                uiFuncs->text_colored(color, "%c", wc);
 
-            uiFuncs->sameLine(0, 0);
+            uiFuncs->same_line(0, 0);
         }
 
         uiFuncs->text("\n");
@@ -148,11 +148,11 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
 
 void drawUI(HexMemoryData* data, PDUI* uiFuncs)
 {
-    uiFuncs->pushItemWidth(100);
-    uiFuncs->inputText("Start Address", data->startAddress, sizeof(data->startAddress), PDUIInputTextFlags_CharsHexadecimal, 0, 0);
-    uiFuncs->sameLine(0, -1);
-    uiFuncs->inputText("End Address", data->endAddress, sizeof(data->endAddress), 0, 0, 0);
-    uiFuncs->popItemWidth();
+    uiFuncs->push_item_width(100);
+    uiFuncs->input_text("Start Address", data->startAddress, sizeof(data->startAddress), PDUIInputTextFlags_CharsHexadecimal, 0, 0);
+    uiFuncs->same_line(0, -1);
+    uiFuncs->input_text("End Address", data->endAddress, sizeof(data->endAddress), 0, 0, 0);
+    uiFuncs->pop_item_width();
 
     PDVec2 size = { 0.0f, 0.0f };
 
@@ -174,13 +174,13 @@ void drawUI(HexMemoryData* data, PDUI* uiFuncs)
         data->ea = (uint64_t)endAddress;
     }
 
-    //PDVec2 textStart = uiFuncs->getCursorPos();
-    PDVec2 windowSize = uiFuncs->getWindowSize();
+    //PDVec2 textStart = uiFuncs->get_cursor_pos();
+    PDVec2 windowSize = uiFuncs->get_window_size();
 
-    uiFuncs->beginChild("child", size, false, 0);
+    uiFuncs->begin_child("child", size, false, 0);
 
     //PDRect rect = uiFuncs->getCurrentClipRect();
-    //PDVec2 pos = uiFuncs->getWindowPos();
+    //PDVec2 pos = uiFuncs->get_window_pos();
 
     //printf("pos %f %f\n", pos.x, pos.y);
     //printf("rect %f %f %f %f\n", rect.x, rect.y, rect.width, rect.height);
@@ -196,12 +196,12 @@ void drawUI(HexMemoryData* data, PDUI* uiFuncs)
 
     drawData(data, uiFuncs, drawableLineCount, (int)drawableChars);
 
-    uiFuncs->endChild();
+    uiFuncs->end_child();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateMemory(HexMemoryData* userData, PDReader* reader)
+static void updateMemory(HexMemoryData* user_data, PDReader* reader)
 {
     void* data;
     uint64_t address = 0;
@@ -226,10 +226,10 @@ static void updateMemory(HexMemoryData* userData, PDReader* reader)
     // TODO: VirtualMemory manager that can requestmemory on a per 4k page or something similar instead of this
 
     // save the old data that is used for showing the changes
-    memcpy(userData->oldData + address, userData->data + address, (size_t)size);
+    memcpy(user_data->oldData + address, user_data->data + address, (size_t)size);
 
     // And update with the new data
-    memcpy(userData->data + address, data, (size_t)size);
+    memcpy(user_data->data + address, data, (size_t)size);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,11 +249,11 @@ static void updateExceptionLocation(HexMemoryData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
 {
     uint32_t event;
 
-    HexMemoryData* data = (HexMemoryData*)userData;
+    HexMemoryData* data = (HexMemoryData*)user_data;
 
     data->requestData = false;
 
@@ -293,9 +293,9 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* w
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int saveState(void* userData, struct PDSaveState* saveState)
+static int saveState(void* user_data, struct PDSaveState* saveState)
 {
-    HexMemoryData* data = (HexMemoryData*)userData;
+    HexMemoryData* data = (HexMemoryData*)user_data;
 
     PDIO_writeString(saveState, data->startAddress);
     PDIO_writeString(saveState, data->endAddress);
@@ -305,9 +305,9 @@ static int saveState(void* userData, struct PDSaveState* saveState)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int loadState(void* userData, struct PDLoadState* loadState)
+static int loadState(void* user_data, struct PDLoadState* loadState)
 {
-    HexMemoryData* data = (HexMemoryData*)userData;
+    HexMemoryData* data = (HexMemoryData*)user_data;
 
     PDIO_readString(loadState, data->startAddress, sizeof(data->startAddress));
     PDIO_readString(loadState, data->endAddress, sizeof(data->endAddress));
@@ -334,9 +334,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
     {
-        registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+        registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

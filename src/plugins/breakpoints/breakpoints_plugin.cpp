@@ -39,16 +39,16 @@ struct BreakpointsData
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static Breakpoint* createBreakpoint(BreakpointsData* userData)
+static Breakpoint* createBreakpoint(BreakpointsData* user_data)
 {
     Breakpoint* bp = (Breakpoint*)malloc(sizeof(Breakpoint));
     memset(bp, 0, sizeof(Breakpoint));
 
-    bp->location.address = (char*)malloc(userData->maxPath);
-    bp->condition = (char*)malloc(userData->maxPath);
+    bp->location.address = (char*)malloc(user_data->maxPath);
+    bp->condition = (char*)malloc(user_data->maxPath);
 
-    memset(bp->location.address, 0, userData->maxPath);
-    memset(bp->condition, 0, userData->maxPath);
+    memset(bp->location.address, 0, user_data->maxPath);
+    memset(bp->condition, 0, user_data->maxPath);
 
     bp->enabled = false;
     bp->id = -1;
@@ -72,19 +72,19 @@ static void destroyBreakpoint(Breakpoint* bp)
 static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 {
     (void)serviceFunc;
-    BreakpointsData* userData = new BreakpointsData;
+    BreakpointsData* user_data = new BreakpointsData;
 
     (void)uiFuncs;
     (void)serviceFunc;
 
-    return userData;
+    return user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-    BreakpointsData* data = (BreakpointsData*)userData;
+    BreakpointsData* data = (BreakpointsData*)user_data;
     delete data;
 }
 
@@ -172,13 +172,13 @@ void toggleBreakpointAddress(BreakpointsData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
 {
     uint32_t event;
     (void)uiFuncs;
     (void)writer;
 
-    BreakpointsData* data = (BreakpointsData*)userData;
+    BreakpointsData* data = (BreakpointsData*)user_data;
 
     while ((event = PDRead_getEvent(inEvents)) != 0)
     {
@@ -223,44 +223,44 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* w
     }
 
     uiFuncs->columns(4, "", true);
-    //uiFuncs->text(""); uiFuncs->nextColumn();
-    uiFuncs->text("Name/Address"); uiFuncs->nextColumn();
-    uiFuncs->text("Label"); uiFuncs->nextColumn();
-    uiFuncs->text("Condition"); uiFuncs->nextColumn();
-    uiFuncs->text(""); uiFuncs->nextColumn();
+    //uiFuncs->text(""); uiFuncs->next_column();
+    uiFuncs->text("Name/Address"); uiFuncs->next_column();
+    uiFuncs->text("Label"); uiFuncs->next_column();
+    uiFuncs->text("Condition"); uiFuncs->next_column();
+    uiFuncs->text(""); uiFuncs->next_column();
 
     for (auto& i : data->breakpoints)
     {
         Breakpoint* bp = i;
         bool needUpdate = false;
 
-        uiFuncs->pushIdPtr(bp);
+        uiFuncs->push_id_ptr(bp);
 
         //if (uiFuncs->checkbox("Enabled", &bp->enabled))
         //	needUpdate = true;
 
         if (bp->location.filename)
         {
-            uiFuncs->inputText("##filename", bp->location.filename, (int)data->maxPath, 0, 0, 0);
+            uiFuncs->input_text("##filename", bp->location.filename, (int)data->maxPath, 0, 0, 0);
         }
         else
         {
-            if (uiFuncs->inputText("##address", bp->location.address, (int)data->maxPath,
+            if (uiFuncs->input_text("##address", bp->location.address, (int)data->maxPath,
                                    PDUIInputTextFlags_CharsHexadecimal | PDUIInputTextFlags_EnterReturnsTrue, 0, 0))
                 needUpdate = true;
         }
 
-        uiFuncs->nextColumn();
+        uiFuncs->next_column();
 
         uiFuncs->text("");
-        uiFuncs->nextColumn();
+        uiFuncs->next_column();
 
         uiFuncs->text(""); // no condition for now
 
-        //if (uiFuncs->inputText("##condition", bp->condition, (int)data->maxPath, PDInputTextFlags_EnterReturnsTrue, 0, 0))
+        //if (uiFuncs->input_text("##condition", bp->condition, (int)data->maxPath, PDInputTextFlags_EnterReturnsTrue, 0, 0))
         //	needUpdate = true;
 
-        uiFuncs->nextColumn();
+        uiFuncs->next_column();
 
         if (needUpdate)
         {
@@ -288,9 +288,9 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* w
             bp->markDelete = true;
         }
 
-        uiFuncs->nextColumn();
+        uiFuncs->next_column();
 
-        uiFuncs->popId();
+        uiFuncs->pop_id();
     }
 
     // Delete breakpoints that have been marked delete
@@ -326,9 +326,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
     {
-        registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+        registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -74,28 +74,28 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 {
     (void)serviceFunc;
     (void)uiFuncs;
-    SourceCodeData* userData = (SourceCodeData*)malloc(sizeof(SourceCodeData));
-    memset(userData, 0, sizeof(SourceCodeData));
+    SourceCodeData* user_data = (SourceCodeData*)malloc(sizeof(SourceCodeData));
+    memset(user_data, 0, sizeof(SourceCodeData));
 
 	s_settings = (PDSettingsFuncs*)serviceFunc(PDSETTINGS_GLOBAL);
 
-	userData->fastOpenKey = s_settings->getShortcut(s_pluginName, "fast_open");
-	userData->toggleBreakpointKey = s_settings->getShortcut(s_pluginName, "toggle_breakpoint");
+	user_data->fastOpenKey = s_settings->getShortcut(s_pluginName, "fast_open");
+	user_data->toggleBreakpointKey = s_settings->getShortcut(s_pluginName, "toggle_breakpoint");
 
-	printf("fastOpenKey 0x%x\n", userData->fastOpenKey);
-	printf("toggleBreakpointKey  0x%x\n", userData->toggleBreakpointKey);
+	printf("fastOpenKey 0x%x\n", user_data->fastOpenKey);
+	printf("toggleBreakpointKey  0x%x\n", user_data->toggleBreakpointKey);
 
-    userData->requestFiles = false;
-    userData->hasFiles = false;
+    user_data->requestFiles = false;
+    user_data->hasFiles = false;
 
-    return userData;
+    return user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-    free(userData);
+    free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ static void setSourceCodeFile(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, Sourc
 
         printf("reading file to buffer %s\n", filename);
 
-        PDUI_setTitle(uiFuncs, filename);
+        PDUI_set_title(uiFuncs, filename);
 
         if (fileData)
 		{
@@ -157,12 +157,12 @@ static void updateKeyboard(SourceCodeData* data, PDUISCInterface* sourceFuncs, P
     (void)data;
     (void)uiFuncs;
 
-    if (uiFuncs->isKeyDownId(data->fastOpenKey, 0))
+    if (uiFuncs->is_key_down_id(data->fastOpenKey, 0))
 	{
 		printf("do fast open\n");
 	}
 
-	if (uiFuncs->isKeyDownId(data->toggleBreakpointKey, 0))
+	if (uiFuncs->is_key_down_id(data->toggleBreakpointKey, 0))
 	{
     	PDUI_SCSendCommand(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
 	}
@@ -191,14 +191,14 @@ static void toggleBreakpointCurrentLine(PDUISCInterface* sourceFuncs, SourceCode
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
 {
     uint32_t event;
 
     (void)uiFuncs;
 
-    SourceCodeData* data = (SourceCodeData*)userData;
-    PDUISCInterface* sourceFuncs = uiFuncs->scInputText("test", 800, 700, 0, 0);
+    SourceCodeData* data = (SourceCodeData*)user_data;
+    PDUISCInterface* sourceFuncs = uiFuncs->sc_input_text("test", 800, 700, 0, 0);
 
     while ((event = PDRead_getEvent(inEvents)) != 0)
     {
@@ -275,9 +275,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
 {
-	registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+	registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

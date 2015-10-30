@@ -122,14 +122,14 @@ static void execCommand(ConsoleData* consoleData, const char* commandLine)
 
 static void textEditCallbackStub(PDUIInputTextCallbackData* data)
 {
-    ConsoleData* consoleData = (ConsoleData*)data->userData;
+    ConsoleData* consoleData = (ConsoleData*)data->user_data;
 
-    //addLog(consoleData, "Cursor: %d, EventKey: %d, Selection: %d-%d", data->cursorPos, data->eventKey, data->selectionStart, data->selectionEnd);
+    //addLog(consoleData, "Cursor: %d, EventKey: %d, Selection: %d-%d", data->cursor_pos, data->event_key, data->selection_start, data->selection_end);
 
     std::vector<const char*> candidates;
     const char* wordEnd = nullptr;
     const char* wordStart = nullptr;
-    switch (data->eventKey)
+    switch (data->event_key)
     {
         default:
             break;
@@ -138,7 +138,7 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
         case PDKEY_TAB:
         {
             // Locate beginning of current word
-            wordEnd = data->buf + data->cursorPos;
+            wordEnd = data->buf + data->cursor_pos;
             wordStart = wordEnd;
             while (wordStart > data->buf)
             {
@@ -165,9 +165,9 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
             {
                 // Single match. Delete the beginning of the word and replace it entirely so we've got nice casing
 
-                data->deleteChars(data, int(wordStart - data->buf), int(wordEnd - wordStart));
-                data->insertChars(data, data->cursorPos, candidates[0], 0);
-                data->insertChars(data, data->cursorPos, " ", 0);
+                data->delete_chars(data, int(wordStart - data->buf), int(wordEnd - wordStart));
+                data->insert_chars(data, data->cursor_pos, candidates[0], 0);
+                data->insert_chars(data, data->cursor_pos, " ", 0);
             }
             else
             {
@@ -193,8 +193,8 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
 
                 if (matchLen > 0)
                 {
-                    data->deleteChars(data, int(wordStart - data->buf), int(wordEnd - wordStart));
-                    data->insertChars(data, data->cursorPos, candidates[0], candidates[0] + matchLen);
+                    data->delete_chars(data, int(wordStart - data->buf), int(wordEnd - wordStart));
+                    data->insert_chars(data, data->cursor_pos, candidates[0], candidates[0] + matchLen);
                 }
 
                 // List matches
@@ -211,14 +211,14 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
         case PDKEY_DOWN:
         {
             const int prevHistoryPos = consoleData->historyPos;
-            if (data->eventKey == PDKEY_UP)
+            if (data->event_key == PDKEY_UP)
             {
                 if (consoleData->historyPos == -1)
                     consoleData->historyPos = int(consoleData->history.size()) - 1;
                 else if (consoleData->historyPos > 0)
                     consoleData->historyPos--;
             }
-            else if (data->eventKey == PDKEY_DOWN)
+            else if (data->event_key == PDKEY_DOWN)
             {
                 if (consoleData->historyPos != -1)
                 {
@@ -231,8 +231,8 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
             if (prevHistoryPos != consoleData->historyPos)
             {
                 strcpy(data->buf, (consoleData->historyPos >= 0) ? consoleData->history[(size_t)consoleData->historyPos] : "");
-                data->bufDirty = true;
-                data->cursorPos = data->selectionStart = data->selectionEnd = int(strlen(data->buf));
+                data->buf_dirty = true;
+                data->cursor_pos = data->selection_start = data->selection_end = int(strlen(data->buf));
             }
 
             break;
@@ -264,9 +264,9 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
+static void destroyInstance(void* user_data)
 {
-    ConsoleData* consoleData = (ConsoleData*)userData;
+    ConsoleData* consoleData = (ConsoleData*)user_data;
     clearLog(consoleData);
     free(consoleData);
 }
@@ -278,37 +278,37 @@ static void showInUI(ConsoleData* consoleData, PDReader* reader, PDUI* uiFuncs)
     (void)consoleData;
     (void)reader;
 
-    uiFuncs->textWrapped("ProDBG Scripting Console");
-    uiFuncs->textWrapped("Enter 'HELP' for help. Press TAB to use text completion.");
+    uiFuncs->text_wrapped("ProDBG Scripting Console");
+    uiFuncs->text_wrapped("Enter 'HELP' for help. Press TAB to use text completion.");
 
     // TODO: display from bottom
     // TODO: clip manually
 
-    if (uiFuncs->smallButton("Clear"))
+    if (uiFuncs->small_button("Clear"))
         clearLog(consoleData);
 
-    uiFuncs->sameLine(0, -1);
+    uiFuncs->same_line(0, -1);
     uiFuncs->separator();
 
     PDVec2 pad = { 0.0f, 0.0f };
 
-    uiFuncs->pushStyleVarVec(PDUIStyleVar_FramePadding, pad);
+    uiFuncs->push_style_varVec(PDUIStyleVar_FramePadding, pad);
 
     //static ImGuiTextFilter filter;
     //filter.Draw("Filter (\"incl,-excl\") (\"error\")", 180);
 
-    if (uiFuncs->isItemHovered())
-        uiFuncs->setKeyboardFocusHere(-1); // Auto focus on hover
+    if (uiFuncs->is_item_hovered())
+        uiFuncs->set_keyboard_focus_here(-1); // Auto focus on hover
 
-    uiFuncs->popStyleVar(1);
+    uiFuncs->pop_style_var(1);
 
     uiFuncs->separator();
 
-    PDVec2 spacing = { 0, -uiFuncs->getTextLineHeightWithSpacing() * 2 };
+    PDVec2 spacing = { 0, -uiFuncs->get_text_line_height_with_spacing() * 2 };
     PDVec2 itemSpacing = { 4.0f, 1.0f };
 
-    uiFuncs->beginChild("ScrollingRegion", spacing, false, PDUIWindowFlags(0));
-    uiFuncs->pushStyleVarVec(PDUIStyleVar_ItemSpacing, itemSpacing); // Tighten spacing
+    uiFuncs->begin_child("ScrollingRegion", spacing, false, PDUIWindowFlags(0));
+    uiFuncs->push_style_varVec(PDUIStyleVar_ItemSpacing, itemSpacing); // Tighten spacing
 
     for (size_t i = 0; i < consoleData->items.size(); i++)
     {
@@ -320,21 +320,21 @@ static void showInUI(ConsoleData* consoleData, PDReader* reader, PDUI* uiFuncs)
             col = PDUI_COLOR(255, 100, 100, 255);
         else if (strncmp(item, "# ", 2) == 0)
             col = PDUI_COLOR(255, 200, 150, 255);
-        uiFuncs->textColored(col, item);
+        uiFuncs->text_colored(col, item);
     }
 
     if (consoleData->scrollToBottom)
-        uiFuncs->setScrollHere(0.5f);
+        uiFuncs->set_scroll_here(0.5f);
 
     consoleData->scrollToBottom = false;
 
-    uiFuncs->popStyleVar(1);
-    uiFuncs->endChild();
+    uiFuncs->pop_style_var(1);
+    uiFuncs->end_child();
     uiFuncs->separator();
 
     // Command Line
 
-    if (uiFuncs->inputText("Input", consoleData->inputBuffer, sizeof(consoleData->inputBuffer), PDUIInputTextFlags_EnterReturnsTrue | PDUIInputTextFlags_CallbackCompletion | PDUIInputTextFlags_CallbackHistory, &textEditCallbackStub, (void*)consoleData))
+    if (uiFuncs->input_text("Input", consoleData->inputBuffer, sizeof(consoleData->inputBuffer), PDUIInputTextFlags_EnterReturnsTrue | PDUIInputTextFlags_CallbackCompletion | PDUIInputTextFlags_CallbackHistory, &textEditCallbackStub, (void*)consoleData))
     {
         char* inputEnd = consoleData->inputBuffer + strlen(consoleData->inputBuffer);
 
@@ -349,15 +349,15 @@ static void showInUI(ConsoleData* consoleData, PDReader* reader, PDUI* uiFuncs)
         strcpy(consoleData->inputBuffer, "");
     }
 
-    if (uiFuncs->isItemHovered())
-        uiFuncs->setKeyboardFocusHere(-1); // Auto focus on hover
+    if (uiFuncs->is_item_hovered())
+        uiFuncs->set_keyboard_focus_here(-1); // Auto focus on hover
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
 {
-    ConsoleData* consoleData = (ConsoleData*)userData;
+    ConsoleData* consoleData = (ConsoleData*)user_data;
 
     uint32_t event = 0;
     (void)event;
@@ -370,7 +370,7 @@ static int update(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* o
         {
             case PDEventType_setConsole:
             {
-                //showInUI((ConsoleData*)userData, inEvents, uiFuncs);
+                //showInUI((ConsoleData*)user_data, inEvents, uiFuncs);
                 break;
             }
         }
@@ -415,9 +415,9 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
     {
-        registerPlugin(PD_VIEW_API_VERSION, &plugin, privateData);
+        registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

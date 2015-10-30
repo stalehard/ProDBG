@@ -4,8 +4,8 @@ extern PDBackendPlugin g_backendPlugin;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* privateData)
+PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
 {
-    registerPlugin(PD_BACKEND_API_VERSION, &g_backendPlugin, privateData);
+    registerPlugin(PD_BACKEND_API_VERSION, &g_backendPlugin, private_data);
 }
 

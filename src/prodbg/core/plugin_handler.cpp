@@ -197,9 +197,9 @@ struct PluginPrivateData
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void registerPlugin(const char* type, void* plugin, void* privateData)
+static void registerPlugin(const char* type, void* plugin, void* private_data)
 {
-    PluginPrivateData* privData = (PluginPrivateData*)privateData;
+    PluginPrivateData* privData = (PluginPrivateData*)private_data;
 
     const char* filename = privData->name;
 
@@ -253,7 +253,7 @@ static char* buildLoadingPath(const char* basePath, const char* plugin)
 
 bool PluginHandler_addPlugin(const char* basePath, const char* plugin)
 {
-    void* (* initPlugin)(RegisterPlugin* registerPlugin, void* privateData);
+    void* (* initPlugin)(RegisterPlugin* registerPlugin, void* private_data);
     struct PluginPrivateData data;
     object_t lib = 0;
 
