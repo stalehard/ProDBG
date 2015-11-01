@@ -52,8 +52,7 @@ static Session** s_sessions = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void fileUpdateCallback(void* userData, const char* file, int type)
-{
+void fileUpdateCallback(void* userData, const char* file, int type) {
     (void)userData;
 
     // TODO: Only supporting modified files for now
@@ -93,8 +92,7 @@ void fileUpdateCallback(void* userData, const char* file, int type)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_globalInit(bool reloadPlugins)
-{
+void Session_globalInit(bool reloadPlugins) {
     if (!reloadPlugins)
         return;
 
@@ -105,8 +103,7 @@ void Session_globalInit(bool reloadPlugins)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_globalDestroy()
-{
+void Session_globalDestroy() {
     int count = array_size(s_sessions);
 
     for (int i = 0; i < count; ++i)
@@ -119,8 +116,7 @@ void Session_globalDestroy()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_destroy(Session* session)
-{
+void Session_destroy(Session* session) {
     int count = array_size(s_sessions);
 
     for (int i = 0; i < count; ++i) {
@@ -140,8 +136,7 @@ void Session_destroy(Session* session)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Session** Session_getSessions()
-{
+Session** Session_getSessions() {
     return s_sessions;
 }
 
@@ -151,8 +146,7 @@ static void updateLocal(Session* s, PDAction action);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void commonInit(Session* s)
-{
+static void commonInit(Session* s) {
     s->writer0 = (PDWriter*)alloc_zero(sizeof(PDWriter));
     s->writer1 = (PDWriter*)alloc_zero(sizeof(PDWriter));
     s->tempWriter0 = (PDWriter*)alloc_zero(sizeof(PDWriter));
@@ -171,7 +165,7 @@ static void commonInit(Session* s)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Session* Session_create(){
+struct Session* Session_create() {
     Session* s = new Session;
 
     g_pluginUI->setStatusText("Not running");
@@ -185,8 +179,7 @@ struct Session* Session_create(){
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_createDockingGrid(Session* session, int width, int height)
-{
+void Session_createDockingGrid(Session* session, int width, int height) {
     (void)session;
     (void)width;
     (void)height;
@@ -209,8 +202,7 @@ void Session_createDockingGrid(Session* session, int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Session_loadLayout(Session* session, const char* filename, int width, int height)
-{
+bool Session_loadLayout(Session* session, const char* filename, int width, int height) {
     (void)session;
     (void)filename;
     (void)width;
@@ -234,8 +226,7 @@ bool Session_loadLayout(Session* session, const char* filename, int width, int h
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Session* Session_startRemote(Session* s, const char* target, int port)
-{
+Session* Session_startRemote(Session* s, const char* target, int port) {
     s->type = Session_Remote;
 
     struct RemoteConnection* conn = RemoteConnection_create(RemoteConnectionType_Connect, port);
@@ -253,8 +244,7 @@ Session* Session_startRemote(Session* s, const char* target, int port)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int Session_isConnected(Session* session)
-{
+int Session_isConnected(Session* session) {
     if (!session->connection)
         return 0;
 
@@ -263,8 +253,7 @@ int Session_isConnected(Session* session)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Session* Session_createRemote(const char* target, int port)
-{
+Session* Session_createRemote(const char* target, int port) {
     Session* s = new Session;
 
     commonInit(s);
@@ -276,8 +265,7 @@ Session* Session_createRemote(const char* target, int port)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Session* Session_startLocal(Session* s, PDBackendPlugin* backend, const char* filename)
-{
+Session* Session_startLocal(Session* s, PDBackendPlugin* backend, const char* filename) {
     // Create the backend
 
     s->type = Session_Local;
@@ -313,8 +301,7 @@ Session* Session_startLocal(Session* s, PDBackendPlugin* backend, const char* fi
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Session* Session_createLocal(PDBackendPlugin* backend, const char* filename)
-{
+Session* Session_createLocal(PDBackendPlugin* backend, const char* filename) {
     Session* s = new Session;
 
     commonInit(s);
@@ -324,8 +311,7 @@ Session* Session_createLocal(PDBackendPlugin* backend, const char* filename)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static const char* getStateName(int state)
-{
+static const char* getStateName(int state) {
     if (state < PDDebugState_count && state >= 0) {
         switch (state) {
             case PDDebugState_noTarget:
@@ -346,8 +332,7 @@ static const char* getStateName(int state)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void doToggleBreakpoint(Session* s, PDReader* reader)
-{
+static void doToggleBreakpoint(Session* s, PDReader* reader) {
     const char* filename;
     uint32_t line;
 
@@ -373,8 +358,7 @@ static void doToggleBreakpoint(Session* s, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void toggleBreakpoint(Session* s, PDReader* reader)
-{
+static void toggleBreakpoint(Session* s, PDReader* reader) {
     uint32_t event;
 
     while ((event = PDRead_getEvent(reader)) != 0) {
@@ -391,8 +375,7 @@ static void toggleBreakpoint(Session* s, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void executeCommand(Session* s, PDReader* reader)
-{
+static void executeCommand(Session* s, PDReader* reader) {
     (void)s;
 
     const char* command;
@@ -419,8 +402,7 @@ static void executeCommand(Session* s, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateScript(Session* s, PDReader* reader)
-{
+static void updateScript(Session* s, PDReader* reader) {
     uint32_t event;
 
     while ((event = PDRead_getEvent(reader)) != 0) {
@@ -440,8 +422,7 @@ Con* getCoveredCon(int x, int y);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateLocal(Session* s, PDAction action)
-{
+static void updateLocal(Session* s, PDAction action) {
     PDBinaryWriter_finalize(s->currentWriter);
 
     // Swap the write buffers
@@ -493,8 +474,7 @@ static void updateLocal(Session* s, PDAction action)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const char* getBackendState(PDReader* reader)
-{
+const char* getBackendState(PDReader* reader) {
     uint32_t event;
     uint32_t state;
     const char* retState = "Unknown";
@@ -521,8 +501,7 @@ const char* getBackendState(PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateRemote(Session* s, PDAction action)
-{
+static void updateRemote(Session* s, PDAction action) {
     if (!s->connection)
         return;
 
@@ -580,8 +559,7 @@ static void updateRemote(Session* s, PDAction action)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Remove vewies that has been marked deleted
 
-static void updateMarkedDelete(Session* s)
-{
+static void updateMarkedDelete(Session* s) {
     int count = array_size(s->viewPlugins);
 
     for (int i = 0; i < count; ++i) {
@@ -596,8 +574,7 @@ static void updateMarkedDelete(Session* s)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_update(Session* s)
-{
+void Session_update(Session* s) {
     switch (s->type) {
         case Session_Null:
         case Session_Local:
@@ -618,8 +595,7 @@ void Session_update(Session* s)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_action(Session* s, PDAction action)
-{
+void Session_action(Session* s, PDAction action) {
     if (!s)
         return;
 
@@ -640,15 +616,13 @@ void Session_action(Session* s, PDAction action)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_addViewPlugin(struct Session* session, struct ViewPluginInstance* instance)
-{
+void Session_addViewPlugin(struct Session* session, struct ViewPluginInstance* instance) {
     array_push(session->viewPlugins, instance);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Session_removeViewPlugin(Session* session, struct ViewPluginInstance* plugin)
-{
+bool Session_removeViewPlugin(Session* session, struct ViewPluginInstance* plugin) {
     int count = array_size(session->viewPlugins);
 
     if (count == 0)
@@ -671,7 +645,7 @@ bool Session_removeViewPlugin(Session* session, struct ViewPluginInstance* plugi
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ViewPluginInstance** Session_getViewPlugins(struct Session* session, int* count){
+struct ViewPluginInstance** Session_getViewPlugins(struct Session* session, int* count) {
     *count = array_size(session->viewPlugins);
     return session->viewPlugins;
 }
@@ -679,8 +653,7 @@ struct ViewPluginInstance** Session_getViewPlugins(struct Session* session, int*
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: Somewhat temporay functions
 
-void Session_loadSourceFile(Session* s, const char* filename)
-{
+void Session_loadSourceFile(Session* s, const char* filename) {
     PDWrite_eventBegin(s->currentWriter, PDEventType_setExceptionLocation);
     PDWrite_string(s->currentWriter, "filename", filename);
     PDWrite_u32(s->currentWriter, "line", 0);
@@ -689,8 +662,7 @@ void Session_loadSourceFile(Session* s, const char* filename)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_toggleBreakpointCurrentLine(Session* s)
-{
+void Session_toggleBreakpointCurrentLine(Session* s) {
     PDWrite_eventBegin(s->currentWriter, PDEventType_toggleBreakpointCurrentLine);
     PDWrite_u8(s->currentWriter, "dummy", 0);
     PDWrite_eventEnd(s->currentWriter);
@@ -698,8 +670,7 @@ void Session_toggleBreakpointCurrentLine(Session* s)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_stepIn(Session* s)
-{
+void Session_stepIn(Session* s) {
     PDBackendInstance* backend = s->backend;
 
     if (backend)
@@ -710,8 +681,7 @@ void Session_stepIn(Session* s)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Session_stepOver(Session* s)
-{
+void Session_stepOver(Session* s) {
     PDBackendInstance* backend = s->backend;
 
     if (backend)
@@ -722,8 +692,7 @@ void Session_stepOver(Session* s)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SessionStatus Session_onMenu(Session* session, int eventId)
-{
+SessionStatus Session_onMenu(Session* session, int eventId) {
     int count = 0;
 
     if (session->backend) {
@@ -779,14 +748,14 @@ SessionStatus Session_onMenu(Session* session, int eventId)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Con* Session_getDockingGrid(struct Session* session){
+struct Con* Session_getDockingGrid(struct Session* session) {
     //return session->uiDockingGrid;
     return session->i3_dock_grid;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct ViewPluginInstance* Session_getViewAt(struct Session* session, int x, int y, int border){
+struct ViewPluginInstance* Session_getViewAt(struct Session* session, int x, int y, int border) {
     int count = 0;
 
     ViewPluginInstance** instances = Session_getViewPlugins(session, &count);

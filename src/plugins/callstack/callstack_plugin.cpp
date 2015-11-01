@@ -28,8 +28,7 @@ struct CallstackData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     CallstackData* user_data = new CallstackData;
 
@@ -48,16 +47,14 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     delete (CallstackData*)user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: Support floats
 
-static void getAddressString(char* value, PDReader* reader, PDReaderIterator it)
-{
+static void getAddressString(char* value, PDReader* reader, PDReaderIterator it) {
     uint64_t regValue;
     uint32_t type = PDRead_findU64(reader, &regValue, "address", it);
 
@@ -83,8 +80,7 @@ static void getAddressString(char* value, PDReader* reader, PDReaderIterator it)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int findSeparator(const char* str)
-{
+static int findSeparator(const char* str) {
     size_t len = strlen(str);
 
     for (size_t i = len; i != 0; --i) {
@@ -97,8 +93,7 @@ static int findSeparator(const char* str)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateCallstack(CallstackData* data, PDReader* reader)
-{
+static void updateCallstack(CallstackData* data, PDReader* reader) {
     PDReaderIterator it;
 
     if (PDRead_findArray(reader, &it, "callstack", 0) == PDReadStatus_notFound)
@@ -150,8 +145,7 @@ static void updateCallstack(CallstackData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void drawText(PDUI* uiFuncs, const char* text)
-{
+static void drawText(PDUI* uiFuncs, const char* text) {
     if (text)
         uiFuncs->text(text);
     else
@@ -162,8 +156,7 @@ static void drawText(PDUI* uiFuncs, const char* text)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void drawTextInt(PDUI* uiFuncs, int v)
-{
+static void drawTextInt(PDUI* uiFuncs, int v) {
     if (v >= 0)
         uiFuncs->text("%d", v);
     else
@@ -174,8 +167,7 @@ static void drawTextInt(PDUI* uiFuncs, int v)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void showUI(PDUI* uiFuncs, CallstackData* data)
-{
+static void showUI(PDUI* uiFuncs, CallstackData* data) {
     uiFuncs->columns(4, "callstack", true);
     uiFuncs->text("Address"); uiFuncs->next_column();
     uiFuncs->text("Module"); uiFuncs->next_column();
@@ -205,8 +197,7 @@ static void showUI(PDUI* uiFuncs, CallstackData* data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* writer)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* writer) {
     uint32_t event;
 
     CallstackData* data = (CallstackData*)user_data;
@@ -289,8 +280,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

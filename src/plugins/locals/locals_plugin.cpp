@@ -13,8 +13,7 @@ struct LocalsData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     (void)uiFuncs;
     LocalsData* user_data = (LocalsData*)malloc(sizeof(LocalsData));
@@ -24,15 +23,13 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void showInUI(LocalsData* data, PDReader* reader, PDUI* uiFuncs)
-{
+static void showInUI(LocalsData* data, PDReader* reader, PDUI* uiFuncs) {
     PDReaderIterator it;
     (void)data;
 
@@ -63,8 +60,7 @@ static void showInUI(LocalsData* data, PDReader* reader, PDUI* uiFuncs)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents) {
     uint32_t event = 0;
 
     while ((event = PDRead_getEvent(inEvents)) != 0) {
@@ -104,8 +100,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

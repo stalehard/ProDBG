@@ -21,8 +21,7 @@ static uint8_t s_data[] = { 1, 2, 3, 80, 50, 60 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testWriteReadEvent(void**)
-{
+void testWriteReadEvent(void**) {
     unsigned char* data;
     unsigned int size;
 
@@ -47,8 +46,7 @@ void testWriteReadEvent(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testDataReadWrite(void**)
-{
+void testDataReadWrite(void**) {
     unsigned char* data;
     unsigned int size;
     uint64_t dataSize;
@@ -93,8 +91,7 @@ void testDataReadWrite(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testWriteReadAction(void**)
-{
+void testWriteReadAction(void**) {
     const char* filename = 0;
     uint32_t value = 0xfadebabe;
     PDBinaryWriter_reset(writer);
@@ -121,8 +118,7 @@ void testWriteReadAction(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testWriteSingleString(void**)
-{
+void testWriteSingleString(void**) {
     PDBinaryWriter_reset(writer);
 
     assert_true(PDWrite_eventBegin(writer, 2) == PDWriteStatus_ok);
@@ -158,8 +154,7 @@ void testWriteSingleString(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testAllValueTypes(void**)
-{
+void testAllValueTypes(void**) {
     int8_t s8;
     uint8_t u8;
     int16_t s16;
@@ -291,8 +286,7 @@ void testAllValueTypes(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testHeaderArray(void**)
-{
+void testHeaderArray(void**) {
     PDBinaryWriter_reset(writer);
 
     // Not implemented so expect it to always fail
@@ -303,8 +297,7 @@ void testHeaderArray(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testArrayWriteBreakage(void**)
-{
+void testArrayWriteBreakage(void**) {
     PDBinaryWriter_reset(writer);
 
     assert_true(PDWrite_arrayBegin(writer, "test") == PDWriteStatus_ok);
@@ -335,8 +328,7 @@ void testArrayWriteBreakage(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testFind(void**)
-{
+void testFind(void**) {
     uint8_t u8;
     uint16_t u16;
     uint32_t u32;
@@ -361,8 +353,7 @@ void testFind(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testArray(void**)
-{
+void testArray(void**) {
     // TODO: More tests
 
     PDBinaryWriter_reset(writer);
@@ -415,8 +406,7 @@ void testArray(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void testArrayRead(void**)
-{
+void testArrayRead(void**) {
     PDReaderIterator arrayIter;
 
     PDBinaryReader_initStream(reader, PDBinaryWriter_getData(writer), PDBinaryWriter_getSize(writer));
@@ -530,8 +520,7 @@ void testArrayRead(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int main()
-{
+int main() {
     log_set_level(LOG_ERROR);
 
     const UnitTest tests[] =

@@ -15,22 +15,19 @@ static ServiceData* s_serviceData;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Service_create()
-{
+void Service_create() {
     array_clear(s_serviceData);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Service_destroy()
-{
+void Service_destroy() {
     array_clear(s_serviceData);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Service_register(void* serviceFuncs, const char* ident)
-{
+void Service_register(void* serviceFuncs, const char* ident) {
     ServiceData data = { serviceFuncs, ident };
 
     int count = array_size(s_serviceData);
@@ -45,8 +42,7 @@ void Service_register(void* serviceFuncs, const char* ident)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void* Service_getService(const char* ident)
-{
+void* Service_getService(const char* ident) {
     int count = array_size(s_serviceData);
 
     for (int i = 0; i < count; ++i) {

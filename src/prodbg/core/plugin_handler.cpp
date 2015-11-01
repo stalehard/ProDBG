@@ -41,8 +41,7 @@ static const char* s_shadowDirName = "shadow_plugins";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PluginHandler_create(bool shadowDirectory)
-{
+void PluginHandler_create(bool shadowDirectory) {
     s_useShadowDir = shadowDirectory;
 
     if (!shadowDirectory)
@@ -65,22 +64,19 @@ void PluginHandler_create(bool shadowDirectory)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PluginHandler_destroy()
-{
+void PluginHandler_destroy() {
     PluginHandler_unloadAllPlugins();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PluginHandler_addSearchPath(const char* path)
-{
+void PluginHandler_addSearchPath(const char* path) {
     array_push(s_searchPaths, path);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PluginData* findPlugin(PluginData** plugins, const char* pluginFile, const char* pluginName)
-{
+static PluginData* findPlugin(PluginData** plugins, const char* pluginFile, const char* pluginName) {
     int count = array_size(plugins);
 
     for (int i = 0; i < count; ++i) {
@@ -96,8 +92,7 @@ static PluginData* findPlugin(PluginData** plugins, const char* pluginFile, cons
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PluginData* findPluginAll(const char* pluginFile, const char* pluginName)
-{
+static PluginData* findPluginAll(const char* pluginFile, const char* pluginName) {
     PluginData* plugin = 0;
 
     for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
@@ -110,8 +105,7 @@ static PluginData* findPluginAll(const char* pluginFile, const char* pluginName)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PluginData* PluginHandler_findPluginByFilename(const char* filename)
-{
+PluginData* PluginHandler_findPluginByFilename(const char* filename) {
     for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
         int count = array_size(s_plugins[i]);
 
@@ -128,8 +122,7 @@ PluginData* PluginHandler_findPluginByFilename(const char* filename)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void removePlugin(PluginData* pluginData)
-{
+static void removePlugin(PluginData* pluginData) {
     // Remove the plugin data
 
     for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
@@ -155,8 +148,7 @@ static void removePlugin(PluginData* pluginData)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PluginData* PluginHandler_reloadPlugin(PluginData* pluginData)
-{
+PluginData* PluginHandler_reloadPlugin(PluginData* pluginData) {
     const char* filename = pluginData->filename;
     const char* fullName = string_clone(pluginData->fullFilename);
 
@@ -189,8 +181,7 @@ struct PluginPrivateData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void registerPlugin(const char* type, void* plugin, void* private_data)
-{
+static void registerPlugin(const char* type, void* plugin, void* private_data) {
     PluginPrivateData* privData = (PluginPrivateData*)private_data;
 
     const char* filename = privData->name;
@@ -218,8 +209,7 @@ static void registerPlugin(const char* type, void* plugin, void* private_data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static char* buildLoadingPath(const char* basePath, const char* plugin)
-{
+static char* buildLoadingPath(const char* basePath, const char* plugin) {
     char* output = 0;
 
     size_t baseLen = strlen(basePath);
@@ -241,8 +231,7 @@ static char* buildLoadingPath(const char* basePath, const char* plugin)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool PluginHandler_addPlugin(const char* basePath, const char* plugin)
-{
+bool PluginHandler_addPlugin(const char* basePath, const char* plugin) {
     void* (* initPlugin)(RegisterPlugin* registerPlugin, void* private_data);
     struct PluginPrivateData data;
     object_t lib = 0;
@@ -289,8 +278,7 @@ bool PluginHandler_addPlugin(const char* basePath, const char* plugin)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PluginHandler_unloadAllPlugins()
-{
+void PluginHandler_unloadAllPlugins() {
     // TODO: Actually unload everything
 
     for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
@@ -312,8 +300,7 @@ void PluginHandler_unloadAllPlugins()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PluginData* PluginHandler_findPlugin(const char** paths, const char* pluginFile, const char* pluginName, bool load)
-{
+PluginData* PluginHandler_findPlugin(const char** paths, const char* pluginFile, const char* pluginName, bool load) {
     PluginData* pluginData;
 
     // TODO: Support paths
@@ -340,24 +327,21 @@ PluginData* PluginHandler_findPlugin(const char** paths, const char* pluginFile,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PluginData** PluginHandler_getBackendPlugins(int* count)
-{
+PluginData** PluginHandler_getBackendPlugins(int* count) {
     *count = array_size(s_plugins[PRODBG_BACKEND_PLUGIN]);
     return s_plugins[PRODBG_BACKEND_PLUGIN];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PluginData** PluginHandler_getViewPlugins(int* count)
-{
+PluginData** PluginHandler_getViewPlugins(int* count) {
     *count = array_size(s_plugins[PRODBG_VIEW_PLUGIN]);
     return s_plugins[PRODBG_VIEW_PLUGIN];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PluginData* getPluginData(PluginData** plugins, void* plugin)
-{
+static PluginData* getPluginData(PluginData** plugins, void* plugin) {
     int count = array_size(plugins);
 
     for (int i = 0; i < count; ++i) {
@@ -370,8 +354,7 @@ static PluginData* getPluginData(PluginData** plugins, void* plugin)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PluginData* PluginHandler_getPluginData(void* plugin)
-{
+PluginData* PluginHandler_getPluginData(void* plugin) {
     PluginData* data = 0;
 
     for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {

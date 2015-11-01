@@ -15,15 +15,13 @@ static const float KeyRepeatRate = 0.050f;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-InputState* InputState_getState()
-{
+InputState* InputState_getState() {
     return &s_inputState;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void InputState_update(float deltaTime)
-{
+void InputState_update(float deltaTime) {
     InputState* state = &s_inputState;
     state->deltaTime = deltaTime;
 
@@ -36,8 +34,7 @@ void InputState_update(float deltaTime)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int InputState_isKeyDown(int key, uint32_t modifiers, int repeat)
-{
+int InputState_isKeyDown(int key, uint32_t modifiers, int repeat) {
     InputState* state = &s_inputState;
 
     assert(key >= 0 && key < (int)sizeof_array(state->keyDownDuration));

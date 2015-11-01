@@ -74,8 +74,7 @@ static const char* s_plugins[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void loadLayout(Session* session, int width, int height)
-{
+void loadLayout(Session* session, int width, int height) {
     Session_createDockingGrid(session, width, height);
 
     if (docksys_load_layout("data/current_layout_2.json"))
@@ -95,8 +94,7 @@ void loadLayout(Session* session, int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint32_t findMenuIdRange(PDMenu* menu)
-{
+uint32_t findMenuIdRange(PDMenu* menu) {
     uint32_t idStart = uint32_t(~0);
     uint32_t idEnd = 0;
 
@@ -123,8 +121,7 @@ uint32_t findMenuIdRange(PDMenu* menu)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void createMenusForPlugins()
-{
+void createMenusForPlugins() {
     int count = 0;
 
     PluginData** plugins = PluginHandler_getBackendPlugins(&count);
@@ -159,8 +156,7 @@ void createMenusForPlugins()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool findDataDirectory()
-{
+static bool findDataDirectory() {
     // check if the data dir is directly here
 
     if (fs_is_directory("data"))
@@ -191,8 +187,7 @@ static bool findDataDirectory()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_create(void* window, int width, int height)
-{
+void ProDBG_create(void* window, int width, int height) {
     Context* context = &s_context;
     //Rect settingsRect;
     //
@@ -231,8 +226,7 @@ void ProDBG_create(void* window, int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_update()
-{
+void ProDBG_update() {
     Context* context = &s_context;
 
     //uint64_t currentTime = time_current();
@@ -254,8 +248,7 @@ void ProDBG_update()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_applicationLaunched()
-{
+void ProDBG_applicationLaunched() {
     int pluginCount = 0;
     // NOTE(marco): this is where the native menu is created. We need to abstract this
     // so that we can use ImGUI to render the menu, while also being able to allow the
@@ -266,8 +259,7 @@ void ProDBG_applicationLaunched()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_destroy()
-{
+void ProDBG_destroy() {
     Context* context = &s_context;
 
     //rmt_DestroyGlobalInstance(s_remotery);
@@ -285,15 +277,13 @@ void ProDBG_destroy()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_timedUpdate()
-{
+void ProDBG_timedUpdate() {
     ProDBG_update();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void onLoadRunExec(Session* session, const char* filename)
-{
+static void onLoadRunExec(Session* session, const char* filename) {
     PluginData* pluginData = PluginHandler_findPlugin(0, "lldb_plugin", "LLDB", true);
 
     if (!pluginData) {
@@ -311,16 +301,14 @@ static void onLoadRunExec(Session* session, const char* filename)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // We should mave this place some where better, I really don't like this approach but will have to do for now
 
-Con* getCoveredCon(int x, int y)
-{
+Con* getCoveredCon(int x, int y) {
     return docksys_con_by_user_data(Session_getViewAt(s_context.session, x, y, 0));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Events
 
-void ProDBG_event(int eventId)
-{
+void ProDBG_event(int eventId) {
     Context* context = &s_context;
 
     int count;

@@ -60,8 +60,7 @@ protected:
             : name(file)
             , lineNumber(line)
             , function(func)
-            , needsAdjusting(true)
-        {
+            , needsAdjusting(true) {
         }
 
         std::string name;

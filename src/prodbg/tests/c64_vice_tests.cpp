@@ -42,8 +42,7 @@ static ProcessHandle s_viceHandle;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void test_c64_vice_init(void**)
-{
+static void test_c64_vice_init(void**) {
     int count = 0;
 
     assert_true(PluginHandler_addPlugin(OBJECT_DIR, "c64_vice_plugin"));
@@ -52,8 +51,7 @@ static void test_c64_vice_init(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void test_c64_vice_fail_connect(void**)
-{
+static void test_c64_vice_fail_connect(void**) {
     int count = 0;
 
     PluginData* pluginData;
@@ -75,8 +73,7 @@ static void test_c64_vice_fail_connect(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool getMemory(void* dest, int* len, uint16_t inAddress, int readLength)
-{
+bool getMemory(void* dest, int* len, uint16_t inAddress, int readLength) {
     PDWriter* writer = s_session->currentWriter;
 
     PDWrite_eventBegin(writer, PDEventType_getMemory);
@@ -115,8 +112,7 @@ bool getMemory(void* dest, int* len, uint16_t inAddress, int readLength)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateRegisters(CPUState* cpuState, PDReader* reader)
-{
+static void updateRegisters(CPUState* cpuState, PDReader* reader) {
     PDReaderIterator it;
 
     if (PDRead_findArray(reader, &it, "registers", 0) == PDReadStatus_notFound)
@@ -144,8 +140,7 @@ static void updateRegisters(CPUState* cpuState, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool handleEvents(CPUState* cpuState, Session* session)
-{
+bool handleEvents(CPUState* cpuState, Session* session) {
     uint32_t event = 0;
 
     PDReader* reader = session->reader;
@@ -164,15 +159,13 @@ bool handleEvents(CPUState* cpuState, Session* session)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void printCPUState(CPUState* state)
-{
+void printCPUState(CPUState* state) {
     printf("pc %04x - a %02x - x - %02x - y %02x - sp %02x\n", state->pc, state->a, state->x, state->y, state->sp);
 }
 
 //////////////////////////////////////////////hndle////////////////////////////////////////////////////////////////////////
 
-static void test_c64_vice_connect(void**)
-{
+static void test_c64_vice_connect(void**) {
     int count = 0;
 
     PluginData* pluginData;
@@ -225,8 +218,7 @@ static void test_c64_vice_connect(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_c64_vice_start_executable(void**)
-{
+void test_c64_vice_start_executable(void**) {
     const char* prgFile = "/Users/danielcollin/code/ProDBG/examples/c64_vice/test.prg";
 
     PDWriter* writer = s_session->currentWriter;
@@ -245,8 +237,7 @@ void test_c64_vice_start_executable(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_c64_vice_get_registers(void**)
-{
+void test_c64_vice_get_registers(void**) {
     CPUState state;
 
     PDWriter* writer = s_session->currentWriter;
@@ -262,8 +253,7 @@ void test_c64_vice_get_registers(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_c64_vice_step_cpu(void**)
-{
+void test_c64_vice_step_cpu(void**) {
     CPUState state;
 
     Session_action(s_session, PDAction_step);
@@ -315,8 +305,7 @@ struct Assembly {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_c64_vice_get_disassembly(void**)
-{
+void test_c64_vice_get_disassembly(void**) {
     static Assembly assembly[] =
     {
         { 0x080e, "A9 22       LDA #$22" },
@@ -375,8 +364,7 @@ void test_c64_vice_get_disassembly(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_c64_vice_get_memory(void**)
-{
+void test_c64_vice_get_memory(void**) {
     const uint8_t read_memory[] = { 0xa9, 0x22, 0xa2, 0x32, 0xc8, 0xee, 0x20, 0xd0, 0xee, 0x21, 0xd0, 0x4c, 0x0e, 0x08 };
     uint8_t dest[sizeof(read_memory) + 1];
     int dataSize = 0;
@@ -390,8 +378,7 @@ void test_c64_vice_get_memory(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool getExceptionLocation(PDReader* reader, uint64_t* address, CPUState* cpuState)
-{
+static bool getExceptionLocation(PDReader* reader, uint64_t* address, CPUState* cpuState) {
     uint32_t event;
     bool foundException = false;
 
@@ -420,8 +407,7 @@ static bool getExceptionLocation(PDReader* reader, uint64_t* address, CPUState* 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void stepToPC(uint64_t pc)
-{
+static void stepToPC(uint64_t pc) {
     // first we step the CPU se we have the PC at known position, we try to step 10 times
     // and if we don't get the correct PC with in that time we fail the test
 
@@ -444,8 +430,7 @@ static void stepToPC(uint64_t pc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void waitForBreak(uint64_t breakAddress, const CPUState* cpuState, uint64_t checkMask)
-{
+static void waitForBreak(uint64_t breakAddress, const CPUState* cpuState, uint64_t checkMask) {
     CPUState outState;
 
     //printf("wait for break $%llx\n", breakAddress);
@@ -480,8 +465,7 @@ static void waitForBreak(uint64_t breakAddress, const CPUState* cpuState, uint64
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_c64_vice_basic_breakpoint(void**)
-{
+void test_c64_vice_basic_breakpoint(void**) {
     Session_action(s_session, PDAction_step);
 
     uint64_t breakAddress = 0x0813;
@@ -539,8 +523,7 @@ void test_c64_vice_basic_breakpoint(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_c64_vice_breakpoint_cond(void**)
-{
+void test_c64_vice_breakpoint_cond(void**) {
     CPUState state = { 0 };
 
     Session_action(s_session, PDAction_step);
@@ -568,8 +551,7 @@ void test_c64_vice_breakpoint_cond(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_c64_vice_callstack(void**)
-{
+void test_c64_vice_callstack(void**) {
     uint32_t event;
     PDReaderIterator it;
 
@@ -656,8 +638,7 @@ void test_c64_vice_callstack(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int main()
-{
+int main() {
     Core_init();
 
     const UnitTest tests[] =

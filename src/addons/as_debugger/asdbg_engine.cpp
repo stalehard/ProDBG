@@ -17,8 +17,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void log_out(const char* format, ...)
-{
+static void log_out(const char* format, ...) {
     va_list ap;
 
     va_start(ap, format);
@@ -49,8 +48,7 @@ AngelScriptDebugger* g_debugger;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(ServiceFunc* serviceFunc)
-{
+static void* createInstance(ServiceFunc* serviceFunc) {
     (void)serviceFunc;
 
     g_debugger = (AngelScriptDebugger*)malloc(sizeof(AngelScriptDebugger));    // this is a bit ugly but for this plugin we only have one instance
@@ -63,8 +61,7 @@ static void* createInstance(ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* userData)
-{
+static void destroyInstance(void* userData) {
     free(userData);
     g_debugger = nullptr;
 }
@@ -72,8 +69,7 @@ static void destroyInstance(void* userData)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-static PDDebugState update(void* userData, PDAction action, PDReader* reader, PDWriter* writer)
-{
+static PDDebugState update(void* userData, PDAction action, PDReader* reader, PDWriter* writer) {
     //int event = 0;
 
     (void)reader;
@@ -125,8 +121,7 @@ namespace asdbg {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::registerToStringFunc(const asIObjectType* type, ToStringFunc callback)
-{
+void Engine::registerToStringFunc(const asIObjectType* type, ToStringFunc callback) {
     if (m_toStringCallbacks.find(type) == m_toStringCallbacks.end())
         m_toStringCallbacks.insert(std::map<const asIObjectType*, ToStringFunc>::value_type(type, callback));
 }
@@ -135,8 +130,7 @@ Engine::Engine()
     : m_debugAction(DebugAction_Continue)
     , m_lastCommandAtStackLevel(0)
     , m_lastFunction(nullptr)
-    , m_connected(false)
-{
+    , m_connected(false) {
     if (!PDRemote_create(&s_asdebuggerPlugin, 0)) {
         output("Unable to setup debugger connection\n");
         return;
@@ -147,15 +141,13 @@ Engine::Engine()
     m_connected = true;
 }
 
-Engine::~Engine()
-{
+Engine::~Engine() {
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::tick()
-{
+void Engine::tick() {
     if (!PDRemote_isConnected()) {
         //if ((instructions & 127) == 0)
         PDRemote_update(0);
@@ -188,7 +180,7 @@ void Engine::tick()
 
             PDRemote_update(1);
         }
-    }else  {
+    }else {
         updateDebugger();
     }
 #endif
@@ -196,30 +188,26 @@ void Engine::tick()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::takeCommands(asIScriptContext* context)
-{
+void Engine::takeCommands(asIScriptContext* context) {
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::output(const std::string& text)
-{
+void Engine::output(const std::string& text) {
     // By default we just output to stdout
     std::cout << text;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::lineCallback(asIScriptContext* context)
-{
+void Engine::lineCallback(asIScriptContext* context) {
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::addFileBreakpoint(const std::string& file, int line)
-{
+void Engine::addFileBreakpoint(const std::string& file, int line) {
     // Store just file name, not entire path
     size_t r = file.find_last_of("\\/");
     std::string actual;
@@ -243,8 +231,7 @@ void Engine::addFileBreakpoint(const std::string& file, int line)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::addFuncBreakpoint(const std::string& func)
-{
+void Engine::addFuncBreakpoint(const std::string& func) {
     // Trim the function name
     size_t b = func.find_first_not_of(" \t");
     size_t e = func.find_last_not_of(" \t");
@@ -260,8 +247,7 @@ void Engine::addFuncBreakpoint(const std::string& func)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::listBreakpoints()
-{
+void Engine::listBreakpoints() {
     // List all break points
     std::stringstream s;
     for (size_t breakpoint = 0; breakpoint < m_breakpoints.size(); ++breakpoint) {
@@ -276,8 +262,7 @@ void Engine::listBreakpoints()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::listLocalVariables(asIScriptContext* context)
-{
+void Engine::listLocalVariables(asIScriptContext* context) {
     if (context == nullptr) {
         output("No script is running\n");
         return;
@@ -298,8 +283,7 @@ void Engine::listLocalVariables(asIScriptContext* context)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::listGlobalVariables(asIScriptContext* context)
-{
+void Engine::listGlobalVariables(asIScriptContext* context) {
     if (context == nullptr) {
         output("No script is running\n");
         return;
@@ -326,8 +310,7 @@ void Engine::listGlobalVariables(asIScriptContext* context)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::listMemberProperties(asIScriptContext* context)
-{
+void Engine::listMemberProperties(asIScriptContext* context) {
     if (context == nullptr) {
         output("No script is running\n");
         return;
@@ -342,8 +325,7 @@ void Engine::listMemberProperties(asIScriptContext* context)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::listStatistics(asIScriptContext* context)
-{
+void Engine::listStatistics(asIScriptContext* context) {
     if (context == nullptr) {
         output("No script is running\n");
         return;
@@ -367,8 +349,7 @@ void Engine::listStatistics(asIScriptContext* context)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::printCallstack(asIScriptContext* context)
-{
+void Engine::printCallstack(asIScriptContext* context) {
     if (context == nullptr) {
         output("No script is running\n");
         return;
@@ -387,8 +368,7 @@ void Engine::printCallstack(asIScriptContext* context)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Engine::printValue(const std::string& expression, asIScriptContext* context)
-{
+void Engine::printValue(const std::string& expression, asIScriptContext* context) {
     if (context == nullptr) {
         output("No script is running\n");
         return;
@@ -426,7 +406,7 @@ void Engine::printValue(const std::string& expression, asIScriptContext* context
             if (name == "this") {
                 ptr = context->GetThisPointer();
                 typeId = context->GetThisTypeId();
-            }else  {
+            }else {
                 asIObjectType* type = engine->GetObjectTypeById(context->GetThisTypeId());
                 for (asUINT prop = 0; prop < type->GetPropertyCount(); ++prop) {
                     const char* propName = nullptr;
@@ -466,29 +446,26 @@ void Engine::printValue(const std::string& expression, asIScriptContext* context
             s << toString(ptr, typeId, true, engine) << std::endl;
             output(s.str());
         }
-    }else  {
+    }else {
         output("Invalid expression. Expected identifier\n");
     }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Engine::interpretCommand(const std::string& command, asIScriptContext* context)
-{
+bool Engine::interpretCommand(const std::string& command, asIScriptContext* context) {
     return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Engine::checkBreakPoint(asIScriptContext* context)
-{
+bool Engine::checkBreakPoint(asIScriptContext* context) {
     return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-std::string Engine::toString(void* value, asUINT typeId, bool expandMembers, asIScriptEngine* engine)
-{
+std::string Engine::toString(void* value, asUINT typeId, bool expandMembers, asIScriptEngine* engine) {
     if (value == 0)
         return "<null>";
 
@@ -531,7 +508,7 @@ std::string Engine::toString(void* value, asUINT typeId, bool expandMembers, asI
                 break;
             }
         }
-    }else if (typeId & asTYPEID_SCRIPTOBJECT)  {
+    }else if (typeId & asTYPEID_SCRIPTOBJECT) {
         // Dereference handles, so we can see what it points to
         if (typeId & asTYPEID_OBJHANDLE)
             value = *(void**)value;
@@ -547,7 +524,7 @@ std::string Engine::toString(void* value, asUINT typeId, bool expandMembers, asI
             for (asUINT prop = 0; prop < obj->GetPropertyCount(); ++prop)
                 s << std::endl << "  " << type->GetPropertyDeclaration(prop) << " = " << toString(obj->GetAddressOfProperty(prop), obj->GetPropertyTypeId(prop), false, engine);
         }
-    }else  {
+    }else {
         // Dereference handles, so we can see what it points to
         if (typeId & asTYPEID_OBJHANDLE)
             value = *(void**)value;
@@ -577,7 +554,7 @@ std::string Engine::toString(void* value, asUINT typeId, bool expandMembers, asI
                 // Invoke the callback to get the string representation of this type
                 std::string str = it->second(value, expandMembers, this);
                 s << str;
-            }else  {
+            }else {
                 // GW-TODO: Value types can have their properties expanded by default
             }
         }

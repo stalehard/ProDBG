@@ -21,8 +21,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct ConsoleData {
-    ConsoleData() : historyPos(0), scrollToBottom(0)
-    {
+    ConsoleData() : historyPos(0), scrollToBottom(0) {
         memset(inputBuffer, 0, sizeof(inputBuffer));
     }
 
@@ -37,8 +36,7 @@ struct ConsoleData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void clearLog(ConsoleData* consoleData)
-{
+static void clearLog(ConsoleData* consoleData) {
     for (size_t i = 0; i < consoleData->items.size(); ++i)
         free(consoleData->items[i]);
     consoleData->items.clear();
@@ -47,8 +45,7 @@ static void clearLog(ConsoleData* consoleData)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void addLog(ConsoleData* consoleData, const char* fmt, ...)
-{
+static void addLog(ConsoleData* consoleData, const char* fmt, ...) {
     char buffer[1024];
     va_list args;
     va_start(args, fmt);
@@ -62,8 +59,7 @@ static void addLog(ConsoleData* consoleData, const char* fmt, ...)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void execCommand(ConsoleData* consoleData, const char* commandLine)
-{
+static void execCommand(ConsoleData* consoleData, const char* commandLine) {
     // TODO: Hook up as PD event
 
     addLog(consoleData, "# %s\n", commandLine);
@@ -104,8 +100,7 @@ static void execCommand(ConsoleData* consoleData, const char* commandLine)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void textEditCallbackStub(PDUIInputTextCallbackData* data)
-{
+static void textEditCallbackStub(PDUIInputTextCallbackData* data) {
     ConsoleData* consoleData = (ConsoleData*)data->user_data;
 
     //addLog(consoleData, "Cursor: %d, EventKey: %d, Selection: %d-%d", data->cursor_pos, data->event_key, data->selection_start, data->selection_end);
@@ -210,8 +205,7 @@ static void textEditCallbackStub(PDUIInputTextCallbackData* data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     (void)uiFuncs;
 
@@ -232,8 +226,7 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     ConsoleData* consoleData = (ConsoleData*)user_data;
     clearLog(consoleData);
     free(consoleData);
@@ -241,8 +234,7 @@ static void destroyInstance(void* user_data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void showInUI(ConsoleData* consoleData, PDReader* reader, PDUI* uiFuncs)
-{
+static void showInUI(ConsoleData* consoleData, PDReader* reader, PDUI* uiFuncs) {
     (void)consoleData;
     (void)reader;
 
@@ -321,8 +313,7 @@ static void showInUI(ConsoleData* consoleData, PDReader* reader, PDUI* uiFuncs)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents) {
     ConsoleData* consoleData = (ConsoleData*)user_data;
 
     uint32_t event = 0;
@@ -380,8 +371,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

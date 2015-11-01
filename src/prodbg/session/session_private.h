@@ -26,8 +26,7 @@ struct Breakpoint {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct Session {
-    inline Session()
-    {
+    inline Session() {
         type = Session_Null;
         reader = 0;
         writer0 = 0;

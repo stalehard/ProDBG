@@ -18,8 +18,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* dummyCreateInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* dummyCreateInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)uiFuncs;
     (void)serviceFunc;
     return 0;
@@ -27,15 +26,13 @@ static void* dummyCreateInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void dummyDestroyInstance(void* userData)
-{
+static void dummyDestroyInstance(void* userData) {
     (void)userData;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int dummyUpdate(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
-{
+static int dummyUpdate(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents) {
     (void)userData;
     (void)uiFuncs;
     (void)inEvents;
@@ -46,8 +43,7 @@ static int dummyUpdate(void* userData, PDUI* uiFuncs, PDReader* inEvents, PDWrit
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int dummySaveState(void* userData, struct PDSaveState* saveState)
-{
+static int dummySaveState(void* userData, struct PDSaveState* saveState) {
     (void)userData;
 
     PDIO_writeInt(saveState, -1231);
@@ -66,8 +62,7 @@ static int dummySaveState(void* userData, struct PDSaveState* saveState)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int dummyLoadState(void* userData, struct PDLoadState* loadState)
-{
+static int dummyLoadState(void* userData, struct PDLoadState* loadState) {
     int64_t v0;
     int64_t v1;
     double v2;
@@ -132,7 +127,7 @@ static PluginData s_pluginData = { &s_dummyPlugin, PD_VIEW_API_VERSION, "", 0 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Session* createSession(){
+struct Session* createSession() {
     struct Session* session = Session_create();
 
     assert_non_null(session);
@@ -142,8 +137,7 @@ struct Session* createSession(){
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void create_null_session(void**)
-{
+static void create_null_session(void**) {
     struct Session* session = createSession();
 
     Session** sessions = Session_getSessions();
@@ -157,8 +151,7 @@ static void create_null_session(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void session_add_plugins(void**)
-{
+static void session_add_plugins(void**) {
     int pluginCount = 0;
 
     struct Session* session = createSession();
@@ -184,8 +177,7 @@ static void session_add_plugins(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void session_delete_plugins(void**)
-{
+static void session_delete_plugins(void**) {
     int pluginCount = 0;
 
     struct Session* session = createSession();
@@ -214,8 +206,7 @@ static void session_delete_plugins(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void session_test_many(void**)
-{
+static void session_test_many(void**) {
     struct Session* s0 = createSession();
     struct Session* s1 = createSession();
     struct Session* s2 = createSession();
@@ -241,8 +232,7 @@ static void session_test_many(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void session_save_plugin_state(void**)
-{
+static void session_save_plugin_state(void**) {
     const char* filename = "t2-output/test.json";
 
     {
@@ -287,8 +277,7 @@ static void session_save_plugin_state(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int main()
-{
+int main() {
     Core_init();
 
     g_pluginUI = new BgfxPluginUI;

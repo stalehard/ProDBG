@@ -36,8 +36,7 @@ struct BreakpointsData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static Breakpoint* createBreakpoint(BreakpointsData* user_data)
-{
+static Breakpoint* createBreakpoint(BreakpointsData* user_data) {
     Breakpoint* bp = (Breakpoint*)malloc(sizeof(Breakpoint));
     memset(bp, 0, sizeof(Breakpoint));
 
@@ -56,8 +55,7 @@ static Breakpoint* createBreakpoint(BreakpointsData* user_data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyBreakpoint(Breakpoint* bp)
-{
+static void destroyBreakpoint(Breakpoint* bp) {
     free(bp->location.filename);
     free(bp->location.address);
     free(bp->condition);
@@ -66,8 +64,7 @@ static void destroyBreakpoint(Breakpoint* bp)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     BreakpointsData* user_data = new BreakpointsData;
 
@@ -79,16 +76,14 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     BreakpointsData* data = (BreakpointsData*)user_data;
     delete data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateCondition(Breakpoint* bp, PDReader* reader)
-{
+static void updateCondition(Breakpoint* bp, PDReader* reader) {
     const char* condition;
 
     bp->condition = 0;
@@ -101,8 +96,7 @@ static void updateCondition(Breakpoint* bp, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void toogleBreakpointFileLine(BreakpointsData* data, PDReader* reader)
-{
+void toogleBreakpointFileLine(BreakpointsData* data, PDReader* reader) {
     const char* filename = 0;
     uint32_t line;
 
@@ -111,8 +105,9 @@ void toogleBreakpointFileLine(BreakpointsData* data, PDReader* reader)
     PDRead_findString(reader, &filename, "filename", 0);
     PDRead_findU32(reader, &line, "line", 0);
 
-    if (!filename)
+    if (!filename) {
         return;
+    }
 
     for (auto i = data->breakpoints.begin(); i != data->breakpoints.end(); ++i) {
         if ((*i)->location.line == (int)line && !strcmp((*i)->location.filename, filename)) {
@@ -138,8 +133,7 @@ void toogleBreakpointFileLine(BreakpointsData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void toggleBreakpointAddress(BreakpointsData* data, PDReader* reader)
-{
+void toggleBreakpointAddress(BreakpointsData* data, PDReader* reader) {
     const char* address;
 
     if (PDRead_findString(reader, &address, "address", 0) == PDReadStatus_notFound)
@@ -165,8 +159,7 @@ void toggleBreakpointAddress(BreakpointsData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer) {
     uint32_t event;
     (void)uiFuncs;
     (void)writer;
@@ -307,8 +300,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

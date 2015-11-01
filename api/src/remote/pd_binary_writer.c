@@ -50,7 +50,7 @@ static PDWriteStatus writeS8(struct PDWriter* writer, const char* id, int8_t v) 
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -64,7 +64,7 @@ static PDWriteStatus writeU8(struct PDWriter* writer, const char* id, uint8_t v)
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -81,7 +81,7 @@ static PDWriteStatus writeS16(struct PDWriter* writer, const char* id, int16_t v
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -98,7 +98,7 @@ static PDWriteStatus writeU16(struct PDWriter* writer, const char* id, uint16_t 
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -117,7 +117,7 @@ static PDWriteStatus writeS32(struct PDWriter* writer, const char* id, int32_t v
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -136,7 +136,7 @@ static PDWriteStatus writeU32(struct PDWriter* writer, const char* id, uint32_t 
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -159,7 +159,7 @@ static PDWriteStatus writeS64(struct PDWriter* writer, const char* id, int64_t v
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -182,7 +182,7 @@ static PDWriteStatus writeU64(struct PDWriter* writer, const char* id, uint64_t 
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -213,7 +213,7 @@ static PDWriteStatus writeFloat(struct PDWriter* writer, const char* id, float v
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -239,7 +239,7 @@ static PDWriteStatus writeDouble(struct PDWriter* writer, const char* id, double
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -259,7 +259,7 @@ static PDWriteStatus writeString(struct PDWriter* writer, const char* id, const 
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }
@@ -287,7 +287,7 @@ static PDWriteStatus writeData(struct PDWriter* writer, const char* id, void* da
 
     if (wData->writingArrayEntry) {
         wData->entryCount++;
-	}
+    }
 
     return PDWriteStatus_ok;
 }

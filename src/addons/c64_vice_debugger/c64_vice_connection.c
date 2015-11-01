@@ -40,8 +40,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void debug_log(const char* fmt, ...)
-{
+void debug_log(const char* fmt, ...) {
 #ifdef DEBUG_LOG
     va_list args;
     va_start(args, fmt);
@@ -64,8 +63,7 @@ typedef struct VICEConnection {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int socketPoll(int socket)
-{
+static int socketPoll(int socket) {
     struct timeval to = { 0, 0 };
     fd_set fds;
 
@@ -85,8 +83,7 @@ static int socketPoll(int socket)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int createListner(VICEConnection* conn, int port)
-{
+static int createListner(VICEConnection* conn, int port) {
     struct sockaddr_in sin;
     int yes = 1;
 
@@ -122,7 +119,7 @@ static int createListner(VICEConnection* conn, int port)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct VICEConnection* VICEConnection_create(enum VICEConnectionType type, int port){
+struct VICEConnection* VICEConnection_create(enum VICEConnectionType type, int port) {
     VICEConnection* conn = 0;
 
 #if defined(_WIN32)
@@ -149,8 +146,7 @@ struct VICEConnection* VICEConnection_create(enum VICEConnectionType type, int p
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int VICEConnection_connect(VICEConnection* conn, const char* address, int port)
-{
+int VICEConnection_connect(VICEConnection* conn, const char* address, int port) {
     struct hostent* he;
     struct sockaddr_in sa = { 0 };
     char** ap;
@@ -200,8 +196,7 @@ int VICEConnection_connect(VICEConnection* conn, const char* address, int port)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void VICEConnection_destroy(struct VICEConnection* conn)
-{
+void VICEConnection_destroy(struct VICEConnection* conn) {
     if (conn->socket != INVALID_SOCKET)
         closesocket(conn->socket);
 
@@ -213,15 +208,13 @@ void VICEConnection_destroy(struct VICEConnection* conn)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int VICEConnection_connected(struct VICEConnection* conn)
-{
+int VICEConnection_connected(struct VICEConnection* conn) {
     return conn->socket != INVALID_SOCKET;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int clientConnect(VICEConnection* conn, struct sockaddr_in* host)
-{
+static int clientConnect(VICEConnection* conn, struct sockaddr_in* host) {
     struct sockaddr_in hostTemp;
     unsigned int hostSize = sizeof(struct sockaddr_in);
 
@@ -245,8 +238,7 @@ static int clientConnect(VICEConnection* conn, struct sockaddr_in* host)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void VICEConnection_updateListner(VICEConnection* conn)
-{
+void VICEConnection_updateListner(VICEConnection* conn) {
     struct timeval timeout;
     struct sockaddr_in client;
     fd_set fds;
@@ -278,8 +270,7 @@ void VICEConnection_updateListner(VICEConnection* conn)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int VICEConnection_disconnect(VICEConnection* conn)
-{
+int VICEConnection_disconnect(VICEConnection* conn) {
     debug_log("Disconnected\n");
 
     if (conn->socket != INVALID_SOCKET)
@@ -292,8 +283,7 @@ int VICEConnection_disconnect(VICEConnection* conn)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int VICEConnection_recv(VICEConnection* conn, char* buffer, int length, int flags)
-{
+int VICEConnection_recv(VICEConnection* conn, char* buffer, int length, int flags) {
     int ret;
 
     if (!VICEConnection_connected(conn))
@@ -312,8 +302,7 @@ int VICEConnection_recv(VICEConnection* conn, char* buffer, int length, int flag
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int VICEConnection_send(VICEConnection* conn, const void* buffer, int length, int flags)
-{
+int VICEConnection_send(VICEConnection* conn, const void* buffer, int length, int flags) {
     int ret;
 
     if (!VICEConnection_connected(conn))
@@ -329,8 +318,7 @@ int VICEConnection_send(VICEConnection* conn, const void* buffer, int length, in
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int VICEConnection_sendStream(VICEConnection* conn, const unsigned char* buffer)
-{
+int VICEConnection_sendStream(VICEConnection* conn, const unsigned char* buffer) {
     int sizeCount = 0;
     // stream has the size at the very start and 2 top bits used for other things
     int32_t size = ((buffer[0] & 0x3f) << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
@@ -357,8 +345,7 @@ int VICEConnection_sendStream(VICEConnection* conn, const unsigned char* buffer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned char* VICEConnection_recvStream(VICEConnection* conn, unsigned char* outputBuffer, int size)
-{
+unsigned char* VICEConnection_recvStream(VICEConnection* conn, unsigned char* outputBuffer, int size) {
     uint8_t* retBuffer = outputBuffer;
     uint8_t ownBuffer = 0;
 
@@ -406,8 +393,7 @@ unsigned char* VICEConnection_recvStream(VICEConnection* conn, unsigned char* ou
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int VICEConnection_pollRead(VICEConnection* conn)
-{
+int VICEConnection_pollRead(VICEConnection* conn) {
     if (!VICEConnection_connected(conn))
         return 0;
 
@@ -416,8 +402,7 @@ int VICEConnection_pollRead(VICEConnection* conn)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int VICEConnection_isConnected(VICEConnection* conn)
-{
+int VICEConnection_isConnected(VICEConnection* conn) {
     if (conn == NULL)
         return 0;
 

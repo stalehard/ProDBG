@@ -14,8 +14,7 @@ struct ThreadsData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     (void)uiFuncs;
 
@@ -29,15 +28,13 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void showInUI(ThreadsData* user_data, PDReader* reader, PDUI* uiFuncs)
-{
+static void showInUI(ThreadsData* user_data, PDReader* reader, PDUI* uiFuncs) {
     PDReaderIterator it;
     ThreadsData* data = (ThreadsData*)user_data;
 
@@ -90,8 +87,7 @@ static void showInUI(ThreadsData* user_data, PDReader* reader, PDUI* uiFuncs)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents) {
     uint32_t event = 0;
 
     ThreadsData* data = (ThreadsData*)user_data;
@@ -149,8 +145,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

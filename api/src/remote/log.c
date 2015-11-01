@@ -18,7 +18,7 @@ void pda_log_out(int logLevel, const char* filename, int line, const char* forma
 
     if (logLevel < s_log_level) {
         return;
-	}
+    }
 
     switch (logLevel) {
         case LOG_DEBUG:

@@ -58,8 +58,7 @@ extern struct WindowImpl* AllocateWindowImpl();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool htmlToColour(ColourDesired& colour, const char* html)
-{
+bool htmlToColour(ColourDesired& colour, const char* html) {
 #if 1 // Built In
     colour.Set(html);
     colour.Set(colour.AsLong() | ((unsigned int)0xFF << 24)); // ColourDesired is lame in that it never sets the alpha channel..
@@ -318,27 +317,23 @@ public:
         : m_width(0)
         , m_height(0)
         , m_wheelVRotation(0)
-        , m_wheelHRotation(0)
-    {
+        , m_wheelHRotation(0) {
         memset(&interface, 0, sizeof(interface));
     }
 
-    virtual ~ScEditor()
-    {
+    virtual ~ScEditor() {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void Update()
-    {
+    void Update() {
         //HandleInput();
         Tick();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void ToggleBreakpoint()
-    {
+    void ToggleBreakpoint() {
         Point caretPosition = PointMainCaret();
         unsigned int lineNumber = (unsigned int)LineFromLocation(caretPosition);
         std::vector<unsigned int>::iterator iter = find(m_breakpointLines.begin(), m_breakpointLines.end(), lineNumber);
@@ -357,8 +352,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool IsComment(int position)
-    {
+    bool IsComment(int position) {
         //position = max(0, position - 1);
         sptr_t style = SendCommand(SCI_GETSTYLEAT, (uptr_t)position);
 
@@ -368,22 +362,19 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int GetWordStartPosition(int position, bool onlyWordCharacters)
-    {
+    int GetWordStartPosition(int position, bool onlyWordCharacters) {
         return (int)SendCommand(SCI_WORDSTARTPOSITION, (uptr_t)position, (sptr_t)onlyWordCharacters);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    int GetWordEndPosition(int position, bool onlyWordCharacters)
-    {
+    int GetWordEndPosition(int position, bool onlyWordCharacters) {
         return (int)SendCommand(SCI_WORDENDPOSITION, uptr_t(position), sptr_t(onlyWordCharacters));
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    char* GetTextRange(int startPosition, int endPosition)
-    {
+    char* GetTextRange(int startPosition, int endPosition) {
         if (endPosition < startPosition) {
             int temp = startPosition;
             startPosition = endPosition;
@@ -409,8 +400,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    char* GetWordFromPosition(int position, int& start, int& end)
-    {
+    char* GetWordFromPosition(int position, int& start, int& end) {
         end   = GetWordEndPosition(position, true);
         start = GetWordStartPosition(position, true);
         return GetTextRange(start, end);
@@ -418,8 +408,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static bool IsKeyPressedMap(ImGuiKey key, bool repeat = false)
-    {
+    static bool IsKeyPressedMap(ImGuiKey key, bool repeat = false) {
         ImGuiIO& io = ImGui::GetIO();
         const int key_index = io.KeyMap[key];
         return ImGui::IsKeyPressed(key_index, repeat);
@@ -427,8 +416,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void HandleInput()
-    {
+    void HandleInput() {
         // TODO: Would be better to decouple ImGui key values here and abstract it into a prodbg api instead
         if (IsKeyPressedMap(ImGuiKey_DownArrow, true)) {
             ImGui::SetScrollY(ImGui::GetScrollY() + 23);
@@ -470,8 +458,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void HandleMouseWheel(const PDMouseWheelEvent& wheelEvent)
-    {
+    void HandleMouseWheel(const PDMouseWheelEvent& wheelEvent) {
         int topLineNew = topLine;
         int lines;
         int xPos = xOffset;
@@ -514,8 +501,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void Render()
-    {
+    void Render() {
         PRectangle rcPaint = GetClientRectangle();
 
         AutoSurface surfaceWindow(this);
@@ -527,8 +513,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void SetAStyle(int style, ColourDesired fore, ColourDesired back = 0xFFFFFFFF, int size = -1, const char* face = nullptr)
-    {
+    void SetAStyle(int style, ColourDesired fore, ColourDesired back = 0xFFFFFFFF, int size = -1, const char* face = nullptr) {
         SendCommand(SCI_STYLESETFORE, uptr_t(style), fore.AsLong());
         SendCommand(SCI_STYLESETBACK, uptr_t(style), back.AsLong());
         if (size >= 1)
@@ -539,8 +524,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void Initialise()
-    {
+    void Initialise() {
         wMain = AllocateWindowImpl();
 
         // TODO: TEMP! Hook up properly to ImGui
@@ -634,8 +618,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void Resize(int x, int y, int width, int height)
-    {
+    void Resize(int x, int y, int width, int height) {
         m_width = width;
         m_height = height;
 
@@ -655,21 +638,18 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    virtual void SetVerticalScrollPos() override
-    {
+    virtual void SetVerticalScrollPos() override {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    virtual void SetHorizontalScrollPos() override
-    {
+    virtual void SetHorizontalScrollPos() override {
         xOffset = 0;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool ModifyScrollBars(int nMax, int nPage)
-    {
+    bool ModifyScrollBars(int nMax, int nPage) {
         (void)nMax;
         (void)nPage;
         return false;
@@ -677,8 +657,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    virtual void CreateCallTipWindow(PRectangle rc) override
-    {
+    virtual void CreateCallTipWindow(PRectangle rc) override {
         (void)rc;
         if (!ct.wCallTip.Created()) {
             //ct.wCallTip = new CallTip(stc, &ct, this);
@@ -689,8 +668,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    virtual void AddToPopUp(const char* label, int cmd = 0, bool enabled = true) override
-    {
+    virtual void AddToPopUp(const char* label, int cmd = 0, bool enabled = true) override {
         (void)label;
         (void)cmd;
         (void)enabled;
@@ -699,60 +677,51 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void ClaimSelection()
-    {
+    void ClaimSelection() {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void Copy()
-    {
+    void Copy() {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void Paste()
-    {
+    void Paste() {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void NotifyChange()
-    {
+    void NotifyChange() {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void NotifyParent(SCNotification scn)
-    {
+    void NotifyParent(SCNotification scn) {
         (void)scn;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void CopyToClipboard(const SelectionText& selectedText)
-    {
+    void CopyToClipboard(const SelectionText& selectedText) {
         (void)selectedText;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void SetMouseCapture(bool on)
-    {
+    void SetMouseCapture(bool on) {
         (void)on;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    bool HaveMouseCapture()
-    {
+    bool HaveMouseCapture() {
         return false;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam)
-    {
+    sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
         (void)iMessage;
         (void)wParam;
         (void)lParam;
@@ -763,8 +732,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    sptr_t SendCommand(unsigned int iMessage, uptr_t wParam = 0, sptr_t lParam = 0)
-    {
+    sptr_t SendCommand(unsigned int iMessage, uptr_t wParam = 0, sptr_t lParam = 0) {
         // Handle our messages first and the fallback on default path
 
         switch (iMessage) {
@@ -795,32 +763,28 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-intptr_t ImScEditor::SendCommand(unsigned int message, uintptr_t p0, intptr_t p1)
-{
+intptr_t ImScEditor::SendCommand(unsigned int message, uintptr_t p0, intptr_t p1) {
     ScEditor* editor = (ScEditor*)privateData;
     return (intptr_t)editor->SendCommand(message, (uptr_t)p0, (sptr_t)p1);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ImScEditor::Update()
-{
+void ImScEditor::Update() {
     ScEditor* editor = (ScEditor*)privateData;
     ScEditor_tick(editor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ImScEditor::Draw()
-{
+void ImScEditor::Draw() {
     ScEditor* editor = (ScEditor*)privateData;
     ScEditor_render(editor);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ImScEditor::HandleInput()
-{
+void ImScEditor::HandleInput() {
     ScEditor* editor = (ScEditor*)privateData;
     if (editor)
         editor->HandleInput();
@@ -828,8 +792,7 @@ void ImScEditor::HandleInput()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ImScEditor::ScrollTo(int line, bool moveThumb)
-{
+void ImScEditor::ScrollTo(int line, bool moveThumb) {
     ScEditor* editor = (ScEditor*)privateData;
     editor->ScrollTo(line, moveThumb);
 }
@@ -837,15 +800,13 @@ void ImScEditor::ScrollTo(int line, bool moveThumb)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ScEclipseTheme::ScEclipseTheme()
-    : m_themeId(0)
-{
+    : m_themeId(0) {
     //m_themeName[0] = '\0';
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ScEclipseTheme::~ScEclipseTheme()
-{
+ScEclipseTheme::~ScEclipseTheme() {
 }
 
 #ifdef _WIN32
@@ -854,8 +815,7 @@ extern "C" __declspec(dllimport) void __stdcall OutputDebugStringA(const char* _
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ScEclipseTheme::Load(const char* themeName)
-{
+bool ScEclipseTheme::Load(const char* themeName) {
     using namespace tinyxml2;
 
     XMLDocument xmlDocument;
@@ -923,8 +883,7 @@ bool ScEclipseTheme::Load(const char* themeName)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool ScEclipseTheme::LoadColour(ColourDesired& colour, const char* name, tinyxml2::XMLElement* element)
-{
+bool ScEclipseTheme::LoadColour(ColourDesired& colour, const char* name, tinyxml2::XMLElement* element) {
     using namespace tinyxml2;
 
     XMLElement* colourElement = element->FirstChildElement(name);
@@ -941,8 +900,7 @@ bool ScEclipseTheme::LoadColour(ColourDesired& colour, const char* name, tinyxml
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScEclipseTheme::Apply(struct ScEditor* editor, int fontSize, const char* fontName)
-{
+void ScEclipseTheme::Apply(struct ScEditor* editor, int fontSize, const char* fontName) {
     // Set up the global default style. These attributes are used wherever no explicit choices are made.
     editor->SetAStyle(STYLE_DEFAULT, m_foreground, m_background, fontSize, fontName);
     editor->SendCommand(SCI_STYLECLEARALL); // Copies global style to all others
@@ -989,8 +947,7 @@ void ScEclipseTheme::Apply(struct ScEditor* editor, int fontSize, const char* fo
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ScEditor* ScEditor_create(int width, int height)
-{
+ScEditor* ScEditor_create(int width, int height) {
     ScEditor* ed = new ScEditor;
 
     ed->interface.userData = 0;
@@ -1004,8 +961,7 @@ ScEditor* ScEditor_create(int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScEditor_resize(ScEditor* editor, int x, int y, int width, int height)
-{
+void ScEditor_resize(ScEditor* editor, int x, int y, int width, int height) {
     (void)x;
     (void)y;
 
@@ -1015,31 +971,27 @@ void ScEditor_resize(ScEditor* editor, int x, int y, int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScEditor_tick(ScEditor* editor)
-{
+void ScEditor_tick(ScEditor* editor) {
     if (editor)
         editor->Update();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScEditor_render(ScEditor* editor)
-{
+void ScEditor_render(ScEditor* editor) {
     if (editor)
         editor->Render();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ScEditor_scrollMouse(ScEditor* editor, const PDMouseWheelEvent& wheelEvent)
-{
+void ScEditor_scrollMouse(ScEditor* editor, const PDMouseWheelEvent& wheelEvent) {
     if (editor)
         editor->HandleMouseWheel(wheelEvent);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-ImScEditor* ScEditor_getInterface(ScEditor* editor)
-{
+ImScEditor* ScEditor_getInterface(ScEditor* editor) {
     return &editor->interface;
 }

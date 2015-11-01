@@ -48,8 +48,7 @@ typedef struct PluginData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(ServiceFunc* serviceFunc)
-{
+static void* createInstance(ServiceFunc* serviceFunc) {
     (void)serviceFunc;
 
     PluginData* t = (PluginData*)malloc(sizeof(PluginData));
@@ -60,8 +59,7 @@ static void* createInstance(ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool queryRemoteTarget(PluginData* data)
-{
+static bool queryRemoteTarget(PluginData* data) {
     uint8_t reply[1024];
 
     int ret = RemoteConnection_sendFormatRecv(reply, sizeof(reply), data->conn, 100, "$QStartNoAckMode#b0");
@@ -81,8 +79,7 @@ static bool queryRemoteTarget(PluginData* data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void connectToLocalHost(PluginData* data)
-{
+static void connectToLocalHost(PluginData* data) {
     struct RemoteConnection* conn = 0;
 
     // Kill the current connection if we have one
@@ -124,8 +121,7 @@ static int s_disBufferLength = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned int m68k_read_disassembler_8(unsigned int address)
-{
+unsigned int m68k_read_disassembler_8(unsigned int address) {
     address -= s_baseAddress;
 
     if ((int)address > s_disBufferLength) {
@@ -138,8 +134,7 @@ unsigned int m68k_read_disassembler_8(unsigned int address)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned int m68k_read_disassembler_16(unsigned int address)
-{
+unsigned int m68k_read_disassembler_16(unsigned int address) {
     address -= s_baseAddress;
 
     if (((int)address + 1) > s_disBufferLength) {
@@ -155,8 +150,7 @@ unsigned int m68k_read_disassembler_16(unsigned int address)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned int m68k_read_disassembler_32(unsigned int address)
-{
+unsigned int m68k_read_disassembler_32(unsigned int address) {
     address -= s_baseAddress;
 
     if (((int)address + 3) > s_disBufferLength) {
@@ -174,15 +168,13 @@ unsigned int m68k_read_disassembler_32(unsigned int address)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void destroyInstance(void* user_data)
-{
+void destroyInstance(void* user_data) {
     free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void onMenu(PluginData* data, PDReader* reader)
-{
+static void onMenu(PluginData* data, PDReader* reader) {
     uint32_t menuId;
 
     (void)data;
@@ -201,8 +193,7 @@ static void onMenu(PluginData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool isValidPacket(const uint8_t* buffer, int length)
-{
+static bool isValidPacket(const uint8_t* buffer, int length) {
 
     if (buffer[0] != '$')
         return false;
@@ -217,8 +208,7 @@ static bool isValidPacket(const uint8_t* buffer, int length)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int hex(char ch)
-{
+static int hex(char ch) {
     if ((ch >= 'a') && (ch <= 'f'))
         return ch - 'a' + 10;
 
@@ -233,8 +223,7 @@ static int hex(char ch)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t get_u32 (const uint8_t** data)
-{
+static uint32_t get_u32 (const uint8_t** data) {
     const uint8_t* temp = *data;
 
     uint32_t t[4];
@@ -251,8 +240,7 @@ static uint32_t get_u32 (const uint8_t** data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void writeRegister(PDWriter* writer, const char* name, uint8_t size, uint32_t reg, uint8_t readOnly)
-{
+static void writeRegister(PDWriter* writer, const char* name, uint8_t size, uint32_t reg, uint8_t readOnly) {
     PDWrite_arrayEntryBegin(writer);
     PDWrite_string(writer, "name", name);
     PDWrite_u8(writer, "size", size);
@@ -267,8 +255,7 @@ static void writeRegister(PDWriter* writer, const char* name, uint8_t size, uint
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void getRegisters(PluginData* data, PDWriter* writer)
-{
+void getRegisters(PluginData* data, PDWriter* writer) {
     char regName[4] = { 0 };
     uint8_t reply[1024];
     const uint8_t* tdata = reply;
@@ -319,8 +306,7 @@ void getRegisters(PluginData* data, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned char checksumString(char* string, bool append)
-{
+unsigned char checksumString(char* string, bool append) {
     uint8_t cs = 0;
     size_t len = strlen(string);
 
@@ -340,8 +326,7 @@ unsigned char checksumString(char* string, bool append)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer)
-{
+static void getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer) {
     uint8_t reply[1024];
     char cmdBuffer[512];
     int disLength = 0;
@@ -404,8 +389,7 @@ static void getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void setExceptionLocation(PluginData* data, PDWriter* writer)
-{
+static void setExceptionLocation(PluginData* data, PDWriter* writer) {
     PDWrite_eventBegin(writer, PDEventType_setExceptionLocation);
     PDWrite_u64(writer, "address", data->exceptionLocation);
     PDWrite_u8(writer, "address_size", 4);
@@ -414,8 +398,7 @@ static void setExceptionLocation(PluginData* data, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void onStep(PluginData* data, PDWriter* writer)
-{
+static void onStep(PluginData* data, PDWriter* writer) {
     uint8_t reply[1024];
 
     int length = RemoteConnection_sendFormatRecv(reply, sizeof(reply), data->conn, 100, "$s#73");
@@ -432,8 +415,7 @@ static void onStep(PluginData* data, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void onAction(PluginData* plugin, PDAction action, PDWriter* writer)
-{
+static void onAction(PluginData* plugin, PDAction action, PDWriter* writer) {
     switch (action) {
         case PDAction_step:
         {
@@ -454,8 +436,7 @@ static void onAction(PluginData* plugin, PDAction action, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PDDebugState update(void* user_data, PDAction action, PDReader* reader, PDWriter* writer)
-{
+PDDebugState update(void* user_data, PDAction action, PDReader* reader, PDWriter* writer) {
     (void)action;
     (void)writer;
 
@@ -510,8 +491,7 @@ static PDMenu s_menus[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDMenu* createMenu()
-{
+static PDMenu* createMenu() {
     return (PDMenu*)&s_menus;
 }
 

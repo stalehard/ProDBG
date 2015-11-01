@@ -31,8 +31,7 @@ struct WorkspaceData {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: Lots of (temp) memory allocs in this code, would be good to cleaan up
 
-static void populatePathRecursive(DirEntry* entry, char* fullPath, char* sub)
-{
+static void populatePathRecursive(DirEntry* entry, char* fullPath, char* sub) {
     entry->directoryName = sub;
 
     char** files = entry->filesBase = fs_files(fullPath);
@@ -59,8 +58,7 @@ static void populatePathRecursive(DirEntry* entry, char* fullPath, char* sub)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void populatePath(WorkspaceData* data, char* path)
-{
+static void populatePath(WorkspaceData* data, char* path) {
     DirEntry* dirs = (DirEntry*)malloc(sizeof(DirEntry));
     memset(dirs, 0, sizeof(DirEntry));
 
@@ -88,8 +86,7 @@ static void populatePath(WorkspaceData* data, char* path)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void recursiveDrawTree(DirEntry* entry, PDUI* uiFuncs, PDWriter* writer)
-{
+static void recursiveDrawTree(DirEntry* entry, PDUI* uiFuncs, PDWriter* writer) {
     int dirCount = array_size(entry->dirs);
 
     for (int i = 0; i < dirCount; ++i) {
@@ -118,8 +115,7 @@ static void recursiveDrawTree(DirEntry* entry, PDUI* uiFuncs, PDWriter* writer)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* writer)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* writer) {
     uint32_t event = 0;
 
     WorkspaceData* data = (WorkspaceData*)user_data;
@@ -150,8 +146,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)uiFuncs;
     WorkspaceData* user_data = (WorkspaceData*)malloc(sizeof(WorkspaceData));
     memset(user_data, 0, sizeof(WorkspaceData));
@@ -172,8 +167,7 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     WorkspaceData* data = (WorkspaceData*)user_data;
 
     for (int i = 0; i < array_size(data->paths); ++i)
@@ -186,8 +180,7 @@ static void destroyInstance(void* user_data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int saveState(void* user_data, PDSaveState* ss)
-{
+static int saveState(void* user_data, PDSaveState* ss) {
     WorkspaceData* data = (WorkspaceData*)user_data;
 
     for (int i = 0; i < array_size(data->paths); ++i) {
@@ -200,8 +193,7 @@ static int saveState(void* user_data, PDSaveState* ss)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int loadState(void* user_data, PDLoadState* ls)
-{
+static int loadState(void* user_data, PDLoadState* ls) {
     char stringData[4096];
 
     WorkspaceData* data = (WorkspaceData*)user_data;
@@ -241,8 +233,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

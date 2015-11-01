@@ -34,8 +34,7 @@ static PDCapstoneFuncs g_capstoneService =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void CapstoneService_init()
-{
+void CapstoneService_init() {
     Service_register(&g_capstoneService, PDCAPSTONEFUNCS_GLOBAL);
 }
 

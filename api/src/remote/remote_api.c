@@ -34,8 +34,7 @@ enum {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void sleepMs(int ms)
-{
+void sleepMs(int ms) {
 #ifdef _MSC_VER
     Sleep(ms);
 #else
@@ -45,8 +44,7 @@ void sleepMs(int ms)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int PDRemote_create(struct PDBackendPlugin* plugin, int waitForConnection)
-{
+int PDRemote_create(struct PDBackendPlugin* plugin, int waitForConnection) {
     s_conn = RemoteConnection_create(RemoteConnectionType_Listener, 1340);
 
     if (!s_conn)
@@ -79,8 +77,7 @@ int PDRemote_create(struct PDBackendPlugin* plugin, int waitForConnection)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int PDRemote_update(int sleepTime)
-{
+int PDRemote_update(int sleepTime) {
     PDDebugState state;
     uint8_t* recvData = 0;
     int recvSize = 0;
@@ -144,8 +141,7 @@ int PDRemote_update(int sleepTime)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int PDRemote_isConnected()
-{
+int PDRemote_isConnected() {
     return RemoteConnection_isConnected(s_conn);
 }
 

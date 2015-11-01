@@ -21,8 +21,7 @@ struct HexMemoryData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     (void)uiFuncs;
 
@@ -51,15 +50,13 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void getAddressLine(char* adressText, uint64_t address, int adressSize)
-{
+static void getAddressLine(char* adressText, uint64_t address, int adressSize) {
     switch (adressSize) {
         case 1:
             sprintf(adressText, "0x%02x", (uint8_t)address); break;
@@ -74,8 +71,7 @@ static void getAddressLine(char* adressText, uint64_t address, int adressSize)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int charsPerLine)
-{
+static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int charsPerLine) {
     uint64_t address = (uint64_t)strtol(data->startAddress, 0, 16);
     int adressSize = data->addressSize;
     uint8_t* memoryData = data->data + address;
@@ -141,8 +137,7 @@ static void drawData(HexMemoryData* data, PDUI* uiFuncs, int lineCount, int char
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void drawUI(HexMemoryData* data, PDUI* uiFuncs)
-{
+void drawUI(HexMemoryData* data, PDUI* uiFuncs) {
     uiFuncs->push_item_width(100);
     uiFuncs->input_text("Start Address", data->startAddress, sizeof(data->startAddress), PDUIInputTextFlags_CharsHexadecimal, 0, 0);
     uiFuncs->same_line(0, -1);
@@ -194,8 +189,7 @@ void drawUI(HexMemoryData* data, PDUI* uiFuncs)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateMemory(HexMemoryData* user_data, PDReader* reader)
-{
+static void updateMemory(HexMemoryData* user_data, PDReader* reader) {
     void* data;
     uint64_t address = 0;
     uint64_t size = 0;
@@ -226,8 +220,7 @@ static void updateMemory(HexMemoryData* user_data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateExceptionLocation(HexMemoryData* data, PDReader* reader)
-{
+static void updateExceptionLocation(HexMemoryData* data, PDReader* reader) {
     uint64_t address = 0;
 
     PDRead_findU64(reader, &address, "address", 0);
@@ -241,8 +234,7 @@ static void updateExceptionLocation(HexMemoryData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer) {
     uint32_t event;
 
     HexMemoryData* data = (HexMemoryData*)user_data;
@@ -282,8 +274,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int saveState(void* user_data, struct PDSaveState* saveState)
-{
+static int saveState(void* user_data, struct PDSaveState* saveState) {
     HexMemoryData* data = (HexMemoryData*)user_data;
 
     PDIO_writeString(saveState, data->startAddress);
@@ -294,8 +285,7 @@ static int saveState(void* user_data, struct PDSaveState* saveState)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int loadState(void* user_data, struct PDLoadState* loadState)
-{
+static int loadState(void* user_data, struct PDLoadState* loadState) {
     HexMemoryData* data = (HexMemoryData*)user_data;
 
     PDIO_readString(loadState, data->startAddress, sizeof(data->startAddress));
@@ -323,8 +313,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

@@ -41,16 +41,14 @@ static struct MultiCommandData* s_multiCommand = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Commands_init()
-{
+void Commands_init() {
     memset(&s_undoStack, 0, sizeof(CommandList));
     memset(&s_redoStack, 0, sizeof(CommandList));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int countEntriesInList(CommandList* list)
-{
+static int countEntriesInList(CommandList* list) {
     CommandEntry* command;
     int count = 0;
 
@@ -62,15 +60,13 @@ static int countEntriesInList(CommandList* list)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int Commands_undoCount()
-{
+int Commands_undoCount() {
     return countEntriesInList(&s_undoStack);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void execCommand(CommandEntry* entry)
-{
+static void execCommand(CommandEntry* entry) {
     // set if we have multi command recording enabled)
 
     if (s_multiCommand) {
@@ -85,8 +81,7 @@ static void execCommand(CommandEntry* entry)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void execMultiCommand(void* user_data)
-{
+static void execMultiCommand(void* user_data) {
     CommandEntry* entry;
     struct MultiCommandData* data = (struct MultiCommandData*)user_data;
 
@@ -96,8 +91,7 @@ static void execMultiCommand(void* user_data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void undoMultiCommand(void* user_data)
-{
+static void undoMultiCommand(void* user_data) {
     CommandEntry* entry;
     struct MultiCommandData* data = (struct MultiCommandData*)user_data;
 
@@ -107,15 +101,13 @@ static void undoMultiCommand(void* user_data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Commands_beginMulti()
-{
+void Commands_beginMulti() {
     s_multiCommand = (struct MultiCommandData*)alloc_zero(sizeof(struct MultiCommandData));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Commands_endMulti()
-{
+void Commands_endMulti() {
     // Check if any command was added during multi command
 
     if (CommandList_isEmpty(&s_multiCommand->list)) {
@@ -135,8 +127,7 @@ void Commands_endMulti()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Commands_undo()
-{
+void Commands_undo() {
     if (CommandList_isEmpty(&s_undoStack))
         return;
 
@@ -153,8 +144,7 @@ void Commands_undo()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Commands_redo()
-{
+void Commands_redo() {
     if (CommandList_isEmpty(&s_redoStack))
         return;
 
@@ -171,8 +161,7 @@ void Commands_redo()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Commands_execute(Command command)
-{
+void Commands_execute(Command command) {
     CommandEntry* entry = (CommandEntry*)alloc_zero(sizeof(CommandEntry));
     entry->command = command;
 
@@ -181,8 +170,7 @@ void Commands_execute(Command command)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void CommandList_addEntry(CommandList* list, CommandEntry* command)
-{
+static void CommandList_addEntry(CommandList* list, CommandEntry* command) {
     if (list->last) {
         list->last->next = command;
         command->prev = list->last;
@@ -195,8 +183,7 @@ static void CommandList_addEntry(CommandList* list, CommandEntry* command)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void CommandList_unlinkEntry(CommandList* list, CommandEntry* entry)
-{
+static void CommandList_unlinkEntry(CommandList* list, CommandEntry* entry) {
     CommandEntry* prev;
     CommandEntry* next;
 
@@ -224,8 +211,7 @@ static void CommandList_unlinkEntry(CommandList* list, CommandEntry* entry)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void CommandList_delEntry(CommandList* list, CommandEntry* entry)
-{
+static void CommandList_delEntry(CommandList* list, CommandEntry* entry) {
     CommandList_unlinkEntry(list, entry);
 
     free(entry->command.user_data);
@@ -234,8 +220,7 @@ static void CommandList_delEntry(CommandList* list, CommandEntry* entry)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void CommandList_clear(CommandList* list)
-{
+static void CommandList_clear(CommandList* list) {
     while (list->last) {
         CommandEntry* entry = list->last;
         CommandList_delEntry(list, entry);
@@ -245,22 +230,19 @@ static void CommandList_clear(CommandList* list)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void CommandList_pop(CommandList* list)
-{
+static void CommandList_pop(CommandList* list) {
     CommandList_unlinkEntry(list, list->last);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static bool CommandList_isEmpty(CommandList* list)
-{
+static bool CommandList_isEmpty(CommandList* list) {
     return (!list->first && !list->last);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Commands_clear()
-{
+void Commands_clear() {
     CommandList_clear(&s_undoStack);
     CommandList_clear(&s_redoStack);
 }

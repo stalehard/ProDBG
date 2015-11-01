@@ -20,8 +20,7 @@ static bgfx::TextureHandle s_textureId;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void imguiRender(ImDrawData* draw_data)
-{
+static void imguiRender(ImDrawData* draw_data) {
     const float width = ImGui::GetIO().DisplaySize.x;
     const float height = ImGui::GetIO().DisplaySize.y;
 
@@ -84,8 +83,7 @@ static void imguiRender(ImDrawData* draw_data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_setup(int width, int height)
-{
+void IMGUI_setup(int width, int height) {
     unsigned char* fontData;
     int fWidth;
     int fHeight;
@@ -143,8 +141,7 @@ void IMGUI_setup(int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_updateSize(int width, int height)
-{
+void IMGUI_updateSize(int width, int height) {
     ImGuiIO& io = ImGui::GetIO();
 
     io.DisplaySize = ImVec2((float)width, (float)height);
@@ -153,8 +150,7 @@ void IMGUI_updateSize(int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_preUpdate(float deltaTime)
-{
+void IMGUI_preUpdate(float deltaTime) {
     ImGuiIO& io = ImGui::GetIO();
     io.DeltaTime = deltaTime;
 
@@ -163,24 +159,21 @@ void IMGUI_preUpdate(float deltaTime)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_setMouseState(int mouseLmb)
-{
+void IMGUI_setMouseState(int mouseLmb) {
     ImGuiIO& io = ImGui::GetIO();
     io.MouseDown[0] = !!mouseLmb;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_setMousePos(float x, float y)
-{
+void IMGUI_setMousePos(float x, float y) {
     ImGuiIO& io = ImGui::GetIO();
     io.MousePos = ImVec2(x, y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_setScroll(float scroll)
-{
+void IMGUI_setScroll(float scroll) {
     ImGuiIO& io = ImGui::GetIO();
     io.MouseWheel = scroll;
 }
@@ -195,22 +188,19 @@ void IMGUI_setScroll(float scroll)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline bool isAscii(int ch)
-{
+inline bool isAscii(int ch) {
     return (ch >= 0) && (ch < 0x80);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool isAlphaNumeric(char ch)
-{
+bool isAlphaNumeric(char ch) {
     return isAscii(ch) && isalnum(ch);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_setKeyDown(int key, int modifier)
-{
+void IMGUI_setKeyDown(int key, int modifier) {
     ImGuiIO& io = ImGui::GetIO();
     assert(key >= 0 && key <= (int)sizeof_array(io.KeysDown));
     io.KeysDown[key] = true;
@@ -220,8 +210,7 @@ void IMGUI_setKeyDown(int key, int modifier)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_setKeyUp(int key, int modifier)
-{
+void IMGUI_setKeyUp(int key, int modifier) {
     ImGuiIO& io = ImGui::GetIO();
     assert(key >= 0 && key <= (int)sizeof_array(io.KeysDown));
     io.KeysDown[key] = false;
@@ -231,16 +220,14 @@ void IMGUI_setKeyUp(int key, int modifier)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_addInputCharacter(unsigned short c)
-{
+void IMGUI_addInputCharacter(unsigned short c) {
     ImGuiIO& io = ImGui::GetIO();
     io.AddInputCharacter(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void IMGUI_postUpdate()
-{
+void IMGUI_postUpdate() {
     ImGui::Render();
 }
 

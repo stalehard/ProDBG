@@ -31,15 +31,13 @@ void Window_setTitle(const char* title);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
--(void) updateMain
-{
+-(void) updateMain {
     ProDBG_timedUpdate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (id)initWithFrame:(NSRect)frame
-{
+- (id)initWithFrame:(NSRect)frame {
     self = [super initWithFrame:frame];
     if (self == nil)
         return nil;
@@ -54,8 +52,7 @@ void Window_setTitle(const char* title);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)lockFocus
-{
+- (void)lockFocus {
     NSOpenGLContext* context = (NSOpenGLContext*)bgfx::nativeContext();
 
     [super lockFocus];
@@ -69,8 +66,7 @@ void Window_setTitle(const char* title);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)windowDidResize:(NSNotification*)notification
-{
+- (void)windowDidResize:(NSNotification*)notification {
     (void)notification;
     printf("resize\n");
 }
@@ -78,8 +74,7 @@ void Window_setTitle(const char* title);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)drawRect:(NSRect)frame
-{
+- (void)drawRect:(NSRect)frame {
     (void)frame;
 
     ProDBG_setWindowSize((int)frame.size.width, (int)frame.size.height);
@@ -88,8 +83,7 @@ void Window_setTitle(const char* title);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int getModifierFlags(int flags)
-{
+int getModifierFlags(int flags) {
     int specialKeys = 0;
 
     if (flags & NSShiftKeyMask)
@@ -109,8 +103,7 @@ int getModifierFlags(int flags)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int translateKey(unsigned int key)
-{
+static int translateKey(unsigned int key) {
     // Keyboard symbol translation table
 
     static const unsigned int table[128] =
@@ -253,8 +246,7 @@ static int translateKey(unsigned int key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)keyDown:(NSEvent*)event
-{
+- (void)keyDown:(NSEvent*)event {
     const int key = translateKey([event keyCode]);
     const int mods = getModifierFlags([event modifierFlags]);
 
@@ -269,8 +261,7 @@ static int translateKey(unsigned int key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)flagsChanged:(NSEvent *)event
-{
+- (void)flagsChanged:(NSEvent *)event {
     bool release = false;
     const unsigned int modifierFlags = [event modifierFlags] & NSDeviceIndependentModifierFlagsMask;
     const int key = translateKey([event keyCode]);
@@ -298,8 +289,7 @@ static int translateKey(unsigned int key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)keyUp:(NSEvent*)event
-{
+- (void)keyUp:(NSEvent*)event {
     const int key = translateKey([event keyCode]);
     const int mods = getModifierFlags([event modifierFlags]);
 
@@ -308,15 +298,13 @@ static int translateKey(unsigned int key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)acceptsFirstResponder
-{
+- (BOOL)acceptsFirstResponder {
     return YES;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
--(void) viewWillMoveToWindow:(NSWindow*)newWindow
-{
+-(void) viewWillMoveToWindow:(NSWindow*)newWindow {
     NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self frame]
                                     options: (NSTrackingInVisibleRect | NSTrackingMouseMoved | NSTrackingActiveAlways) owner:self userInfo:nil];
     [self addTrackingArea:trackingArea];
@@ -325,8 +313,7 @@ static int translateKey(unsigned int key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)mouseMoved:(NSEvent*)event
-{
+- (void)mouseMoved:(NSEvent*)event {
     NSWindow* window = [self window];
     NSRect originalFrame = [window frame];
     NSPoint location = [window mouseLocationOutsideOfEventStream];
@@ -341,8 +328,7 @@ static int translateKey(unsigned int key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)mouseDragged:(NSEvent*)event
-{
+- (void)mouseDragged:(NSEvent*)event {
     NSWindow* window = [self window];
     NSRect originalFrame = [window frame];
     NSPoint location = [window mouseLocationOutsideOfEventStream];
@@ -355,8 +341,7 @@ static int translateKey(unsigned int key)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)scrollWheel:(NSEvent *)event
-{
+- (void)scrollWheel:(NSEvent *)event {
     float x = (float)[event deltaX];
     float y = (float)[event deltaY];
     //int flags = getModifierFlags([theEvent modifierFlags]);
@@ -365,16 +350,14 @@ static int translateKey(unsigned int key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)mouseUp:(NSEvent*)event
-{
+- (void)mouseUp:(NSEvent*)event {
     (void)event;
     ProDBG_setMouseState(0, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)mouseDown:(NSEvent*)event
-{
+- (void)mouseDown:(NSEvent*)event {
     NSWindow* window = [self window];
     NSRect originalFrame = [window frame];
     NSPoint location = [window mouseLocationOutsideOfEventStream];
@@ -392,23 +375,20 @@ static int translateKey(unsigned int key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
--(BOOL) isOpaque
-{
+-(BOOL) isOpaque {
     return YES;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)onMenuPress:(id)sender
-{
+- (void)onMenuPress:(id)sender {
     int id = (int)((NSButton*)sender).tag;
     ProDBG_event(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void buildSubMenu(NSMenu* menu, PDMenuItem menuDesc[], int idOffset)
-{
+void buildSubMenu(NSMenu* menu, PDMenuItem menuDesc[], int idOffset) {
     PDMenuItem* desc = &menuDesc[0];
     //[menu removeAllItems];
 
@@ -499,8 +479,7 @@ static NSMenu* s_popupMenu;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)rightMouseDown:(NSEvent*)event
-{
+- (void)rightMouseDown:(NSEvent*)event {
     if (!s_popupMenu)
         return;
 
@@ -509,8 +488,7 @@ static NSMenu* s_popupMenu;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Window_buildMenu()
-{
+void Window_buildMenu() {
     NSMenu* mainMenu = [NSApp mainMenu];
     NSMenu* fileMenu = [[mainMenu itemWithTitle:@"File"] submenu];
     NSMenu* debugMenu = [[mainMenu itemWithTitle:@"Debug"] submenu];
@@ -521,8 +499,7 @@ void Window_buildMenu()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Window_addMenu(const char* inName, PDMenuItem* items, uint32_t idOffset)
-{
+void Window_addMenu(const char* inName, PDMenuItem* items, uint32_t idOffset) {
     (void)idOffset;
     //NSMenu* mainMenu = [NSApp mainMenu];
     NSString* name = [NSString stringWithUTF8String: inName];
@@ -544,8 +521,7 @@ void Window_addMenu(const char* inName, PDMenuItem* items, uint32_t idOffset)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PDMenuItem* buildPluginsMenu(PluginData** plugins, int count)
-{
+PDMenuItem* buildPluginsMenu(PluginData** plugins, int count) {
     PDMenuItem* menu = (PDMenuItem*)alloc_zero(sizeof(PDMenuItem) * (count + 1)); // + 1 as array needs to end with zeros
 
     for (int i = 0; i < count; ++i) {
@@ -576,8 +552,7 @@ PDMenuItem* buildPluginsMenu(PluginData** plugins, int count)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void buildPopupSubmenu(NSMenu* popupMenu, const char* inName, PDMenuItem* pluginsMenu, int count, uint32_t startId, uint32_t idMask)
-{
+static void buildPopupSubmenu(NSMenu* popupMenu, const char* inName, PDMenuItem* pluginsMenu, int count, uint32_t startId, uint32_t idMask) {
     NSString* name = [NSString stringWithUTF8String: inName];
 
     NSMenuItem* newItem = [[NSMenuItem allocWithZone:[NSMenu menuZone]] initWithTitle:name action:NULL keyEquivalent:@""];
@@ -604,8 +579,7 @@ static void buildPopupSubmenu(NSMenu* popupMenu, const char* inName, PDMenuItem*
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void buildPopupMenu(PDMenuItem* pluginsMenu, int count)
-{
+void buildPopupMenu(PDMenuItem* pluginsMenu, int count) {
     // TODO: Support rebuild of this menu
 
     if (s_popupMenu)
@@ -622,8 +596,7 @@ void buildPopupMenu(PDMenuItem* pluginsMenu, int count)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int Window_buildPluginMenu(PluginData** plugins, int count)
-{
+int Window_buildPluginMenu(PluginData** plugins, int count) {
     NSMenu* mainMenu = [NSApp mainMenu];
     NSMenu* pluginsMenu = [[mainMenu itemWithTitle:@"Plugins"] submenu];
 

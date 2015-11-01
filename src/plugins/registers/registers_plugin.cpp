@@ -28,8 +28,7 @@ struct RegistersData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     RegistersData* user_data = (RegistersData*)malloc(sizeof(RegistersData));
 
@@ -45,16 +44,14 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: Support floats
 
-static void getRegisterString(char* value, PDReader* reader, PDReaderIterator it)
-{
+static void getRegisterString(char* value, PDReader* reader, PDReaderIterator it) {
     uint64_t regValue = 0;
     const char* regString = 0;
 
@@ -85,8 +82,7 @@ static void getRegisterString(char* value, PDReader* reader, PDReaderIterator it
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void addOrUpdate(RegistersData* data, const char* name, const char* value)
-{
+static void addOrUpdate(RegistersData* data, const char* name, const char* value) {
     int count = data->registerCount;
 
     for (int i = 0; i < count; ++i) {
@@ -109,8 +105,7 @@ static void addOrUpdate(RegistersData* data, const char* name, const char* value
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateRegisters(RegistersData* data, PDReader* reader)
-{
+static void updateRegisters(RegistersData* data, PDReader* reader) {
     PDReaderIterator it;
 
     if (PDRead_findArray(reader, &it, "registers", 0) == PDReadStatus_notFound)
@@ -129,8 +124,7 @@ static void updateRegisters(RegistersData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void showUI(RegistersData* data, PDUI* uiFuncs)
-{
+static void showUI(RegistersData* data, PDUI* uiFuncs) {
     uiFuncs->text("");
     uiFuncs->columns(2, "registers", true);
     uiFuncs->text("Name"); uiFuncs->next_column();
@@ -144,8 +138,7 @@ static void showUI(RegistersData* data, PDUI* uiFuncs)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents) {
     uint32_t event;
     RegistersData* data = (RegistersData*)user_data;
 
@@ -182,8 +175,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

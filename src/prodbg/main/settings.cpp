@@ -12,8 +12,7 @@ static Settings s_settings;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void initDefaultSettings(Settings* settings)
-{
+static void initDefaultSettings(Settings* settings) {
     settings->windowRect.x = 0;
     settings->windowRect.y = 0;
     settings->windowRect.width = 800;
@@ -22,24 +21,21 @@ static void initDefaultSettings(Settings* settings)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Settings_getWindowRect(PDGRect* rect)
-{
+void Settings_getWindowRect(PDGRect* rect) {
     Settings* settings = &s_settings;
     *rect = settings->windowRect;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Settings_setWindowRect(PDGRect* rect)
-{
+void Settings_setWindowRect(PDGRect* rect) {
     Settings* settings = &s_settings;
     settings->windowRect = *rect;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Settings_load()
-{
+void Settings_load() {
     Settings* settings = &s_settings;
     const PDGRect* r = &settings->windowRect;
 
@@ -58,8 +54,7 @@ void Settings_load()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Settings_save()
-{
+void Settings_save() {
     /*
        Settings* settings = &s_settings;
        const PDGRect* r = &settings->windowRect;

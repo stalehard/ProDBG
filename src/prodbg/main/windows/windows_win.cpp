@@ -39,8 +39,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void closeWindow()
-{
+static void closeWindow() {
     if (s_window) {
         DestroyWindow(s_window);
     }
@@ -50,8 +49,7 @@ static void closeWindow()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool createWindow(const wchar_t* title, int width, int height)
-{
+bool createWindow(const wchar_t* title, int width, int height) {
     WNDCLASS wc;
     DWORD exStyle;
     DWORD style;
@@ -105,8 +103,7 @@ bool createWindow(const wchar_t* title, int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void addAccelarator(const PDMenuItem* desc)
-{
+static void addAccelarator(const PDMenuItem* desc) {
     uint8_t virt = 0;
     uint32_t winMod = desc->winMod;
     uint32_t key = desc->key;
@@ -178,8 +175,7 @@ static void addAccelarator(const PDMenuItem* desc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void formatName(char* outName, int keyMod, int key, const char* name)
-{
+static void formatName(char* outName, int keyMod, int key, const char* name) {
     char modName[64] = { 0 };
     char keyName[64] = { 0 };
 
@@ -216,8 +212,7 @@ static void formatName(char* outName, int keyMod, int key, const char* name)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void buildSubMenu(HMENU parentMenu, PDMenuItem menuDesc[], wchar_t* name, uint32_t idOffset)
-{
+static void buildSubMenu(HMENU parentMenu, PDMenuItem menuDesc[], wchar_t* name, uint32_t idOffset) {
     wchar_t tempWchar[512];
 
     PDMenuItem* desc = &menuDesc[0];
@@ -250,8 +245,7 @@ static void buildSubMenu(HMENU parentMenu, PDMenuItem menuDesc[], wchar_t* name,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void buildPopupSubmenu(HMENU parentMenu, wchar_t* inName, PDMenuItem* pluginsMenu, int count, uint32_t startId, uint32_t idMask)
-{
+static void buildPopupSubmenu(HMENU parentMenu, wchar_t* inName, PDMenuItem* pluginsMenu, int count, uint32_t startId, uint32_t idMask) {
     for (int i = 0; i < count; ++i) {
         pluginsMenu[i].key = 0;
         pluginsMenu[i].id = (uint32_t)i | idMask;
@@ -262,8 +256,7 @@ static void buildPopupSubmenu(HMENU parentMenu, wchar_t* inName, PDMenuItem* plu
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Window_buildMenu()
-{
+void Window_buildMenu() {
     HMENU mainMenu = CreateMenu();
     buildSubMenu(mainMenu, g_fileMenu, L"&File", 0);
     buildSubMenu(mainMenu, g_debugMenu, L"&Debug", 0);
@@ -273,8 +266,7 @@ void Window_buildMenu()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: Remove platform duplication
 
-static PDMenuItem* buildPluginsMenu(PluginData** plugins, int count)
-{
+static PDMenuItem* buildPluginsMenu(PluginData** plugins, int count) {
     PDMenuItem* menu = (PDMenuItem*)alloc_zero(sizeof(PDMenuItem) * (count + 1)); // + 1 as array needs to end with zeros
 
     for (int i = 0; i < count; ++i) {
@@ -294,8 +286,7 @@ static PDMenuItem* buildPluginsMenu(PluginData** plugins, int count)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void buildPopupMenu(PDMenuItem* pluginsMenu, int count)
-{
+void buildPopupMenu(PDMenuItem* pluginsMenu, int count) {
     // TODO: Support rebuild of this menu
 
     if (s_popupMenu)
@@ -312,8 +303,7 @@ void buildPopupMenu(PDMenuItem* pluginsMenu, int count)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Window_addMenu(const char* name, PDMenuItem* items, uint32_t idOffset)
-{
+void Window_addMenu(const char* name, PDMenuItem* items, uint32_t idOffset) {
     wchar_t tempWchar[512];
     HMENU mainMenu = GetMenu(s_window);
 
@@ -326,8 +316,7 @@ void Window_addMenu(const char* name, PDMenuItem* items, uint32_t idOffset)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int Window_buildPluginMenu(PluginData** plugins, int count)
-{
+int Window_buildPluginMenu(PluginData** plugins, int count) {
     HMENU mainMenu = GetMenu(s_window);
 
     PDMenuItem* menu = buildPluginsMenu(plugins, count);
@@ -342,16 +331,14 @@ int Window_buildPluginMenu(PluginData** plugins, int count)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Window_setTitle(const wchar_t* title)
-{
+void Window_setTitle(const wchar_t* title) {
     SetWindowText(s_window, title);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Retrieves and translates modifier keys
 
-static int getKeyMods()
-{
+static int getKeyMods() {
     int mods = 0;
 
     if (GetKeyState(VK_SHIFT) & (1 << 31))
@@ -369,8 +356,7 @@ static int getKeyMods()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Translates a Windows key to the corresponding PRODBG key (code taken from GLFW)
 
-static int translateKey(WPARAM wParam, LPARAM lParam)
-{
+static int translateKey(WPARAM wParam, LPARAM lParam) {
     // Check for numeric keypad keys
     // NOTE: This way we always force "NumLock = ON", which is intentional since
     // the returned key code should correspond to a physical location.
@@ -772,8 +758,7 @@ static int translateKey(WPARAM wParam, LPARAM lParam)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
-{
+LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
         case WM_ACTIVATE:
         {
@@ -932,15 +917,13 @@ LRESULT CALLBACK WndProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void CALLBACK timedCallback(HWND hwnd, UINT id, UINT_PTR ptr, DWORD meh)
-{
+static void CALLBACK timedCallback(HWND hwnd, UINT id, UINT_PTR ptr, DWORD meh) {
     ProDBG_timedUpdate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int WINAPI WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmndLine, int show)
-{
+int WINAPI WinMain(HINSTANCE instance, HINSTANCE prevInstance, LPSTR cmndLine, int show) {
     MSG msg;
     HACCEL accel;
     bool done = false;

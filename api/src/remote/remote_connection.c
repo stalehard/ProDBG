@@ -39,8 +39,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void sleepMs(int ms)
-{
+static void sleepMs(int ms) {
 #ifdef _MSC_VER
     Sleep(ms);
 #else
@@ -60,8 +59,7 @@ typedef struct RemoteConnection {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int socketPoll(int socket)
-{
+static int socketPoll(int socket) {
     struct timeval to = { 0, 0 };
     fd_set fds;
 
@@ -81,8 +79,7 @@ static int socketPoll(int socket)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int createListner(RemoteConnection* conn, int port)
-{
+static int createListner(RemoteConnection* conn, int port) {
     struct sockaddr_in sin;
     int yes = 1;
 
@@ -118,7 +115,7 @@ static int createListner(RemoteConnection* conn, int port)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct RemoteConnection* RemoteConnection_create(enum RemoteConnectionType type, int port){
+struct RemoteConnection* RemoteConnection_create(enum RemoteConnectionType type, int port) {
     RemoteConnection* conn = 0;
 
 #if defined(_WIN32)
@@ -145,8 +142,7 @@ struct RemoteConnection* RemoteConnection_create(enum RemoteConnectionType type,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_connect(RemoteConnection* conn, const char* address, int port)
-{
+int RemoteConnection_connect(RemoteConnection* conn, const char* address, int port) {
     struct hostent* he;
     struct sockaddr_in sa;
     char** ap;
@@ -196,8 +192,7 @@ int RemoteConnection_connect(RemoteConnection* conn, const char* address, int po
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RemoteConnection_destroy(struct RemoteConnection* conn)
-{
+void RemoteConnection_destroy(struct RemoteConnection* conn) {
     if (conn->socket != INVALID_SOCKET)
         closesocket(conn->socket);
 
@@ -209,15 +204,13 @@ void RemoteConnection_destroy(struct RemoteConnection* conn)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_connected(struct RemoteConnection* conn)
-{
+int RemoteConnection_connected(struct RemoteConnection* conn) {
     return conn->socket != INVALID_SOCKET;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int clientConnect(RemoteConnection* conn, struct sockaddr_in* host)
-{
+static int clientConnect(RemoteConnection* conn, struct sockaddr_in* host) {
     struct sockaddr_in hostTemp;
     unsigned int hostSize = sizeof(struct sockaddr_in);
 
@@ -241,8 +234,7 @@ static int clientConnect(RemoteConnection* conn, struct sockaddr_in* host)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void RemoteConnection_updateListner(RemoteConnection* conn)
-{
+void RemoteConnection_updateListner(RemoteConnection* conn) {
     struct timeval timeout;
     struct sockaddr_in client;
     fd_set fds;
@@ -274,8 +266,7 @@ void RemoteConnection_updateListner(RemoteConnection* conn)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_disconnect(RemoteConnection* conn)
-{
+int RemoteConnection_disconnect(RemoteConnection* conn) {
     printf("Disconnected\n");
 
     if (conn->socket != INVALID_SOCKET)
@@ -288,8 +279,7 @@ int RemoteConnection_disconnect(RemoteConnection* conn)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_recv(RemoteConnection* conn, char* buffer, int length, int flags)
-{
+int RemoteConnection_recv(RemoteConnection* conn, char* buffer, int length, int flags) {
     int ret;
 
     if (!RemoteConnection_connected(conn))
@@ -308,8 +298,7 @@ int RemoteConnection_recv(RemoteConnection* conn, char* buffer, int length, int 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_send(RemoteConnection* conn, const void* buffer, int length, int flags)
-{
+int RemoteConnection_send(RemoteConnection* conn, const void* buffer, int length, int flags) {
     int ret;
 
     if (!RemoteConnection_connected(conn))
@@ -325,8 +314,7 @@ int RemoteConnection_send(RemoteConnection* conn, const void* buffer, int length
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_sendStream(RemoteConnection* conn, const unsigned char* buffer)
-{
+int RemoteConnection_sendStream(RemoteConnection* conn, const unsigned char* buffer) {
     int sizeCount = 0;
     // stream has the size at the very start and 2 top bits used for other things
     int32_t size = ((buffer[0] & 0x3f) << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
@@ -353,8 +341,7 @@ int RemoteConnection_sendStream(RemoteConnection* conn, const unsigned char* buf
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned char* RemoteConnection_recvStream(RemoteConnection* conn, unsigned char* outputBuffer, int size)
-{
+unsigned char* RemoteConnection_recvStream(RemoteConnection* conn, unsigned char* outputBuffer, int size) {
     uint8_t* retBuffer = outputBuffer;
     uint8_t ownBuffer = 0;
 
@@ -402,8 +389,7 @@ unsigned char* RemoteConnection_recvStream(RemoteConnection* conn, unsigned char
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_pollRead(RemoteConnection* conn)
-{
+int RemoteConnection_pollRead(RemoteConnection* conn) {
     if (!RemoteConnection_connected(conn))
         return 0;
 
@@ -412,8 +398,7 @@ int RemoteConnection_pollRead(RemoteConnection* conn)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_isConnected(RemoteConnection* conn)
-{
+int RemoteConnection_isConnected(RemoteConnection* conn) {
     if (conn == NULL)
         return 0;
 
@@ -422,8 +407,7 @@ int RemoteConnection_isConnected(RemoteConnection* conn)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_sendFormat(struct RemoteConnection* conn, const char* format, ...)
-{
+int RemoteConnection_sendFormat(struct RemoteConnection* conn, const char* format, ...) {
     va_list ap;
     char buffer[2048];
 
@@ -441,8 +425,7 @@ int RemoteConnection_sendFormat(struct RemoteConnection* conn, const char* forma
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int RemoteConnection_sendFormatRecv(unsigned char* dest, int bufferSize, struct RemoteConnection* conn, int timeOut, const char* format, ...)
-{
+int RemoteConnection_sendFormatRecv(unsigned char* dest, int bufferSize, struct RemoteConnection* conn, int timeOut, const char* format, ...) {
     int i = 0;
     va_list ap;
     char buffer[2048];

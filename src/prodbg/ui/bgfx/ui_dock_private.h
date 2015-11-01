@@ -34,8 +34,7 @@ struct UIDock;
 struct UIDockSizer {
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    inline void addDock(UIDock* dock)
-    {
+    inline void addDock(UIDock* dock) {
         cons.push_back(dock);
     }
 
@@ -51,8 +50,7 @@ struct UIDockSizer {
 
 struct UIDock {
     inline UIDock(ViewPluginInstance* inView) :
-        topSizer(0), bottomSizer(0), rightSizer(0), leftSizer(0), view(inView), type(UIDockType_Docked), id(-1)
-    {
+        topSizer(0), bottomSizer(0), rightSizer(0), leftSizer(0), view(inView), type(UIDockType_Docked), id(-1) {
     }
 
     enum {
@@ -112,8 +110,7 @@ struct OverlayData {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 struct UIDockingGrid {
-    UIDockingGrid() : state(UIDockState_None)
-    {
+    UIDockingGrid() : state(UIDockState_None) {
         prevDragPos = { 0.0f, 0.0f };
         idCounter = 0;
         memset(&overlay, 0, sizeof(overlay));

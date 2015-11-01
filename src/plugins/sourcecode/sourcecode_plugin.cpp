@@ -26,8 +26,7 @@ static PDSettingsFuncs* s_settings = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* readFileFromDisk(const char* file, size_t* size)
-{
+static void* readFileFromDisk(const char* file, size_t* size) {
     FILE* f = fopen(file, "rb");
     uint8_t* data = 0;
     size_t s = 0, t = 0;
@@ -69,8 +68,7 @@ static void* readFileFromDisk(const char* file, size_t* size)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     (void)uiFuncs;
     SourceCodeData* user_data = (SourceCodeData*)malloc(sizeof(SourceCodeData));
@@ -92,15 +90,13 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void setSourceCodeFile(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, SourceCodeData* data, const char* filename, uint32_t line)
-{
+static void setSourceCodeFile(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, SourceCodeData* data, const char* filename, uint32_t line) {
     if (strcmp(filename, data->filename)) {
         size_t size = 0;
         void* fileData = readFileFromDisk(filename, &size);
@@ -129,8 +125,7 @@ static void setSourceCodeFile(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, Sourc
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void setExceptionLocation(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, SourceCodeData* data, PDReader* inEvents)
-{
+static void setExceptionLocation(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, SourceCodeData* data, PDReader* inEvents) {
     const char* filename;
     uint32_t line;
 
@@ -147,8 +142,7 @@ static void setExceptionLocation(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, So
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateKeyboard(SourceCodeData* data, PDUISCInterface* sourceFuncs, PDUI* uiFuncs)
-{
+static void updateKeyboard(SourceCodeData* data, PDUISCInterface* sourceFuncs, PDUI* uiFuncs) {
     (void)data;
     (void)uiFuncs;
 
@@ -163,8 +157,7 @@ static void updateKeyboard(SourceCodeData* data, PDUISCInterface* sourceFuncs, P
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void toggleBreakpointCurrentLine(PDUISCInterface* sourceFuncs, SourceCodeData* data, PDWriter* writer)
-{
+static void toggleBreakpointCurrentLine(PDUISCInterface* sourceFuncs, SourceCodeData* data, PDWriter* writer) {
     (void)data;
     (void)writer;
 
@@ -184,8 +177,7 @@ static void toggleBreakpointCurrentLine(PDUISCInterface* sourceFuncs, SourceCode
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer) {
     uint32_t event;
 
     (void)uiFuncs;
@@ -265,8 +257,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

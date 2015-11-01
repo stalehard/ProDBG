@@ -20,35 +20,30 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void plugin_handler_null_base_path(void**)
-{
+void plugin_handler_null_base_path(void**) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void plugin_handler_null_plugin(void**)
-{
+void plugin_handler_null_plugin(void**) {
     assert_false(PluginHandler_addPlugin("dummyPath", 0));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void plugin_handler_dummy_paths(void**)
-{
+void plugin_handler_dummy_paths(void**) {
     assert_false(PluginHandler_addPlugin("dummyPath", "dummy"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void plugin_handler_add_plugin(void**)
-{
+void plugin_handler_add_plugin(void**) {
     assert_false(PluginHandler_addPlugin("dummyPath", "dummy"));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void plugin_handler_add_plugin_true(void**)
-{
+void plugin_handler_add_plugin_true(void**) {
     int count = 0;
 
     assert_true(PluginHandler_addPlugin(OBJECT_DIR, "sourcecode_plugin"));
@@ -70,8 +65,7 @@ void plugin_handler_add_plugin_true(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void plugin_handler_find_plugin(void**)
-{
+void plugin_handler_find_plugin(void**) {
     assert_null(PluginHandler_findPlugin(0, "dummyFile", "dummyName", false));
     assert_null(PluginHandler_findPlugin(0, "dummyFile", "dummyName", true));
     assert_null(PluginHandler_findPlugin(0, "sourcecode_plugin", "Source Code View", false));
@@ -90,8 +84,7 @@ void plugin_handler_find_plugin(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_load_file_ok(void**)
-{
+void test_load_file_ok(void**) {
     size_t size;
 
     void* ret = File_loadToMemory("examples/fake_6502/test.bin", &size, 0);
@@ -104,8 +97,7 @@ void test_load_file_ok(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_load_file_fail(void**)
-{
+void test_load_file_fail(void**) {
     size_t size;
 
     void* ret = File_loadToMemory("examples/fake_6502/test_dont_exist.bin", &size, 0);
@@ -125,8 +117,7 @@ struct IntAddData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void doAdd(int value)
-{
+static void doAdd(int value) {
     IntAddData* addData = (IntAddData*)alloc_zero(sizeof(IntAddData));
 
     addData->newValue = value;
@@ -152,8 +143,7 @@ static void doAdd(int value)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_commands(void**)
-{
+void test_commands(void**) {
     Commands_init();
 
     g_intValue = 0;
@@ -201,8 +191,7 @@ static int s_user_data_3 = 2;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void fileNotifaction(void* user_data, const char* file, int type)
-{
+void fileNotifaction(void* user_data, const char* file, int type) {
     assert_true(user_data == &s_user_data_1);
 
     if (s_checkPhase == 0) {
@@ -224,8 +213,7 @@ void fileNotifaction(void* user_data, const char* file, int type)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void fileNotifaction2(void* user_data, const char* file, int type)
-{
+void fileNotifaction2(void* user_data, const char* file, int type) {
     assert_true(user_data == &s_user_data_2);
 
     if (s_checkPhase == 2) {
@@ -238,8 +226,7 @@ void fileNotifaction2(void* user_data, const char* file, int type)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void fileNotifaction3(void* user_data, const char* file, int type)
-{
+void fileNotifaction3(void* user_data, const char* file, int type) {
     assert_true(user_data == &s_user_data_3);
 
     if (s_checkPhase == 3 && strcmp(file, s_filename_3) == 0) {
@@ -264,8 +251,7 @@ void fileNotifaction3(void* user_data, const char* file, int type)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-void test_file_notification(void**)
-{
+void test_file_notification(void**) {
     int temp = 1;
     const char* test_dir = "t2-output/test_dir";
     const char* test_dir_2 = "t2-output/2_test_dir";
@@ -385,8 +371,7 @@ void test_file_notification(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void test_settings(void**)
-{
+void test_settings(void**) {
     assert_true(Settings_loadSettings("test_data/settings.json"));
 
     assert_string_equal(Settings_getString("default_native_backend", "mac"), "LLDB");
@@ -441,8 +426,7 @@ void test_settings(void**)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int main()
-{
+int main() {
     log_set_level(LOG_NONE);
     Core_init();
 

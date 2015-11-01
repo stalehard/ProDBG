@@ -31,54 +31,47 @@ union Convert {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline int8_t getS8(const uint8_t* ptr)
-{
+static inline int8_t getS8(const uint8_t* ptr) {
     return (int8_t)ptr[0];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline uint8_t getU8(const uint8_t* ptr)
-{
+static inline uint8_t getU8(const uint8_t* ptr) {
     return ptr[0];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline uint16_t getS16(const uint8_t* ptr)
-{
+static inline uint16_t getS16(const uint8_t* ptr) {
     int16_t v = (ptr[0] << 8) | ptr[1];
     return v;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline uint16_t getU16(const uint8_t* ptr)
-{
+static inline uint16_t getU16(const uint8_t* ptr) {
     uint16_t v = (ptr[0] << 8) | ptr[1];
     return v;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline int32_t getS32(const uint8_t* ptr)
-{
+static inline int32_t getS32(const uint8_t* ptr) {
     int32_t v = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
     return v;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline int32_t getU32(const uint8_t* ptr)
-{
+static inline int32_t getU32(const uint8_t* ptr) {
     uint32_t v = (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | ptr[3];
     return v;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline int64_t getS64(const uint8_t* ptr)
-{
+static inline int64_t getS64(const uint8_t* ptr) {
     int64_t v = ((uint64_t)ptr[0] << 56) | ((uint64_t)ptr[1] << 48) | ((uint64_t)ptr[2] << 40) | ((uint64_t)ptr[3] << 32) |
                 (ptr[4] << 24) | (ptr[5] << 16) | (ptr[6] << 8) | ptr[7];
     return v;
@@ -86,8 +79,7 @@ static inline int64_t getS64(const uint8_t* ptr)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline uint64_t getU64(const uint8_t* ptr)
-{
+static inline uint64_t getU64(const uint8_t* ptr) {
     uint64_t v = ((uint64_t)ptr[0] << 56) | ((uint64_t)ptr[1] << 48) | ((uint64_t)ptr[2] << 40) | ((uint64_t)ptr[3] << 32) |
                  (ptr[4] << 24) | (ptr[5] << 16) | (ptr[6] << 8) | ptr[7];
     return v;
@@ -95,8 +87,7 @@ static inline uint64_t getU64(const uint8_t* ptr)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline double getDouble(const uint8_t* ptr)
-{
+static inline double getDouble(const uint8_t* ptr) {
     union Convert c;
     c.u64 = getU64(ptr);
     return c.dv;
@@ -104,8 +95,7 @@ static inline double getDouble(const uint8_t* ptr)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline float getFloat(const uint8_t* ptr)
-{
+static inline float getFloat(const uint8_t* ptr) {
     union Convert c;
     c.u32 = getU32(ptr);
     return c.fv;
@@ -113,16 +103,14 @@ static inline float getFloat(const uint8_t* ptr)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static inline uint64_t getOffsetUpper(ReaderData* readerData, const uint8_t* data)
-{
+static inline uint64_t getOffsetUpper(ReaderData* readerData, const uint8_t* data) {
     uint64_t t = ((uintptr_t)data - (uintptr_t)readerData->dataStart);
     return t << 32L;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readGetEvent(struct PDReader* reader)
-{
+static uint32_t readGetEvent(struct PDReader* reader) {
     ReaderData* rData = (ReaderData*)reader->data;
     uint16_t event;
     uint8_t type;
@@ -194,8 +182,7 @@ static const char* typeTable[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint8_t* findIdByRange(const char* id, uint8_t* start, uint8_t* end)
-{
+static uint8_t* findIdByRange(const char* id, uint8_t* start, uint8_t* end) {
     while (start < end) {
         uint32_t size;
         uint8_t typeId = getU8(start);
@@ -232,8 +219,7 @@ static uint8_t* findIdByRange(const char* id, uint8_t* start, uint8_t* end)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint8_t* findId(struct PDReader* reader, const char* id, PDReaderIterator it)
-{
+static uint8_t* findId(struct PDReader* reader, const char* id, PDReaderIterator it) {
     ReaderData* rData = (ReaderData*)reader->data;
 
     // if iterator is 0 we search the event stream,
@@ -297,78 +283,67 @@ static uint8_t* findId(struct PDReader* reader, const char* id, PDReaderIterator
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindS8(struct PDReader* reader, int8_t* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindS8(struct PDReader* reader, int8_t* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_s8, int8_t, getS8);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindU8(struct PDReader* reader, uint8_t* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindU8(struct PDReader* reader, uint8_t* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_u8, uint8_t, getU8);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindS16(struct PDReader* reader, int16_t* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindS16(struct PDReader* reader, int16_t* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_s16, int16_t, getS16);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindU16(struct PDReader* reader, uint16_t* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindU16(struct PDReader* reader, uint16_t* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_u16, uint16_t, getU16);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindS32(struct PDReader* reader, int32_t* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindS32(struct PDReader* reader, int32_t* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_s32, int32_t, getS32);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindU32(struct PDReader* reader, uint32_t* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindU32(struct PDReader* reader, uint32_t* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_u32, uint32_t, getU32);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindS64(struct PDReader* reader, int64_t* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindS64(struct PDReader* reader, int64_t* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_s64, int64_t, getS64);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindU64(struct PDReader* reader, uint64_t* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindU64(struct PDReader* reader, uint64_t* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_u64, uint64_t, getU64);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindFloat(struct PDReader* reader, float* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindFloat(struct PDReader* reader, float* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_float, float, getFloat);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindDouble(struct PDReader* reader, double* res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindDouble(struct PDReader* reader, double* res, const char* id, PDReaderIterator it) {
     findValue(PDReadType_double, double, getDouble);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindString(struct PDReader* reader, const char** res, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindString(struct PDReader* reader, const char** res, const char* id, PDReaderIterator it) {
     uint8_t type;
     int len;
 
@@ -391,8 +366,7 @@ static uint32_t readFindString(struct PDReader* reader, const char** res, const 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindData(struct PDReader* reader, void** data, uint64_t* size, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindData(struct PDReader* reader, void** data, uint64_t* size, const char* id, PDReaderIterator it) {
     uint8_t type;
     int idLength;
 
@@ -419,8 +393,7 @@ static uint32_t readFindData(struct PDReader* reader, void** data, uint64_t* siz
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static uint32_t readFindArray(struct PDReader* reader, PDReaderIterator* arrayIt, const char* id, PDReaderIterator it)
-{
+static uint32_t readFindArray(struct PDReader* reader, PDReaderIterator* arrayIt, const char* id, PDReaderIterator it) {
     uint8_t type;
     int idLength;
     ReaderData* rData = (ReaderData*)reader->data;
@@ -450,8 +423,7 @@ static uint32_t readFindArray(struct PDReader* reader, PDReaderIterator* arrayIt
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int32_t readNextEntry(struct PDReader* reader, PDReaderIterator* arrayIt)
-{
+static int32_t readNextEntry(struct PDReader* reader, PDReaderIterator* arrayIt) {
     uint8_t type;
     int32_t entries;
     uint64_t it = *arrayIt;
@@ -484,8 +456,7 @@ static int32_t readNextEntry(struct PDReader* reader, PDReaderIterator* arrayIt)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void readDumpData(struct PDReader* reader)
-{
+static void readDumpData(struct PDReader* reader) {
     int eventId;
     ReaderData* rData = (ReaderData*)reader->data;
 
@@ -520,8 +491,7 @@ static void readDumpData(struct PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PDBinaryReader_init(PDReader* reader)
-{
+void PDBinaryReader_init(PDReader* reader) {
     reader->readGetEvent = readGetEvent;
     reader->readNextEntry = readNextEntry;
     reader->readFindS8 = readFindS8;
@@ -545,8 +515,7 @@ void PDBinaryReader_init(PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PDBinaryReader_initStream(PDReader* reader, uint8_t* data, unsigned int size)
-{
+void PDBinaryReader_initStream(PDReader* reader, uint8_t* data, unsigned int size) {
     ReaderData* readerData = (ReaderData*)reader->data;
     readerData->data = readerData->dataStart = data + 4;    // top 4 bytes for size + 2 bits for info
     readerData->dataEnd = (uint8_t*)data + size;
@@ -557,8 +526,7 @@ void PDBinaryReader_initStream(PDReader* reader, uint8_t* data, unsigned int siz
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PDBinaryReader_reset(PDReader* reader)
-{
+void PDBinaryReader_reset(PDReader* reader) {
     ReaderData* readerData = (ReaderData*)reader->data;
     readerData->data = readerData->dataStart;
     readerData->nextEvent = 0;
@@ -566,8 +534,7 @@ void PDBinaryReader_reset(PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PDBinaryReader_destroy(PDReader* reader)
-{
+void PDBinaryReader_destroy(PDReader* reader) {
     ReaderData* readerData = (ReaderData*)reader->data;
     free(readerData);
 }

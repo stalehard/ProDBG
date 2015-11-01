@@ -24,8 +24,7 @@ static struct FileNotificationData* s_notficationData = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileMonitor_addPath(const char* path, const char* fileFilters, FMCallback callback, void* userData)
-{
+void FileMonitor_addPath(const char* path, const char* fileFilters, FMCallback callback, void* userData) {
     FileNotificationData data = { path, fileFilters, callback, userData };
 
     array_push(s_notficationData, data);
@@ -35,8 +34,7 @@ void FileMonitor_addPath(const char* path, const char* fileFilters, FMCallback c
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileMonitor_removePath(const char* path)
-{
+void FileMonitor_removePath(const char* path) {
     int size = array_size(s_notficationData);
 
     for (int i = 0; i < size; ++i) {
@@ -50,8 +48,7 @@ void FileMonitor_removePath(const char* path)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateCallbacks(event_t* event)
-{
+static void updateCallbacks(event_t* event) {
     int size = array_size(s_notficationData);
     const char* filename = event->payload;
 
@@ -104,8 +101,7 @@ static void updateCallbacks(event_t* event)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileMonitor_update()
-{
+void FileMonitor_update() {
     event_block_t* block = 0;
     event_t* event = 0;
 
@@ -125,8 +121,7 @@ void FileMonitor_update()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void FileMonitor_close()
-{
+void FileMonitor_close() {
     int size = array_size(s_notficationData);
 
     for (int i = 0; i < size; ++i) {

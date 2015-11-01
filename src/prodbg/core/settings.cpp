@@ -58,8 +58,7 @@ static PDSettingsFuncs s_settingsFuncs =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint32_t jenkinsOneHash(const char* key)
-{
+uint32_t jenkinsOneHash(const char* key) {
     uint32_t hash = 0;
     uint32_t i = 0;
 
@@ -78,8 +77,7 @@ uint32_t jenkinsOneHash(const char* key)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateSetting(Setting* setting, json_t* value)
-{
+static void updateSetting(Setting* setting, json_t* value) {
     if (setting->type == JSON_STRING)
         string_deallocate(setting->svalue);
 
@@ -98,8 +96,7 @@ static void updateSetting(Setting* setting, json_t* value)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void insertOrUpdateSetting(Category* category, const char* key, json_t* value)
-{
+static void insertOrUpdateSetting(Category* category, const char* key, json_t* value) {
     uint32_t hash = jenkinsOneHash(key);
     int settingsCount = array_size(category->settings);
 
@@ -125,8 +122,7 @@ static uint32_t decodeKey(const char* keyCombo);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void updateKey(Key* key, const char* shortcut)
-{
+void updateKey(Key* key, const char* shortcut) {
     if (key->keyCombo)
         string_deallocate(key->keyCombo);
 
@@ -137,8 +133,7 @@ void updateKey(Key* key, const char* shortcut)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void insertOrUpdateKey(Category* category, const char* name, const char* keyCombo)
-{
+static void insertOrUpdateKey(Category* category, const char* name, const char* keyCombo) {
     if (!keyCombo)
         return;
 
@@ -164,8 +159,7 @@ static void insertOrUpdateKey(Category* category, const char* name, const char* 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void insertOrUpdateKeys(Category* category, json_t* root)
-{
+static void insertOrUpdateKeys(Category* category, json_t* root) {
     if (!json_is_object(root))
         return;
 
@@ -193,8 +187,7 @@ static void insertOrUpdateKeys(Category* category, json_t* root)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void insertOrUpdateSettings(Category* category, json_t* root)
-{
+static void insertOrUpdateSettings(Category* category, json_t* root) {
     void* iter = json_object_iter(root);
 
     while (iter) {
@@ -212,8 +205,7 @@ static void insertOrUpdateSettings(Category* category, json_t* root)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void insertOrUpdateCategory(const char* categoryName, json_t* root)
-{
+static void insertOrUpdateCategory(const char* categoryName, json_t* root) {
     uint32_t hash = jenkinsOneHash(categoryName);
 
     int categoryCount = array_size(s_categories);
@@ -236,8 +228,7 @@ static void insertOrUpdateCategory(const char* categoryName, json_t* root)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void traverseData(json_t* root)
-{
+static void traverseData(json_t* root) {
     void* iter = json_object_iter(root);
 
     while (iter) {
@@ -252,8 +243,7 @@ static void traverseData(json_t* root)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool Settings_loadSettings(const char* filename)
-{
+bool Settings_loadSettings(const char* filename) {
     json_error_t error;
 
     json_t* root = json_load_file(filename, 0, &error);
@@ -270,15 +260,13 @@ bool Settings_loadSettings(const char* filename)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Settings_registerService()
-{
+void Settings_registerService() {
     Service_register(&s_settingsFuncs, PDSETTINGS_GLOBAL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Settings_destroy()
-{
+void Settings_destroy() {
     int categoryCount = array_size(s_categories);
 
     for (int ic = 0; ic < categoryCount; ++ic) {
@@ -320,8 +308,7 @@ void Settings_destroy()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static const Setting* findSetting(const char* categoryName, const char* settingName)
-{
+static const Setting* findSetting(const char* categoryName, const char* settingName) {
     int categoryCount = array_size(s_categories);
 
     uint32_t hash = jenkinsOneHash(categoryName);
@@ -351,8 +338,7 @@ static const Setting* findSetting(const char* categoryName, const char* settingN
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int64_t Settings_getInt(const char* category, const char* value)
-{
+int64_t Settings_getInt(const char* category, const char* value) {
     const Setting* setting = findSetting(category, value);
 
     if (!setting || setting->type != JSON_INTEGER)
@@ -363,8 +349,7 @@ int64_t Settings_getInt(const char* category, const char* value)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-double Settings_getReal(const char* category, const char* value)
-{
+double Settings_getReal(const char* category, const char* value) {
     const Setting* setting = findSetting(category, value);
 
     if (!setting || setting->type != JSON_REAL)
@@ -375,8 +360,7 @@ double Settings_getReal(const char* category, const char* value)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const char* Settings_getString(const char* category, const char* value)
-{
+const char* Settings_getString(const char* category, const char* value) {
     const Setting* setting = findSetting(category, value);
 
     if (!setting || setting->type != JSON_STRING)
@@ -430,8 +414,7 @@ static KeyRemapTable s_remap[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint32_t decodeKey(const char* keyCombo)
-{
+uint32_t decodeKey(const char* keyCombo) {
     char temp[1024];
 
     string_copy(temp, keyCombo, sizeof(temp));
@@ -470,8 +453,7 @@ uint32_t decodeKey(const char* keyCombo)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-uint32_t Settings_getShortcut(const char* categoryName, const char* keyName)
-{
+uint32_t Settings_getShortcut(const char* categoryName, const char* keyName) {
     int categoryCount = array_size(s_categories);
 
     uint32_t hash = jenkinsOneHash(categoryName);

@@ -40,7 +40,6 @@ InputState* InputState_getState();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-inline bool Input_isLmbDown(const InputState* state)
-{
+inline bool Input_isLmbDown(const InputState* state) {
     return state->mouseDown[MouseButton_Left];
 }

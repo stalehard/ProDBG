@@ -6,32 +6,28 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void writeJsonInt(void* privData, const int64_t v)
-{
+static void writeJsonInt(void* privData, const int64_t v) {
     json_t* root = (json_t*)privData;
     json_array_append_new(root, json_integer(v));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void writeJsonDouble(void* privData, const double v)
-{
+static void writeJsonDouble(void* privData, const double v) {
     json_t* root = (json_t*)privData;
     json_array_append_new(root, json_real(v));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void writeJsonString(void* privData, const char* str)
-{
+static void writeJsonString(void* privData, const char* str) {
     json_t* root = (json_t*)privData;
     json_array_append_new(root, json_string(str));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDLoadStatus readJsonInt(void* privData, int64_t* dest)
-{
+static PDLoadStatus readJsonInt(void* privData, int64_t* dest) {
     SessionLoadState* loadState = (SessionLoadState*)privData;
     json_t* item = json_array_get(loadState->root, (size_t)(loadState->arrayIter++));
 
@@ -55,8 +51,7 @@ static PDLoadStatus readJsonInt(void* privData, int64_t* dest)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDLoadStatus readJsonDouble(void* privData, double* dest)
-{
+static PDLoadStatus readJsonDouble(void* privData, double* dest) {
     SessionLoadState* loadState = (SessionLoadState*)privData;
     json_t* item = json_array_get(loadState->root, (size_t)(loadState->arrayIter++));
 
@@ -80,8 +75,7 @@ static PDLoadStatus readJsonDouble(void* privData, double* dest)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDLoadStatus readJsonString(void* privData, char* dest, int len)
-{
+static PDLoadStatus readJsonString(void* privData, char* dest, int len) {
     SessionLoadState* loadState = (SessionLoadState*)privData;
 
     json_t* item = json_array_get(loadState->root, (size_t)(loadState->arrayIter++));
@@ -140,15 +134,13 @@ static PDLoadState loadSaveState =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PluginIO_initLoadJson(PDLoadState* loadFuncs)
-{
+void PluginIO_initLoadJson(PDLoadState* loadFuncs) {
     *loadFuncs = loadSaveState;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void PluginIO_initSaveJson(PDSaveState* saveFuncs)
-{
+void PluginIO_initSaveJson(PDSaveState* saveFuncs) {
     *saveFuncs = jsonSaveState;
 }
 

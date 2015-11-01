@@ -38,8 +38,7 @@ struct DissassemblyData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     DissassemblyData* user_data = new DissassemblyData;
     user_data->location = 0;
@@ -55,15 +54,13 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     delete (DissassemblyData*)user_data;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Block* findBlock(DissassemblyData* data, uint64_t blockId)
-{
+Block* findBlock(DissassemblyData* data, uint64_t blockId) {
     for (Block* b : data->blocks) {
         if (b->id == blockId)
             return b;
@@ -74,8 +71,7 @@ Block* findBlock(DissassemblyData* data, uint64_t blockId)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Block* createBlock(DissassemblyData* data, uint64_t address, uint64_t blockId)
-{
+Block* createBlock(DissassemblyData* data, uint64_t address, uint64_t blockId) {
     Block* block = new Block;
 
     (void)address;
@@ -91,8 +87,7 @@ Block* createBlock(DissassemblyData* data, uint64_t address, uint64_t blockId)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void insertLineBlock(Block* block, uint64_t address, const char* text)
-{
+void insertLineBlock(Block* block, uint64_t address, const char* text) {
     // So this isn't very smart but will do for now
 
     for (auto i = block->lines.begin(); i != block->lines.end(); ++i) {
@@ -127,8 +122,7 @@ void insertLineBlock(Block* block, uint64_t address, const char* text)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void insertLine(DissassemblyData* data, uint64_t address, const char* text)
-{
+void insertLine(DissassemblyData* data, uint64_t address, const char* text) {
     Block* block = 0;
 
     // first find the block which this address should be in
@@ -143,8 +137,7 @@ void insertLine(DissassemblyData* data, uint64_t address, const char* text)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void setDisassemblyCode(DissassemblyData* data, PDReader* reader)
-{
+static void setDisassemblyCode(DissassemblyData* data, PDReader* reader) {
     PDReaderIterator it;
 
     if (PDRead_findArray(reader, &it, "disassembly", 0) == PDReadStatus_notFound)
@@ -163,8 +156,7 @@ static void setDisassemblyCode(DissassemblyData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static Block* findBlockWithPC(DissassemblyData* data, uint64_t pc)
-{
+static Block* findBlockWithPC(DissassemblyData* data, uint64_t pc) {
     for (Block* b : data->blocks) {
         if (pc >= b->address && pc <= b->addressEnd)
             return b;
@@ -175,8 +167,7 @@ static Block* findBlockWithPC(DissassemblyData* data, uint64_t pc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void renderUI(DissassemblyData* data, PDUI* uiFuncs)
-{
+void renderUI(DissassemblyData* data, PDUI* uiFuncs) {
     Block* block = 0;
 
     uiFuncs->text("");  // TODO: Temporary
@@ -204,8 +195,7 @@ void renderUI(DissassemblyData* data, PDUI* uiFuncs)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateRegisters(DissassemblyData* data, PDReader* reader)
-{
+static void updateRegisters(DissassemblyData* data, PDReader* reader) {
     PDReaderIterator it;
 
     if (PDRead_findArray(reader, &it, "registers", 0) == PDReadStatus_notFound)
@@ -224,8 +214,7 @@ static void updateRegisters(DissassemblyData* data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* writer) {
     uint32_t event;
 
     DissassemblyData* data = (DissassemblyData*)user_data;
@@ -294,8 +283,7 @@ extern "C"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data)
-    {
+    PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
         registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
     }
 

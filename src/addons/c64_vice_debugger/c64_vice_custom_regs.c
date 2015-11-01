@@ -19,8 +19,7 @@ static PDColor s_colorRed = PDUI_COLOR(255, 0, 0, 0);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void printSpriteX(PDUI* uiFuncs, uint32_t v, uint32_t i, uint32_t d010)
-{
+void printSpriteX(PDUI* uiFuncs, uint32_t v, uint32_t i, uint32_t d010) {
     uiFuncs->text("$d0%02x - Sprite #%d X-coordinate", i * 2, i);
     uiFuncs->next_column();
 
@@ -39,8 +38,7 @@ void printSpriteX(PDUI* uiFuncs, uint32_t v, uint32_t i, uint32_t d010)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void printSpriteY(PDUI* uiFuncs, uint16_t v, uint32_t i)
-{
+void printSpriteY(PDUI* uiFuncs, uint16_t v, uint32_t i) {
     uiFuncs->text("$d0%02x - Sprite #%d Y-coordinate", 1 + i * 2, i);
     uiFuncs->next_column();
 
@@ -52,8 +50,7 @@ void printSpriteY(PDUI* uiFuncs, uint16_t v, uint32_t i)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
-{
+static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
     (void)serviceFunc;
     CustomRegsData* user_data = (CustomRegsData*)malloc(sizeof(CustomRegsData));
 
@@ -79,15 +76,13 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void destroyInstance(void* user_data)
-{
+static void destroyInstance(void* user_data) {
     free(user_data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void drawText(PDUI* uiFuncs, const char* startText, uint8_t value, uint32_t bitStart, uint32_t mask, const char* endText)
-{
+static void drawText(PDUI* uiFuncs, const char* startText, uint8_t value, uint32_t bitStart, uint32_t mask, const char* endText) {
     uint32_t v = (value >> bitStart) & mask;
     uiFuncs->text(startText);
     uiFuncs->same_line(0, -1);
@@ -100,8 +95,7 @@ static void drawText(PDUI* uiFuncs, const char* startText, uint8_t value, uint32
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void drawSpritBits(PDUI* uiFuncs, const char* registerText, uint8_t reg, const char* descText)
-{
+static void drawSpritBits(PDUI* uiFuncs, const char* registerText, uint8_t reg, const char* descText) {
     uiFuncs->text(registerText); uiFuncs->next_column();
 
     for (int i = 0; i < 8; ++i) {
@@ -120,8 +114,7 @@ static void drawSpritBits(PDUI* uiFuncs, const char* registerText, uint8_t reg, 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void drawd018(PDUI* uiFuncs, uint8_t value, uint8_t bitmapMode)
-{
+static void drawd018(PDUI* uiFuncs, uint8_t value, uint8_t bitmapMode) {
     uiFuncs->text("$d018 - Memory setup"); uiFuncs->next_column();
 
     if (!bitmapMode) {
@@ -185,8 +178,7 @@ static uint32_t s_colors[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void drawWithColor(PDUI* uiFuncs, const char* regName, uint8_t value)
-{
+static void drawWithColor(PDUI* uiFuncs, const char* regName, uint8_t value) {
     PDRect rect;
     uint32_t v = value & 0xf;
 
@@ -214,8 +206,7 @@ static void drawWithColor(PDUI* uiFuncs, const char* regName, uint8_t value)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void showUI(CustomRegsData* data, PDUI* uiFuncs)
-{
+static void showUI(CustomRegsData* data, PDUI* uiFuncs) {
     uiFuncs->text("");
     uiFuncs->columns(2, "registers", true);
     uiFuncs->text("Name"); uiFuncs->next_column();
@@ -353,8 +344,7 @@ static void showUI(CustomRegsData* data, PDUI* uiFuncs)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void updateMemory(CustomRegsData* user_data, PDReader* reader)
-{
+static void updateMemory(CustomRegsData* user_data, PDReader* reader) {
     void* data;
     uint64_t address = 0;
     uint64_t size = 0;
@@ -373,8 +363,7 @@ static void updateMemory(CustomRegsData* user_data, PDReader* reader)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* writer)
-{
+static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* writer) {
     uint32_t event;
     CustomRegsData* data = (CustomRegsData*)user_data;
 
