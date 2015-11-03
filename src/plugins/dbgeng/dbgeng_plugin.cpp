@@ -7,7 +7,7 @@
 #include <string>
 
 struct DbgEngPlugin : public DebugBaseEventCallbacks {
-    PDDebugState state = PDDebugState_noTarget;
+    PDDebugState state = PDDebugState_NoTarget;
     bool hasValidTarget = false;
 
     std::string targetName;
@@ -87,7 +87,7 @@ STDMETHODIMP DbgEngPlugin::Exception(THIS_
                                      IN PEXCEPTION_RECORD64 Exception,
                                      IN ULONG               FirstChance) {
     printf("DbgEngPlugin: Exception\n");
-    state = PDDebugState_stopException;
+    state = PDDebugState_StopException;
     return S_OK;
 }
 
@@ -175,7 +175,7 @@ static void updateDbgEngEvent(DbgEngPlugin* plugin, PDWriter* writer) {
 void onRun(DbgEngPlugin* plugin) {
     printf("DbgEngPlugin: onRun\n");
 
-    if (plugin->state == PDDebugState_noTarget) {
+    if (plugin->state == PDDebugState_NoTarget) {
         assert(!plugin->targetName.empty());
 
         HRESULT hr = plugin->debugClient->CreateProcess(0, PSTR(plugin->targetName.c_str()), DEBUG_ONLY_THIS_PROCESS);
@@ -187,7 +187,7 @@ void onRun(DbgEngPlugin* plugin) {
             printf("Valid target %s\n", plugin->targetName.c_str());
         }
 
-        plugin->state = PDDebugState_running;
+        plugin->state = PDDebugState_Running;
     }
 }
 
@@ -419,15 +419,16 @@ static PDDebugState update(void* user_data, PDAction action, PDReader* reader, P
 
     doAction(plugin, action);
 
-    if (plugin->state == PDDebugState_running) {
+    if (plugin->state == PDDebugState_Running) {
         updateDbgEngEvent(plugin, writer);
     }
 
     return plugin->state;
 }
 
-static PDBackendPlugin plugin =
-{
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static PDBackendPlugin plugin = {
     "Microsoft Debugger Engine",
     createInstance,
     destroyInstance,
