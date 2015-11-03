@@ -136,10 +136,10 @@ void createMenusForPlugins() {
         if (!plugin)
             continue;
 
-        if (!plugin->registerMenu)
+        if (!plugin->register_menu)
             continue;
 
-        PDMenu* menus = plugin->registerMenu();
+        PDMenu* menus = plugin->register_menu();
         uint32_t menuRange = findMenuIdRange(menus);
 
         while (menus->name) {
@@ -393,7 +393,7 @@ void ProDBG_event(int eventId) {
 
         case PRODBG_MENU_DEBUG_START:
         {
-            Session_action(context->session, PDAction_run);
+            Session_action(context->session, PDAction_Run);
             printf("run....\n");
             break;
         }

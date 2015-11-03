@@ -245,13 +245,13 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     while ((event = PDRead_getEvent(inEvents)) != 0) {
         switch (event) {
-            case PDEventType_setMemory:
+            case PDEventType_SetMemory:
             {
                 updateMemory(data, inEvents);
                 break;
             }
 
-            case PDEventType_setExceptionLocation:
+            case PDEventType_SetExceptionLocation:
             {
                 updateExceptionLocation(data, inEvents);
                 break;
@@ -263,7 +263,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     if (data->requestData) {
         //printf("requesting memory range %04x - %04x\n", (uint16_t)data->sa, (uint16_t)data->ea);
-        PDWrite_eventBegin(writer, PDEventType_getMemory);
+        PDWrite_eventBegin(writer, PDEventType_GetMemory);
         PDWrite_u64(writer, "address_start", data->sa);
         PDWrite_u64(writer, "size", data->ea - data->sa);
         PDWrite_eventEnd(writer);

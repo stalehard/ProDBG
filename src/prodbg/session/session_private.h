@@ -37,7 +37,7 @@ typedef struct Session {
         currentWriter = 0;
         prevWriter = 0;
 
-        state = PDDebugState_noTarget;
+        state = PDDebugState_NoTarget;
         backend = 0;
         connection = 0;
         viewPlugins = 0;

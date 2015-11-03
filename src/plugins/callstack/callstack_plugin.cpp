@@ -207,19 +207,19 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
 
     while ((event = PDRead_getEvent(reader)) != 0) {
         switch (event) {
-            case PDEventType_setCallstack:
+            case PDEventType_SetCallstack:
             {
                 updateCallstack(data, reader);
                 break;
             }
 
-            case PDEventType_selectFrame:
+            case PDEventType_SelectFrame:
             {
                 PDRead_findU32(reader, &data->selectedFrame, "frame", 0);
                 break;
             }
 
-            case PDEventType_setExceptionLocation:
+            case PDEventType_SetExceptionLocation:
             {
                 const char* filename = 0;
                 uint32_t line = 0;
@@ -250,13 +250,13 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
     showUI(uiFuncs, data);
 
     if (data->setSelectedFrame) {
-        PDWrite_eventBegin(writer, PDEventType_selectFrame);
+        PDWrite_eventBegin(writer, PDEventType_SelectFrame);
         PDWrite_u32(writer, "frame", (uint32_t)data->selectedFrame);
         PDWrite_eventEnd(writer);
     }
 
     if (data->request) {
-        PDWrite_eventBegin(writer, PDEventType_getCallstack);
+        PDWrite_eventBegin(writer, PDEventType_GetCallstack);
         PDWrite_eventEnd(writer);
     }
 

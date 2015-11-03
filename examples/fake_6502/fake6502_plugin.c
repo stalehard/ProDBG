@@ -19,7 +19,7 @@ static void* createInstance(ServiceFunc* serviceFunc)
     g_debugger = malloc(sizeof(Debugger6502));    // this is a bit ugly but for this plugin we only have one instance
     memset(g_debugger, 0, sizeof(Debugger6502));
 
-    g_debugger->runState = PDDebugState_running;
+    g_debugger->runState = PDDebugState_Running;
 
     return g_debugger;
 }
@@ -55,7 +55,7 @@ static void writeRegister(PDWriter* writer, const char* name, uint8_t size, uint
 
 static void setRegisters(PDWriter* writer)
 {
-    PDWrite_eventBegin(writer, PDEventType_setRegisters);
+    PDWrite_eventBegin(writer, PDEventType_SetRegisters);
     PDWrite_arrayBegin(writer, "registers");
 
     writeRegister(writer, "pc", 2, pc, 1);
@@ -73,7 +73,7 @@ static void setRegisters(PDWriter* writer)
 
 static void setExceptionLocation(PDWriter* writer)
 {
-    PDWrite_eventBegin(writer,PDEventType_setExceptionLocation); 
+    PDWrite_eventBegin(writer,PDEventType_SetExceptionLocation); 
     PDWrite_u16(writer, "address", pc);
     PDWrite_u8(writer, "address_size", 2);
     PDWrite_eventEnd(writer);
@@ -87,7 +87,7 @@ static void setDisassembly(PDWriter* writer, int start, int instCount)
 
     disassembleToBuffer(temp, &start, &instCount);
 
-    PDWrite_eventBegin(writer, PDEventType_setDisassembly);
+    PDWrite_eventBegin(writer, PDEventType_SetDisassembly);
     PDWrite_u16(writer, "address_start", (uint16_t)start);
     PDWrite_u16(writer, "instruction_count", (uint16_t)instCount);
     PDWrite_string(writer, "string_buffer", temp);
@@ -126,29 +126,29 @@ static void doAction(Debugger6502* debugger, PDAction action, PDWriter* writer)
 
     switch (t)
     {
-        case PDAction_break : 
+        case PDAction_Break : 
         {
             // On this target we can anways break so just set that we have stopped on breakpoint
             
             printf("Fake6502Debugger: break\n");
-            debugger->runState = PDDebugState_stopException;
+            debugger->runState = PDDebugState_StopException;
             sendState(writer);
             break;
         }
 
-        case PDAction_run : 
+        case PDAction_Run : 
         {
             // on this target we can always start running directly again
             printf("Fake6502Debugger: run\n");
-            debugger->runState = PDDebugState_running;
+            debugger->runState = PDDebugState_Running;
             break;
         }
 
-        case PDAction_step : 
+        case PDAction_Step : 
         {
             // on this target we can always stepp 
             printf("Fake6502Debugger: step\n");
-            debugger->runState = PDDebugState_trace;
+            debugger->runState = PDDebugState_Trace;
             sendState(writer);
             break;
         }

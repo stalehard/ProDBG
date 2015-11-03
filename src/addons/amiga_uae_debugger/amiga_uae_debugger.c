@@ -95,7 +95,7 @@ static void connectToLocalHost(PluginData* data) {
         RemoteConnection_destroy(conn);
 
         data->conn = 0;
-        data->state = PDDebugState_noTarget;
+        data->state = PDDebugState_NoTarget;
 
         return;
     }
@@ -110,7 +110,7 @@ static void connectToLocalHost(PluginData* data) {
 
     printf("Proper reply from target\n");
 
-    data->state = PDDebugState_running;
+    data->state = PDDebugState_Running;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -271,7 +271,7 @@ void getRegisters(PluginData* data, PDWriter* writer) {
 
     tdata++; // skip '$'
 
-    PDWrite_eventBegin(writer, PDEventType_setRegisters);
+    PDWrite_eventBegin(writer, PDEventType_SetRegisters);
     PDWrite_arrayBegin(writer, "registers");
 
     // d registers
@@ -366,7 +366,7 @@ static void getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer)
 
     disLength = 0;
 
-    PDWrite_eventBegin(writer, PDEventType_setDisassembly);
+    PDWrite_eventBegin(writer, PDEventType_SetDisassembly);
     PDWrite_arrayBegin(writer, "disassembly");
 
     while (disLength < s_disBufferLength - 3) {
@@ -390,7 +390,7 @@ static void getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void setExceptionLocation(PluginData* data, PDWriter* writer) {
-    PDWrite_eventBegin(writer, PDEventType_setExceptionLocation);
+    PDWrite_eventBegin(writer, PDEventType_SetExceptionLocation);
     PDWrite_u64(writer, "address", data->exceptionLocation);
     PDWrite_u8(writer, "address_size", 4);
     PDWrite_eventEnd(writer);
@@ -417,19 +417,19 @@ static void onStep(PluginData* data, PDWriter* writer) {
 
 static void onAction(PluginData* plugin, PDAction action, PDWriter* writer) {
     switch (action) {
-        case PDAction_step:
+        case PDAction_Step:
         {
             onStep(plugin, writer);
             break;
         }
 
-        case PDAction_none:
-        case PDAction_stop:
-        case PDAction_break:
-        case PDAction_run:
-        case PDAction_stepOut:
-        case PDAction_stepOver:
-        case PDAction_custom:
+        case PDAction_None:
+        case PDAction_Stop:
+        case PDAction_Break:
+        case PDAction_Run:
+        case PDAction_StepOut:
+        case PDAction_StepOver:
+        case PDAction_Custom:
             break;
     }
 }
@@ -448,19 +448,19 @@ PDDebugState update(void* user_data, PDAction action, PDReader* reader, PDWriter
 
     while ((event = PDRead_getEvent(reader))) {
         switch (event) {
-            case PDEventType_getRegisters:
+            case PDEventType_GetRegisters:
             {
                 getRegisters(data, writer);
                 break;
             }
 
-            case PDEventType_getDisassembly:
+            case PDEventType_GetDisassembly:
             {
                 getDisassembly(data, reader, writer);
                 break;
             }
 
-            case PDEventType_menuEvent:
+            case PDEventType_MenuEvent:
             {
                 onMenu(data, reader);
                 break;

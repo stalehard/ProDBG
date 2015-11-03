@@ -65,7 +65,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     while ((event = PDRead_getEvent(inEvents)) != 0) {
         switch (event) {
-            case PDEventType_setLocals:
+            case PDEventType_SetLocals:
             {
                 showInUI((LocalsData*)user_data, inEvents, uiFuncs);
                 break;
@@ -76,7 +76,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     // Request callstack data
     // TODO: Dont' request locals all the time
 
-    PDWrite_eventBegin(outEvents, PDEventType_getLocals);
+    PDWrite_eventBegin(outEvents, PDEventType_GetLocals);
     PDWrite_u8(outEvents, "dummy_remove", 0);   // TODO: Remove me
     PDWrite_eventEnd(outEvents);
 

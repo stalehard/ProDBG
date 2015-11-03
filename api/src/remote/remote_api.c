@@ -57,7 +57,7 @@ int PDRemote_create(struct PDBackendPlugin* plugin, int waitForConnection) {
 
     // \todo Verify that this plugin is ok
     s_plugin = plugin;
-    s_userData = plugin->createInstance(0);
+    s_userData = plugin->create_instance(0);
 
     // wait for connection if waitForConnecion > 0
 

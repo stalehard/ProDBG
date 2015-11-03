@@ -169,7 +169,7 @@ static void toggleBreakpointCurrentLine(PDUISCInterface* sourceFuncs, SourceCode
 
     // TODO: Currenty we don't handly if we set breakpoints on a line we can't
 
-    PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
+    PDWrite_eventBegin(writer, PDEventType_SetBreakpoint);
     PDWrite_string(writer, "filename", data->filename);
     PDWrite_u32(writer, "line", currentLine);
     PDWrite_eventEnd(writer);
@@ -187,14 +187,14 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     while ((event = PDRead_getEvent(inEvents)) != 0) {
         switch (event) {
-            case PDEventType_setExceptionLocation:
+            case PDEventType_SetExceptionLocation:
             {
                 setExceptionLocation(uiFuncs, sourceFuncs, data, inEvents);
                 data->requestFiles = true;
                 break;
             }
 
-            case PDEventType_setSourceCodeFile:
+            case PDEventType_SetSourceCodeFile:
             {
                 const char* filename;
 
@@ -206,13 +206,13 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
                 break;
             }
 
-            case PDEventType_toggleBreakpointCurrentLine:
+            case PDEventType_ToggleBreakpointCurrentLine:
             {
                 toggleBreakpointCurrentLine(sourceFuncs, data, writer);
                 break;
             }
 
-            case PDEventType_setSourceFiles:
+            case PDEventType_SetSourceFiles:
             {
                 // TODO: Store the files
 
@@ -229,11 +229,11 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     //showInUI(data, uiFuncs);
 
-    PDWrite_eventBegin(writer, PDEventType_getExceptionLocation);
+    PDWrite_eventBegin(writer, PDEventType_GetExceptionLocation);
     PDWrite_eventEnd(writer);
 
     if (!data->hasFiles && data->requestFiles) {
-        PDWrite_eventBegin(writer, PDEventType_getSourceFiles);
+        PDWrite_eventBegin(writer, PDEventType_GetSourceFiles);
         PDWrite_eventEnd(writer);
     }
 

@@ -371,7 +371,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
 
     while ((event = PDRead_getEvent(reader)) != 0) {
         switch (event) {
-            case PDEventType_setExceptionLocation:
+            case PDEventType_SetExceptionLocation:
             {
                 uint64_t location = 0;
 
@@ -385,7 +385,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
                 break;
             }
 
-            case PDEventType_setMemory:
+            case PDEventType_SetMemory:
             {
                 updateMemory(data, reader);
                 data->hasMemory = true;
@@ -397,7 +397,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
     showUI(data, uiFuncs);
 
     if (data->requestMemory) {
-        PDWrite_eventBegin(writer, PDEventType_getMemory);
+        PDWrite_eventBegin(writer, PDEventType_GetMemory);
         PDWrite_u64(writer, "address_start", 0xd000);
         PDWrite_u64(writer, "size", 0x30);
         PDWrite_eventEnd(writer);

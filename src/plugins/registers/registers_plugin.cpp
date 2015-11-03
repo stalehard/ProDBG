@@ -148,7 +148,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     while ((event = PDRead_getEvent(inEvents)) != 0) {
         switch (event) {
-            case PDEventType_setRegisters:
+            case PDEventType_SetRegisters:
                 updateRegisters(data, inEvents); break;
         }
     }

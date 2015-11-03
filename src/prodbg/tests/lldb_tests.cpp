@@ -38,14 +38,14 @@ static void test_lldb(void** state) {
 
     // Expect that we have a crash here and thus are in PDDebugState_stopException state
 
-    assert_int_equal(session->state, PDDebugState_stopException);
+    assert_int_equal(session->state, PDDebugState_StopException);
 
     // Request locals location.
 
     PDWriter* writer = session->currentWriter;
     PDReader* reader = session->reader;
 
-    PDWrite_eventBegin(writer, PDEventType_getCallstack);
+    PDWrite_eventBegin(writer, PDEventType_GetCallstack);
     PDWrite_u8(writer, "dummy", 0);
     PDWrite_eventEnd(writer);
 
@@ -59,7 +59,7 @@ static void test_lldb(void** state) {
 
     while ((event = PDRead_getEvent(reader)) != 0) {
         switch (event) {
-            case PDEventType_setCallstack:
+            case PDEventType_SetCallstack:
             {
                 foundCallstack = true;
                 break;

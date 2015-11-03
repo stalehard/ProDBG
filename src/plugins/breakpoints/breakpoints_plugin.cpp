@@ -168,13 +168,13 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     while ((event = PDRead_getEvent(inEvents)) != 0) {
         switch (event) {
-            case PDEventType_setBreakpoint:
+            case PDEventType_SetBreakpoint:
             {
                 toogleBreakpointFileLine(data, inEvents);
                 break;
             }
 
-            case PDEventType_replyBreakpoint:
+            case PDEventType_ReplyBreakpoint:
             {
                 uint64_t address = 0;
                 uint32_t id = (uint32_t) ~0;
@@ -242,7 +242,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
         if (needUpdate) {
             // TODO: Add support for file/line
 
-            PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
+            PDWrite_eventBegin(writer, PDEventType_SetBreakpoint);
             PDWrite_u64(writer, "address", (uint64_t)strtol(bp->location.address, 0, 16));
 
             //if (bp->condition[0] != 0)
@@ -257,7 +257,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
         }
 
         if (uiFuncs->button("Delete", {0.0f, 0.0f})) {
-            PDWrite_eventBegin(writer, PDEventType_deleteBreakpoint);
+            PDWrite_eventBegin(writer, PDEventType_DeleteBreakpoint);
             PDWrite_u32(writer, "id", (uint32_t)bp->id);
             PDWrite_eventEnd(writer);
             bp->markDelete = true;

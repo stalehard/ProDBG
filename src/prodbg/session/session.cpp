@@ -124,7 +124,7 @@ void Session_destroy(Session* session) {
             continue;
 
         if (session->backend)
-            session->backend->plugin->destroyInstance(session->backend->userData);
+            session->backend->plugin->destroy_instance(session->backend->userData);
 
         delete session;
 
@@ -271,19 +271,19 @@ Session* Session_startLocal(Session* s, PDBackendPlugin* backend, const char* fi
     s->type = Session_Local;
     s->backend = (PDBackendInstance*)alloc_zero(sizeof(struct PDBackendInstance));
     s->backend->plugin = backend;
-    s->backend->userData = backend->createInstance(Service_getService);
+    s->backend->userData = backend->create_instance(Service_getService);
 
     // Set the executable if we have any
 
     if (filename) {
-        PDWrite_eventBegin(s->currentWriter, PDEventType_setExecutable);
+        PDWrite_eventBegin(s->currentWriter, PDEventType_SetExecutable);
         PDWrite_string(s->currentWriter, "filename", filename);
         PDWrite_eventEnd(s->currentWriter);
 
         // Add existing breakpoints
 
         for (auto i = s->breakpoints.begin(), end = s->breakpoints.end(); i != end; ++i) {
-            PDWrite_eventBegin(s->currentWriter, PDEventType_setBreakpoint);
+            PDWrite_eventBegin(s->currentWriter, PDEventType_SetBreakpoint);
             PDWrite_string(s->currentWriter, "filename", (*i)->filename);
             PDWrite_u32(s->currentWriter, "line", (unsigned int)(*i)->line);
             PDWrite_eventEnd(s->currentWriter);
@@ -312,17 +312,17 @@ Session* Session_createLocal(PDBackendPlugin* backend, const char* filename) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static const char* getStateName(int state) {
-    if (state < PDDebugState_count && state >= 0) {
+    if (state < PDDebugState_Count && state >= 0) {
         switch (state) {
-            case PDDebugState_noTarget:
+            case PDDebugState_NoTarget:
                 return "No target";
-            case PDDebugState_running:
+            case PDDebugState_Running:
                 return "Running";
-            case PDDebugState_stopBreakpoint:
+            case PDDebugState_StopBreakpoint:
                 return "Stop (breakpoint)";
-            case PDDebugState_stopException:
+            case PDDebugState_StopException:
                 return "Stop (exception)";
-            case PDDebugState_trace:
+            case PDDebugState_Trace:
                 return "Trace (stepping)";
         }
     }
@@ -363,7 +363,7 @@ static void toggleBreakpoint(Session* s, PDReader* reader) {
 
     while ((event = PDRead_getEvent(reader)) != 0) {
         switch (event) {
-            case PDEventType_setBreakpoint:
+            case PDEventType_SetBreakpoint:
             {
                 printf("session breakpoint\n");
                 doToggleBreakpoint(s, reader);
@@ -407,7 +407,7 @@ static void updateScript(Session* s, PDReader* reader) {
 
     while ((event = PDRead_getEvent(reader)) != 0) {
         switch (event) {
-            case PDEventType_executeConsole:
+            case PDEventType_ExecuteConsole:
             {
                 executeCommand(s, reader);
                 break;
@@ -481,7 +481,7 @@ const char* getBackendState(PDReader* reader) {
 
     while ((event = PDRead_getEvent(reader)) != 0) {
         switch (event) {
-            case PDEventType_setStatus:
+            case PDEventType_SetStatus:
             {
                 PDRead_findU32(reader, &state, "state", 0);
                 retState = getStateName((int)state);
@@ -579,13 +579,13 @@ void Session_update(Session* s) {
         case Session_Null:
         case Session_Local:
         {
-            updateLocal(s, PDAction_none);
+            updateLocal(s, PDAction_None);
             break;
         }
 
         case Session_Remote:
         {
-            updateRemote(s, PDAction_none);
+            updateRemote(s, PDAction_None);
             break;
         }
     }
@@ -654,7 +654,7 @@ struct ViewPluginInstance** Session_getViewPlugins(struct Session* session, int*
 // TODO: Somewhat temporay functions
 
 void Session_loadSourceFile(Session* s, const char* filename) {
-    PDWrite_eventBegin(s->currentWriter, PDEventType_setExceptionLocation);
+    PDWrite_eventBegin(s->currentWriter, PDEventType_SetExceptionLocation);
     PDWrite_string(s->currentWriter, "filename", filename);
     PDWrite_u32(s->currentWriter, "line", 0);
     PDWrite_eventEnd(s->currentWriter);
@@ -663,7 +663,7 @@ void Session_loadSourceFile(Session* s, const char* filename) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Session_toggleBreakpointCurrentLine(Session* s) {
-    PDWrite_eventBegin(s->currentWriter, PDEventType_toggleBreakpointCurrentLine);
+    PDWrite_eventBegin(s->currentWriter, PDEventType_ToggleBreakpointCurrentLine);
     PDWrite_u8(s->currentWriter, "dummy", 0);
     PDWrite_eventEnd(s->currentWriter);
 }
@@ -674,9 +674,9 @@ void Session_stepIn(Session* s) {
     PDBackendInstance* backend = s->backend;
 
     if (backend)
-        s->state = backend->plugin->update(backend->userData, PDAction_step, s->reader, s->currentWriter);
+        s->state = backend->plugin->update(backend->userData, PDAction_Step, s->reader, s->currentWriter);
     else if (s->type == Session_Remote)
-        Session_action(s, PDAction_step);
+        Session_action(s, PDAction_Step);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -685,9 +685,9 @@ void Session_stepOver(Session* s) {
     PDBackendInstance* backend = s->backend;
 
     if (backend)
-        s->state = backend->plugin->update(backend->userData, PDAction_stepOver, s->reader, s->currentWriter);
+        s->state = backend->plugin->update(backend->userData, PDAction_StepOver, s->reader, s->currentWriter);
     else if (s->type == Session_Remote)
-        Session_action(s, PDAction_stepOver);
+        Session_action(s, PDAction_StepOver);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -713,7 +713,7 @@ SessionStatus Session_onMenu(Session* session, int eventId) {
         if (!plugin)
             continue;
 
-        if (!plugin->registerMenu)
+        if (!plugin->register_menu)
             continue;
 
         // See if this event is own by this plugin
@@ -727,7 +727,7 @@ SessionStatus Session_onMenu(Session* session, int eventId) {
                 backend = (PDBackendInstance*)alloc_zero(sizeof(struct PDBackendInstance));
                 backend->plugin = plugin;
                 backend->pluginData = pluginData;
-                backend->userData = backend->plugin->createInstance(Service_getService);
+                backend->userData = backend->plugin->create_instance(Service_getService);
             }
 
             session->backend = backend;
@@ -737,7 +737,7 @@ SessionStatus Session_onMenu(Session* session, int eventId) {
 
             // Write down
 
-            PDWrite_eventBegin(session->currentWriter, PDEventType_menuEvent);
+            PDWrite_eventBegin(session->currentWriter, PDEventType_MenuEvent);
             PDWrite_u32(session->currentWriter, "menu_id", (uint32_t)(eventId - pluginData->menuStart));
             PDWrite_eventEnd(session->currentWriter);
         }

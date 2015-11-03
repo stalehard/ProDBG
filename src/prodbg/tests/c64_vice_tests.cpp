@@ -64,7 +64,7 @@ static void test_c64_vice_fail_connect(void**) {
 
     // We haven't setup vice at this point so no connect
 
-    assert_int_equal(s_session->state, PDDebugState_noTarget);
+    assert_int_equal(s_session->state, PDDebugState_NoTarget);
 
     Session_destroy(s_session);
 
@@ -76,7 +76,7 @@ static void test_c64_vice_fail_connect(void**) {
 bool getMemory(void* dest, int* len, uint16_t inAddress, int readLength) {
     PDWriter* writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_getMemory);
+    PDWrite_eventBegin(writer, PDEventType_GetMemory);
     PDWrite_u64(writer, "address_start", inAddress);
     PDWrite_u64(writer, "size", (uint32_t)readLength);
     PDWrite_eventEnd(writer);
@@ -94,7 +94,7 @@ bool getMemory(void* dest, int* len, uint16_t inAddress, int readLength) {
         uint64_t dataSize;
         uint64_t address;
 
-        if (event != PDEventType_setMemory)
+        if (event != PDEventType_SetMemory)
             continue;
 
         assert_true(PDRead_findU64(reader, &address, "address", 0) & PDReadStatus_ok);
@@ -148,7 +148,7 @@ bool handleEvents(CPUState* cpuState, Session* session) {
     PDBinaryReader_initStream(reader, PDBinaryWriter_getData(session->currentWriter), PDBinaryWriter_getSize(session->currentWriter));
 
     while ((event = PDRead_getEvent(reader)) != 0) {
-        if (event == PDEventType_setRegisters) {
+        if (event == PDEventType_SetRegisters) {
             updateRegisters(cpuState, reader);
             return true;
         }
@@ -205,7 +205,7 @@ static void test_c64_vice_connect(void**) {
 
     PDWriter* writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_menuEvent);
+    PDWrite_eventBegin(writer, PDEventType_MenuEvent);
     PDWrite_u32(writer, "menu_id", 0);
     PDWrite_eventEnd(writer);
 
@@ -213,7 +213,7 @@ static void test_c64_vice_connect(void**) {
 
     // We haven't setup vice at this point so no connect
 
-    assert_int_not_equal(s_session->state, PDDebugState_noTarget);
+    assert_int_not_equal(s_session->state, PDDebugState_NoTarget);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -222,7 +222,7 @@ void test_c64_vice_start_executable(void**) {
     const char* prgFile = "/Users/danielcollin/code/ProDBG/examples/c64_vice/test.prg";
 
     PDWriter* writer = s_session->currentWriter;
-    PDWrite_eventBegin(writer, PDEventType_setExecutable);
+    PDWrite_eventBegin(writer, PDEventType_SetExecutable);
     PDWrite_string(writer, "filename", prgFile);
     PDWrite_eventEnd(writer);
     PDBinaryWriter_finalize(writer);
@@ -241,7 +241,7 @@ void test_c64_vice_get_registers(void**) {
     CPUState state;
 
     PDWriter* writer = s_session->currentWriter;
-    PDWrite_eventBegin(writer, PDEventType_getRegisters);
+    PDWrite_eventBegin(writer, PDEventType_GetRegisters);
     PDWrite_eventEnd(writer);
     PDBinaryWriter_finalize(writer);
 
@@ -256,19 +256,19 @@ void test_c64_vice_get_registers(void**) {
 void test_c64_vice_step_cpu(void**) {
     CPUState state;
 
-    Session_action(s_session, PDAction_step);
+    Session_action(s_session, PDAction_Step);
     assert_true(handleEvents(&state, s_session));
 
     assert_true(state.pc >= 0x80e && state.pc <= 0x81a);
     assert_int_equal(state.a, 0x22);
     assert_int_equal(state.x, 0x32);
 
-    Session_action(s_session, PDAction_step);
+    Session_action(s_session, PDAction_Step);
     assert_true(handleEvents(&state, s_session));
 
     assert_true(state.pc >= 0x80e && state.pc <= 0x81a);
 
-    Session_action(s_session, PDAction_step);
+    Session_action(s_session, PDAction_Step);
     assert_true(handleEvents(&state, s_session));
 
     assert_true(state.pc >= 0x80e && state.pc <= 0x81a);
@@ -277,7 +277,7 @@ void test_c64_vice_step_cpu(void**) {
 
     PDWriter* writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_getRegisters);
+    PDWrite_eventBegin(writer, PDEventType_GetRegisters);
     PDWrite_eventEnd(writer);
     PDBinaryWriter_finalize(writer);
 
@@ -287,7 +287,7 @@ void test_c64_vice_step_cpu(void**) {
 
     writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_getRegisters);
+    PDWrite_eventBegin(writer, PDEventType_GetRegisters);
     PDWrite_eventEnd(writer);
     PDBinaryWriter_finalize(writer);
 
@@ -319,7 +319,7 @@ void test_c64_vice_get_disassembly(void**) {
 
     PDWriter* writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_getDisassembly);
+    PDWrite_eventBegin(writer, PDEventType_GetDisassembly);
     PDWrite_u64(writer, "address_start", 0x80e);
     PDWrite_u32(writer, "instruction_count", (uint32_t)4);
     PDWrite_eventEnd(writer);
@@ -334,7 +334,7 @@ void test_c64_vice_get_disassembly(void**) {
     uint32_t event;
 
     while ((event = PDRead_getEvent(reader)) != 0) {
-        if (event != PDEventType_setDisassembly)
+        if (event != PDEventType_SetDisassembly)
             continue;
 
         PDReaderIterator it;
@@ -384,7 +384,7 @@ static bool getExceptionLocation(PDReader* reader, uint64_t* address, CPUState* 
 
     while ((event = PDRead_getEvent(reader)) != 0) {
         switch (event) {
-            case PDEventType_setRegisters:
+            case PDEventType_SetRegisters:
             {
                 if (cpuState)
                     updateRegisters(cpuState, reader);
@@ -392,7 +392,7 @@ static bool getExceptionLocation(PDReader* reader, uint64_t* address, CPUState* 
                 break;
             }
 
-            case PDEventType_setExceptionLocation:
+            case PDEventType_SetExceptionLocation:
             {
                 assert_true(PDRead_findU64(reader, address, "address", 0) & PDReadStatus_ok);
                 foundException = true;
@@ -414,7 +414,7 @@ static void stepToPC(uint64_t pc) {
     for (int i = 0; i < 10; ++i) {
         CPUState state;
 
-        Session_action(s_session, PDAction_step);
+        Session_action(s_session, PDAction_Step);
         //Session_update(s_session);
         assert_true(handleEvents(&state, s_session));
 
@@ -466,7 +466,7 @@ static void waitForBreak(uint64_t breakAddress, const CPUState* cpuState, uint64
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void test_c64_vice_basic_breakpoint(void**) {
-    Session_action(s_session, PDAction_step);
+    Session_action(s_session, PDAction_Step);
 
     uint64_t breakAddress = 0x0813;
 
@@ -476,14 +476,14 @@ void test_c64_vice_basic_breakpoint(void**) {
 
     PDWriter* writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
+    PDWrite_eventBegin(writer, PDEventType_SetBreakpoint);
     PDWrite_u64(writer, "address", breakAddress);
     PDWrite_eventEnd(writer);
 
     PDBinaryWriter_finalize(writer);
 
     Session_update(s_session);
-    Session_action(s_session, PDAction_run);
+    Session_action(s_session, PDAction_Run);
 
     waitForBreak(breakAddress, 0, 0);
 
@@ -495,14 +495,14 @@ void test_c64_vice_basic_breakpoint(void**) {
 
     writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
+    PDWrite_eventBegin(writer, PDEventType_SetBreakpoint);
     PDWrite_u64(writer, "address", breakAddress);
     PDWrite_u64(writer, "id", 1);
     PDWrite_eventEnd(writer);
     PDBinaryWriter_finalize(writer);
 
     Session_update(s_session);
-    Session_action(s_session, PDAction_run);
+    Session_action(s_session, PDAction_Run);
 
     waitForBreak(breakAddress, 0, 0);
 
@@ -512,13 +512,13 @@ void test_c64_vice_basic_breakpoint(void**) {
 
     writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_deleteBreakpoint);
+    PDWrite_eventBegin(writer, PDEventType_DeleteBreakpoint);
     PDWrite_u32(writer, "id", 2);
     PDWrite_eventEnd(writer);
     PDBinaryWriter_finalize(writer);
 
     Session_update(s_session);
-    Session_action(s_session, PDAction_run);
+    Session_action(s_session, PDAction_Run);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -526,7 +526,7 @@ void test_c64_vice_basic_breakpoint(void**) {
 void test_c64_vice_breakpoint_cond(void**) {
     CPUState state = { 0 };
 
-    Session_action(s_session, PDAction_step);
+    Session_action(s_session, PDAction_Step);
 
     const uint64_t breakAddress = 0x0816;
 
@@ -536,7 +536,7 @@ void test_c64_vice_breakpoint_cond(void**) {
 
     PDWriter* writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_setBreakpoint);
+    PDWrite_eventBegin(writer, PDEventType_SetBreakpoint);
     PDWrite_u64(writer, "address", breakAddress);
     PDWrite_string(writer, "condition", ".y == 0");
     PDWrite_eventEnd(writer);
@@ -544,7 +544,7 @@ void test_c64_vice_breakpoint_cond(void**) {
     PDBinaryWriter_finalize(writer);
 
     Session_update(s_session);
-    Session_action(s_session, PDAction_run);
+    Session_action(s_session, PDAction_Run);
 
     waitForBreak(breakAddress, &state, CPUState_maskY);
 }
@@ -566,7 +566,7 @@ void test_c64_vice_callstack(void**) {
 
     PDWriter* writer = s_session->currentWriter;
 
-    PDWrite_eventBegin(writer, PDEventType_getCallstack);
+    PDWrite_eventBegin(writer, PDEventType_GetCallstack);
     PDWrite_eventEnd(writer);
     PDBinaryWriter_finalize(writer);
 
@@ -578,7 +578,7 @@ void test_c64_vice_callstack(void**) {
 
     while ((event = PDRead_getEvent(reader)) != 0) {
         switch (event) {
-            case PDEventType_setCallstack:
+            case PDEventType_SetCallstack:
             {
                 if (PDRead_findArray(reader, &it, "callstack", 0) == PDReadStatus_notFound)
                     return;

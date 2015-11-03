@@ -223,13 +223,13 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     while ((event = PDRead_getEvent(inEvents)) != 0) {
         switch (event) {
-            case PDEventType_setDisassembly:
+            case PDEventType_SetDisassembly:
             {
                 setDisassemblyCode(data, inEvents);
                 break;
             }
 
-            case PDEventType_setExceptionLocation:
+            case PDEventType_SetExceptionLocation:
             {
                 uint64_t location = 0;
 
@@ -244,7 +244,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
                 break;
             }
 
-            case PDEventType_setRegisters:
+            case PDEventType_SetRegisters:
             {
                 updateRegisters(data, inEvents);
                 break;
@@ -257,7 +257,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     if (data->requestDisassembly) {
         int pc = (int)(data->pc) & ~(BlockSize - 1);
-        PDWrite_eventBegin(writer, PDEventType_getDisassembly);
+        PDWrite_eventBegin(writer, PDEventType_GetDisassembly);
         PDWrite_u64(writer, "address_start", (uint64_t)pc);
         PDWrite_u32(writer, "instruction_count", (uint32_t)BlockSize / 3);
         PDWrite_eventEnd(writer);

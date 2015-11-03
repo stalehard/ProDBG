@@ -96,22 +96,22 @@ void testWriteReadAction(void**) {
     uint32_t value = 0xfadebabe;
     PDBinaryWriter_reset(writer);
 
-    PDWrite_eventBegin(writer, PDEventType_setExecutable);
+    PDWrite_eventBegin(writer, PDEventType_SetExecutable);
     PDWrite_string(writer, "filename", "/Users/emoon/code/ProDBG/testbed/tundra-output/macosx-clang-debug-default/TestReadWrite");
     PDWrite_eventEnd(writer);
 
-    PDWrite_eventBegin(writer, PDEventType_action);
+    PDWrite_eventBegin(writer, PDEventType_Action);
     PDWrite_u32(writer, "mepa", 3);
     PDWrite_u32(writer, "action", 3);
     PDWrite_eventEnd(writer);
 
     PDBinaryReader_initStream(reader, PDBinaryWriter_getData(writer), PDBinaryWriter_getSize(writer));
 
-    assert_true(PDRead_getEvent(reader) == PDEventType_setExecutable);
+    assert_true(PDRead_getEvent(reader) == PDEventType_SetExecutable);
     assert_true(PDRead_findString(reader, &filename, "filename", 0) == (PDReadStatus_ok | PDReadType_string));
     assert_string_equal("/Users/emoon/code/ProDBG/testbed/tundra-output/macosx-clang-debug-default/TestReadWrite", filename);
 
-    assert_true(PDRead_getEvent(reader) == PDEventType_action);
+    assert_true(PDRead_getEvent(reader) == PDEventType_Action);
     assert_true(PDRead_findU32(reader, &value, "action", 0) == (PDReadStatus_ok | PDReadType_u32));
     assert_true(value == 3);
 }

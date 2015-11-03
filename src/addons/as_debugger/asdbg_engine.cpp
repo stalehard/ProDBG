@@ -54,7 +54,7 @@ static void* createInstance(ServiceFunc* serviceFunc) {
     g_debugger = (AngelScriptDebugger*)malloc(sizeof(AngelScriptDebugger));    // this is a bit ugly but for this plugin we only have one instance
     memset(g_debugger, 0, sizeof(AngelScriptDebugger));
 
-    g_debugger->runState = PDDebugState_running;
+    g_debugger->runState = PDDebugState_Running;
 
     return g_debugger;
 }
@@ -88,13 +88,13 @@ static PDDebugState update(void* userData, PDAction action, PDReader* reader, PD
     uint32_t event;
     while ((event = PDRead_getEvent(reader)) != 0) {
         switch (event) {
-            case PDEventType_getCallstack:
+            case PDEventType_GetCallstack:
                 log_out("GetCallstack!\n");
                 //debugger->engine
                 //getCallstack(reader, writer);
                 break;
 
-            case PDEventType_getLocals:
+            case PDEventType_GetLocals:
                 log_out("GetLocals!\n");
                 //getLocals(reader, writer);
                 break;

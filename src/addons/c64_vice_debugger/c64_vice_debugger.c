@@ -526,7 +526,7 @@ static bool delBreakpoint(PluginData* data, PDReader* reader, PDWriter* writer) 
     int32_t id;
 
     if (PDRead_findS32(reader, &id, "id", 0) == PDReadStatus_notFound) {
-        PDWrite_eventBegin(writer, PDEventType_replyBreakpoint);
+        PDWrite_eventBegin(writer, PDEventType_ReplyBreakpoint);
         PDWrite_string(writer, "error", "No ID being sent for breakpoint");
         PDWrite_eventEnd(writer);
         return false;
@@ -556,13 +556,13 @@ static void connectToLocalHost(PluginData* data) {
         VICEConnection_destroy(conn);
 
         data->conn = 0;
-        data->state = PDDebugState_noTarget;
+        data->state = PDDebugState_NoTarget;
 
         return;
     }
 
     data->conn = conn;
-    data->state = PDDebugState_running;
+    data->state = PDDebugState_Running;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -575,7 +575,7 @@ static void* createInstance(ServiceFunc* serviceFunc) {
 
     getFullName((char*)&data->tempFileFull, "temp/vice_mem_dump");
 
-    data->state = PDDebugState_noTarget;
+    data->state = PDDebugState_NoTarget;
 
     loadConfig(data, "data/c64_vice.cfg");
 
@@ -891,7 +891,7 @@ static void getMemory(PluginData* data, PDReader* reader, PDWriter* writer) {
 
         log_debug("c64_vice: sending memory\n", "");
 
-        PDWrite_eventBegin(writer, PDEventType_setMemory);
+        PDWrite_eventBegin(writer, PDEventType_SetMemory);
         PDWrite_u64(writer, "address", address);
         PDWrite_data(writer, "data", memory + 2, (uint32_t)(readSize - 3));
         PDWrite_eventEnd(writer);
@@ -905,7 +905,7 @@ static void getMemory(PluginData* data, PDReader* reader, PDWriter* writer) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static bool shouldSendCommand(PluginData* data) {
-    bool t0 = data->state != PDDebugState_running;
+    bool t0 = data->state != PDDebugState_Running;
     bool t1 = VICEConnection_isConnected(data->conn);
 
     return t0 && t1;
@@ -1061,7 +1061,7 @@ bool parseDisassemblyCall(PluginData* plugin, const char* res, int len, PDReader
 
     char* pch = strtok(s_tempBuffer, "\n");
 
-    PDWrite_eventBegin(writer, PDEventType_setDisassembly);
+    PDWrite_eventBegin(writer, PDEventType_SetDisassembly);
     PDWrite_arrayBegin(writer, "disassembly");
 
     bool hasAllDisasembly = false;
@@ -1153,7 +1153,7 @@ static bool parseBreakpointCall(PluginData* data, const char* res, int len, PDRe
 
     // add data or update existing
 
-    PDWrite_eventBegin(writer, PDEventType_replyBreakpoint);
+    PDWrite_eventBegin(writer, PDEventType_ReplyBreakpoint);
     PDWrite_u64(writer, "address", bp->address);
     PDWrite_u32(writer, "id", (uint32_t)id);
     PDWrite_eventEnd(writer);
@@ -1262,7 +1262,7 @@ static bool parseForCallstack(PluginData* data, const char* res, int length, PDR
     if (callStackCount == 0)
         return false;
 
-    PDWrite_eventBegin(writer, PDEventType_setCallstack);
+    PDWrite_eventBegin(writer, PDEventType_SetCallstack);
     PDWrite_arrayBegin(writer, "callstack");
 
     for (int i = 0; i < callStackCount; ++i) {
@@ -1306,13 +1306,13 @@ static void processEvents(PluginData* data, PDReader* reader, PDWriter* writer) 
             //case PDEventType_getExceptionLocation : setExceptionLocation(plugin, writer); break;
             //case PDEventType_getCallstack : setCallstack(plugin, writer); break;
 
-            case PDEventType_getRegisters:
+            case PDEventType_GetRegisters:
             {
                 getRegisters(data);
                 break;
             }
 
-            case PDEventType_getCallstack:
+            case PDEventType_GetCallstack:
             {
                 if (shouldSendCommand(data))
                     setCallstack(data, reader, writer);
@@ -1320,7 +1320,7 @@ static void processEvents(PluginData* data, PDReader* reader, PDWriter* writer) 
                 break;
             }
 
-            case PDEventType_getDisassembly:
+            case PDEventType_GetDisassembly:
             {
                 if (shouldSendCommand(data))
                     getDisassembly(data, reader, writer);
@@ -1328,39 +1328,39 @@ static void processEvents(PluginData* data, PDReader* reader, PDWriter* writer) 
                 break;
             }
 
-            case PDEventType_getMemory:
+            case PDEventType_GetMemory:
             {
                 if (shouldSendCommand(data))
                     getMemory(data, reader, writer);
                 break;
             }
 
-            case PDEventType_menuEvent:
+            case PDEventType_MenuEvent:
             {
                 onMenu(data, reader);
                 break;
             }
 
-            case PDEventType_setBreakpoint:
+            case PDEventType_SetBreakpoint:
             {
                 setBreakpoint(data, reader, writer);
 
                 // if we add a breakpoint to VICE it will always stop but if we are already running when
                 // adding the breakpoint we just force VICE to run again
 
-                if (data->state == PDDebugState_running)
+                if (data->state == PDDebugState_Running)
                     send_command(data, "ret\n");
 
                 break;
             }
 
-            case PDEventType_deleteBreakpoint:
+            case PDEventType_DeleteBreakpoint:
             {
                 delBreakpoint(data, reader, writer);
                 break;
             }
 
-            case PDEventType_setExecutable:
+            case PDEventType_SetExecutable:
             {
                 //if (shouldSendCommand(data))
                 setExecutable(data, reader);
@@ -1434,7 +1434,7 @@ static void stopOnExec(PluginData* plugin, const char* data) {
 
     plugin->hasUpdatedRegistes = true;
     plugin->hasUpdatedExceptionLocation = true;
-    plugin->state = PDDebugState_stopBreakpoint;
+    plugin->state = PDDebugState_StopBreakpoint;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1466,7 +1466,7 @@ void updateEvents(PluginData* plugin) {
     if (!getData(plugin, &res, &len))
         return;
 
-    plugin->state = PDDebugState_stopException;
+    plugin->state = PDDebugState_StopException;
 
     // do data parsing here
 
@@ -1501,7 +1501,7 @@ bool parseOnStepCall(PluginData* plugin, const char* res, int len, PDReader* rea
 
     plugin->hasUpdatedRegistes = true;
     plugin->hasUpdatedExceptionLocation = true;
-    plugin->state = PDDebugState_trace;
+    plugin->state = PDDebugState_Trace;
 
     return true;
 }
@@ -1527,46 +1527,46 @@ bool onStep(PluginData* data, PDReader* reader, PDWriter* writer) {
 
 static void onAction(PluginData* plugin, PDAction action) {
     switch (action) {
-        case PDAction_none:
+        case PDAction_None:
             break;
 
-        case PDAction_stop:
+        case PDAction_Stop:
         {
             send_command(plugin, "n\n");
             break;
         }
 
-        case PDAction_break:
+        case PDAction_Break:
         {
             send_command(plugin, "n\n");
             break;
         }
 
-        case PDAction_run:
+        case PDAction_Run:
         {
             //if (plugin->state != PDDebugState_running)
             {
                 send_command(plugin, "ret\n");
-                plugin->state = PDDebugState_running;
+                plugin->state = PDDebugState_Running;
             }
 
             break;
         }
 
-        case PDAction_step:
+        case PDAction_Step:
         {
             onStep(plugin, 0, 0);
             break;
         }
 
-        case PDAction_stepOver:
+        case PDAction_StepOver:
         {
             send_command(plugin, "n\n");
             break;
         }
 
-        case PDAction_stepOut:
-        case PDAction_custom:
+        case PDAction_StepOut:
+        case PDAction_Custom:
         {
             break;
         }
@@ -1591,7 +1591,7 @@ static PDDebugState update(void* user_data, PDAction action, PDReader* reader, P
     if (plugin->hasUpdatedRegistes) {
         log_debug("sending registens\n", "");
 
-        PDWrite_eventBegin(writer, PDEventType_setRegisters);
+        PDWrite_eventBegin(writer, PDEventType_SetRegisters);
         PDWrite_arrayBegin(writer, "registers");
 
         writeStatusRegister(writer, "flags", plugin->regs.flags);
@@ -1606,7 +1606,7 @@ static PDDebugState update(void* user_data, PDAction action, PDReader* reader, P
     }
 
     if (plugin->hasUpdatedExceptionLocation) {
-        PDWrite_eventBegin(writer, PDEventType_setExceptionLocation);
+        PDWrite_eventBegin(writer, PDEventType_SetExceptionLocation);
         PDWrite_u64(writer, "address", plugin->regs.pc);
         PDWrite_u8(writer, "address_size", 2);
         PDWrite_eventEnd(writer);

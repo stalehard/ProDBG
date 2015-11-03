@@ -97,13 +97,13 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     while ((event = PDRead_getEvent(inEvents)) != 0) {
         switch (event) {
-            case PDEventType_setThreads:
+            case PDEventType_SetThreads:
             {
                 showInUI((ThreadsData*)user_data, inEvents, uiFuncs);
                 break;
             }
 
-            case PDEventType_setExceptionLocation:
+            case PDEventType_SetExceptionLocation:
             {
                 data->requestData = true;
                 break;
@@ -114,14 +114,14 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     // Request threads data
 
     if (data->setSelectedThread) {
-        PDWrite_eventBegin(outEvents, PDEventType_selectThread);
+        PDWrite_eventBegin(outEvents, PDEventType_SelectThread);
         printf("writing thread id %d\n", data->threadId);
         PDWrite_u32(outEvents, "thread_id", (uint32_t)data->threadId);
         PDWrite_eventEnd(outEvents);
     }
 
     if (data->requestData) {
-        PDWrite_eventBegin(outEvents, PDEventType_getThreads);
+        PDWrite_eventBegin(outEvents, PDEventType_GetThreads);
         PDWrite_eventEnd(outEvents);
     }
 
