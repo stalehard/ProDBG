@@ -26,7 +26,7 @@ typedef struct PDDialogFuncs
 {
 	int (*openFile)(char* dest);
 	int (*saveFile)(char* dest);
-	int (*selectDirectory)(char* dest);
+	int (*select_directory)(char* dest);
 } PDDialogFuncs;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -35,10 +35,10 @@ typedef struct PDDialogFuncs
 
 typedef struct PDSettingsFuncs
 {
-	int64_t (*getInt)(const char* category, const char* value);
-	double (*getReal)(const char* category, const char* value);
-	const char* (*getString)(const char* category, const char* value);
-	uint32_t (*getShortcut)(const char* pluginId, const char* operation);
+	int64_t (*get_int)(const char* category, const char* value);
+	double (*get_real)(const char* category, const char* value);
+	const char* (*get_string)(const char* category, const char* value);
+	uint32_t (*get_shortcut)(const char* plugin_id, const char* operation);
 } PDSettingsFuncs;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

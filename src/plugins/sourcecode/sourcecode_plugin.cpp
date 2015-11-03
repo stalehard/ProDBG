@@ -76,8 +76,8 @@ static void* createInstance(PDUI* uiFuncs, ServiceFunc* serviceFunc) {
 
     s_settings = (PDSettingsFuncs*)serviceFunc(PDSETTINGS_GLOBAL);
 
-    user_data->fastOpenKey = s_settings->getShortcut(s_pluginName, "fast_open");
-    user_data->toggleBreakpointKey = s_settings->getShortcut(s_pluginName, "toggle_breakpoint");
+    user_data->fastOpenKey = s_settings->get_shortcut(s_pluginName, "fast_open");
+    user_data->toggleBreakpointKey = s_settings->get_shortcut(s_pluginName, "toggle_breakpoint");
 
     printf("fastOpenKey 0x%x\n", user_data->fastOpenKey);
     printf("toggleBreakpointKey  0x%x\n", user_data->toggleBreakpointKey);

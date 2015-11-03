@@ -128,7 +128,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
 
     if (uiFuncs->button("...", size)) {
         char outputPath[4096];
-        if (s_dialogFuncs->selectDirectory(outputPath)) {
+        if (s_dialogFuncs->select_directory(outputPath)) {
             array_push(data->paths, string_clone(outputPath));
             populatePath(data, outputPath);
         }
