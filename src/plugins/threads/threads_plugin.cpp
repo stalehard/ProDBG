@@ -38,7 +38,7 @@ static void showInUI(ThreadsData* user_data, PDReader* reader, PDUI* uiFuncs) {
     PDReaderIterator it;
     ThreadsData* data = (ThreadsData*)user_data;
 
-    if (PDRead_findArray(reader, &it, "threads", 0) == PDReadStatus_notFound)
+    if (PDRead_find_array(reader, &it, "threads", 0) == PDReadStatus_NotFound)
         return;
 
     uiFuncs->text("");
@@ -56,14 +56,14 @@ static void showInUI(ThreadsData* user_data, PDReader* reader, PDUI* uiFuncs) {
 
     int oldSelectedThread = data->selectedThread;
 
-    while (PDRead_getNextEntry(reader, &it)) {
+    while (PDRead_get_next_entry(reader, &it)) {
         uint64_t id;
         const char* name = "";
         const char* function = "";
 
-        PDRead_findU64(reader, &id, "id", it);
-        PDRead_findString(reader, &name, "name", it);
-        PDRead_findString(reader, &function, "function", it);
+        PDRead_find_u64(reader, &id, "id", it);
+        PDRead_find_string(reader, &name, "name", it);
+        PDRead_find_string(reader, &function, "function", it);
 
         char label[32];
         sprintf(label, "%llx", id);
@@ -95,7 +95,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     data->requestData = false;
     data->setSelectedThread = false;
 
-    while ((event = PDRead_getEvent(inEvents)) != 0) {
+    while ((event = PDRead_get_event(inEvents)) != 0) {
         switch (event) {
             case PDEventType_SetThreads:
             {
@@ -114,15 +114,15 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     // Request threads data
 
     if (data->setSelectedThread) {
-        PDWrite_eventBegin(outEvents, PDEventType_SelectThread);
+        PDWrite_event_begin(outEvents, PDEventType_SelectThread);
         printf("writing thread id %d\n", data->threadId);
         PDWrite_u32(outEvents, "thread_id", (uint32_t)data->threadId);
-        PDWrite_eventEnd(outEvents);
+        PDWrite_event_end(outEvents);
     }
 
     if (data->requestData) {
-        PDWrite_eventBegin(outEvents, PDEventType_GetThreads);
-        PDWrite_eventEnd(outEvents);
+        PDWrite_event_begin(outEvents, PDEventType_GetThreads);
+        PDWrite_event_end(outEvents);
     }
 
     return 0;

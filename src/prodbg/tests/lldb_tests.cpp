@@ -45,9 +45,9 @@ static void test_lldb(void** state) {
     PDWriter* writer = session->currentWriter;
     PDReader* reader = session->reader;
 
-    PDWrite_eventBegin(writer, PDEventType_GetCallstack);
+    PDWrite_event_begin(writer, PDEventType_GetCallstack);
     PDWrite_u8(writer, "dummy", 0);
-    PDWrite_eventEnd(writer);
+    PDWrite_event_end(writer);
 
     Session_update(session);
 
@@ -57,7 +57,7 @@ static void test_lldb(void** state) {
     uint32_t event;
     bool foundCallstack = false;
 
-    while ((event = PDRead_getEvent(reader)) != 0) {
+    while ((event = PDRead_get_event(reader)) != 0) {
         switch (event) {
             case PDEventType_SetCallstack:
             {

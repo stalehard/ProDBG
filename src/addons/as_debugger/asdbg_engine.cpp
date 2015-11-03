@@ -86,7 +86,7 @@ static PDDebugState update(void* userData, PDAction action, PDReader* reader, PD
     //doAction(debugger, action, writer);
 
     uint32_t event;
-    while ((event = PDRead_getEvent(reader)) != 0) {
+    while ((event = PDRead_get_event(reader)) != 0) {
         switch (event) {
             case PDEventType_GetCallstack:
                 log_out("GetCallstack!\n");

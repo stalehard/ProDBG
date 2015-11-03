@@ -56,24 +56,24 @@ static void destroyInstance(void* user_data) {
 
 static void getAddressString(char* value, PDReader* reader, PDReaderIterator it) {
     uint64_t regValue;
-    uint32_t type = PDRead_findU64(reader, &regValue, "address", it);
+    uint32_t type = PDRead_find_u64(reader, &regValue, "address", it);
 
-    switch (type & PDReadStatus_typeMask) {
-        case PDReadType_u8:
+    switch (type & PDReadStatus_TypeMask) {
+        case PDReadType_U8:
             sprintf(value, "0x%02x", (uint8_t)regValue); break;
-        case PDReadType_s8:
+        case PDReadType_S8:
             sprintf(value, "0x%02x", (int8_t)regValue); break;
-        case PDReadType_u16:
+        case PDReadType_U16:
             sprintf(value, "0x%04x", (uint16_t)regValue); break;
-        case PDReadType_s16:
+        case PDReadType_S16:
             sprintf(value, "0x%04x", (int16_t)regValue); break;
-        case PDReadType_u32:
+        case PDReadType_U32:
             sprintf(value, "0x%08x", (uint32_t)regValue); break;
-        case PDReadType_s32:
+        case PDReadType_S32:
             sprintf(value, "0x%08x", (int32_t)regValue); break;
-        case PDReadType_u64:
+        case PDReadType_U64:
             sprintf(value, "0x%014llx", (uint64_t)regValue); break;
-        case PDReadType_s64:
+        case PDReadType_S64:
             sprintf(value, "0x%014llx", (int64_t)regValue); break;
     }
 }
@@ -96,7 +96,7 @@ static int findSeparator(const char* str) {
 static void updateCallstack(CallstackData* data, PDReader* reader) {
     PDReaderIterator it;
 
-    if (PDRead_findArray(reader, &it, "callstack", 0) == PDReadStatus_notFound)
+    if (PDRead_find_array(reader, &it, "callstack", 0) == PDReadStatus_NotFound)
         return;
 
     for (CallstackEntry& entry : data->callstack) {
@@ -109,7 +109,7 @@ static void updateCallstack(CallstackData* data, PDReader* reader) {
 
     // TODO: Have a "spec" for the callstack to be used
 
-    while (PDRead_getNextEntry(reader, &it)) {
+    while (PDRead_get_next_entry(reader, &it)) {
         const char* filename = "";
         const char* module = "";
         char address[64] = { 0 };
@@ -119,9 +119,9 @@ static void updateCallstack(CallstackData* data, PDReader* reader) {
 
         getAddressString(address, reader, it);
 
-        PDRead_findString(reader, &filename, "filename", it);
-        PDRead_findString(reader, &module, "module_name", it);
-        PDRead_findU32(reader, &line, "line", it);
+        PDRead_find_string(reader, &filename, "filename", it);
+        PDRead_find_string(reader, &module, "module_name", it);
+        PDRead_find_u32(reader, &line, "line", it);
 
         entry.address = strdup(address);
         entry.line = -1;
@@ -205,7 +205,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
     data->request = false;
     data->setSelectedFrame = false;
 
-    while ((event = PDRead_getEvent(reader)) != 0) {
+    while ((event = PDRead_get_event(reader)) != 0) {
         switch (event) {
             case PDEventType_SetCallstack:
             {
@@ -215,7 +215,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
 
             case PDEventType_SelectFrame:
             {
-                PDRead_findU32(reader, &data->selectedFrame, "frame", 0);
+                PDRead_find_u32(reader, &data->selectedFrame, "frame", 0);
                 break;
             }
 
@@ -225,15 +225,15 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
                 uint32_t line = 0;
                 uint64_t location = 0;
 
-                PDRead_findU64(reader, &location, "address", 0);
+                PDRead_find_u64(reader, &location, "address", 0);
 
                 if (location != data->location) {
                     data->location = location;
                     data->request = true;
                 }
 
-                PDRead_findString(reader, &filename, "filename", 0);
-                PDRead_findU32(reader, &line, "line", 0);
+                PDRead_find_string(reader, &filename, "filename", 0);
+                PDRead_find_u32(reader, &line, "line", 0);
 
                 if (!filename || line == 0)
                     break;
@@ -250,14 +250,14 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
     showUI(uiFuncs, data);
 
     if (data->setSelectedFrame) {
-        PDWrite_eventBegin(writer, PDEventType_SelectFrame);
+        PDWrite_event_begin(writer, PDEventType_SelectFrame);
         PDWrite_u32(writer, "frame", (uint32_t)data->selectedFrame);
-        PDWrite_eventEnd(writer);
+        PDWrite_event_end(writer);
     }
 
     if (data->request) {
-        PDWrite_eventBegin(writer, PDEventType_GetCallstack);
-        PDWrite_eventEnd(writer);
+        PDWrite_event_begin(writer, PDEventType_GetCallstack);
+        PDWrite_event_end(writer);
     }
 
     return 0;

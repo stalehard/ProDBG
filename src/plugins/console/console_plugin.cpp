@@ -321,7 +321,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     // test working build
 
-    /*while ((event = PDRead_getEvent(inEvents)) != 0)
+    /*while ((event = PDRead_get_event(inEvents)) != 0)
        {
         switch (event)
         {
@@ -337,9 +337,9 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
 
     for (size_t i = 0; i < consoleData->scripts.size(); ++i) {
-        PDWrite_eventBegin(outEvents, PDEventType_ExecuteConsole);
+        PDWrite_event_begin(outEvents, PDEventType_ExecuteConsole);
         PDWrite_string(outEvents, "command", consoleData->scripts[i]);   // TODO: Remove me
-        PDWrite_eventEnd(outEvents);
+        PDWrite_event_end(outEvents);
         //free(consoleData->scripts[i]);
     }
 
@@ -347,9 +347,9 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     // Request console data
 
-    PDWrite_eventBegin(outEvents, PDEventType_GetConsole);
+    PDWrite_event_begin(outEvents, PDEventType_GetConsole);
     PDWrite_u8(outEvents, "dummy_remove", 0);   // TODO: Remove me
-    PDWrite_eventEnd(outEvents);
+    PDWrite_event_end(outEvents);
 
     return 0;
 }

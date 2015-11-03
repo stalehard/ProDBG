@@ -194,9 +194,9 @@ static void updateMemory(HexMemoryData* user_data, PDReader* reader) {
     uint64_t address = 0;
     uint64_t size = 0;
 
-    PDRead_findU64(reader, &address, "address", 0);
+    PDRead_find_u64(reader, &address, "address", 0);
 
-    if (PDRead_findData(reader, &data, &size, "data", 0) == PDReadStatus_notFound)
+    if (PDRead_find_data(reader, &data, &size, "data", 0) == PDReadStatus_NotFound)
         return;
 
     //printf("%s(%d) update memory\n", __FILE__, __LINE__);
@@ -223,7 +223,7 @@ static void updateMemory(HexMemoryData* user_data, PDReader* reader) {
 static void updateExceptionLocation(HexMemoryData* data, PDReader* reader) {
     uint64_t address = 0;
 
-    PDRead_findU64(reader, &address, "address", 0);
+    PDRead_find_u64(reader, &address, "address", 0);
 
     if (data->exceptionLocation == address)
         return;
@@ -243,7 +243,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     // Loop over all the in events
 
-    while ((event = PDRead_getEvent(inEvents)) != 0) {
+    while ((event = PDRead_get_event(inEvents)) != 0) {
         switch (event) {
             case PDEventType_SetMemory:
             {
@@ -263,10 +263,10 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     if (data->requestData) {
         //printf("requesting memory range %04x - %04x\n", (uint16_t)data->sa, (uint16_t)data->ea);
-        PDWrite_eventBegin(writer, PDEventType_GetMemory);
+        PDWrite_event_begin(writer, PDEventType_GetMemory);
         PDWrite_u64(writer, "address_start", data->sa);
         PDWrite_u64(writer, "size", data->ea - data->sa);
-        PDWrite_eventEnd(writer);
+        PDWrite_event_end(writer);
     }
 
     return 0;

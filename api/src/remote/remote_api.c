@@ -116,9 +116,9 @@ int PDRemote_update(int sleepTime) {
 
     state = s_plugin->update(s_userData, (PDAction)action, s_reader, s_writer);
 
-    //PDWrite_eventBegin(s_writer, PDEventType_setStatus);
+    //PDWrite_event_begin(s_writer, PDEventType_setStatus);
     //PDWrite_u32(s_writer, "state", (uint32_t)state);
-    //PDWrite_eventEnd(s_writer);
+    //PDWrite_event_end(s_writer);
 
     PDBinaryWriter_finalize(s_writer);
 

@@ -88,7 +88,7 @@ static void updateCondition(Breakpoint* bp, PDReader* reader) {
 
     bp->condition = 0;
 
-    PDRead_findString(reader, &condition, "condition", 0);
+    PDRead_find_string(reader, &condition, "condition", 0);
 
     if (condition)
         bp->condition = strdup(condition);
@@ -102,8 +102,8 @@ void toogleBreakpointFileLine(BreakpointsData* data, PDReader* reader) {
 
     char fileLine[8192];
 
-    PDRead_findString(reader, &filename, "filename", 0);
-    PDRead_findU32(reader, &line, "line", 0);
+    PDRead_find_string(reader, &filename, "filename", 0);
+    PDRead_find_u32(reader, &line, "line", 0);
 
     if (!filename) {
         return;
@@ -136,7 +136,7 @@ void toogleBreakpointFileLine(BreakpointsData* data, PDReader* reader) {
 void toggleBreakpointAddress(BreakpointsData* data, PDReader* reader) {
     const char* address;
 
-    if (PDRead_findString(reader, &address, "address", 0) == PDReadStatus_notFound)
+    if (PDRead_find_string(reader, &address, "address", 0) == PDReadStatus_NotFound)
         return;
 
     for (auto i = data->breakpoints.begin(); i != data->breakpoints.end(); ++i) {
@@ -166,7 +166,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     BreakpointsData* data = (BreakpointsData*)user_data;
 
-    while ((event = PDRead_getEvent(inEvents)) != 0) {
+    while ((event = PDRead_get_event(inEvents)) != 0) {
         switch (event) {
             case PDEventType_SetBreakpoint:
             {
@@ -179,8 +179,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
                 uint64_t address = 0;
                 uint32_t id = (uint32_t) ~0;
 
-                PDRead_findU64(inEvents, &address, "address", 0);
-                PDRead_findU32(inEvents, &id, "id", 0);
+                PDRead_find_u64(inEvents, &address, "address", 0);
+                PDRead_find_u32(inEvents, &id, "id", 0);
 
                 for (Breakpoint* bp : data->breakpoints) {
                     if ((uint64_t)strtol(bp->location.address, 0, 16) == address) {
@@ -242,7 +242,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
         if (needUpdate) {
             // TODO: Add support for file/line
 
-            PDWrite_eventBegin(writer, PDEventType_SetBreakpoint);
+            PDWrite_event_begin(writer, PDEventType_SetBreakpoint);
             PDWrite_u64(writer, "address", (uint64_t)strtol(bp->location.address, 0, 16));
 
             //if (bp->condition[0] != 0)
@@ -251,15 +251,15 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
             if (bp->id != -1)
                 PDWrite_u32(writer, "id", (uint32_t)bp->id);
 
-            PDWrite_eventEnd(writer);
+            PDWrite_event_end(writer);
 
             printf("Sending breakpint\n");
         }
 
         if (uiFuncs->button("Delete", {0.0f, 0.0f})) {
-            PDWrite_eventBegin(writer, PDEventType_DeleteBreakpoint);
+            PDWrite_event_begin(writer, PDEventType_DeleteBreakpoint);
             PDWrite_u32(writer, "id", (uint32_t)bp->id);
-            PDWrite_eventEnd(writer);
+            PDWrite_event_end(writer);
             bp->markDelete = true;
         }
 

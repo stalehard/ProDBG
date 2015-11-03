@@ -276,17 +276,17 @@ Session* Session_startLocal(Session* s, PDBackendPlugin* backend, const char* fi
     // Set the executable if we have any
 
     if (filename) {
-        PDWrite_eventBegin(s->currentWriter, PDEventType_SetExecutable);
+        PDWrite_event_begin(s->currentWriter, PDEventType_SetExecutable);
         PDWrite_string(s->currentWriter, "filename", filename);
-        PDWrite_eventEnd(s->currentWriter);
+        PDWrite_event_end(s->currentWriter);
 
         // Add existing breakpoints
 
         for (auto i = s->breakpoints.begin(), end = s->breakpoints.end(); i != end; ++i) {
-            PDWrite_eventBegin(s->currentWriter, PDEventType_SetBreakpoint);
+            PDWrite_event_begin(s->currentWriter, PDEventType_SetBreakpoint);
             PDWrite_string(s->currentWriter, "filename", (*i)->filename);
             PDWrite_u32(s->currentWriter, "line", (unsigned int)(*i)->line);
-            PDWrite_eventEnd(s->currentWriter);
+            PDWrite_event_end(s->currentWriter);
         }
     }
 
@@ -336,8 +336,8 @@ static void doToggleBreakpoint(Session* s, PDReader* reader) {
     const char* filename;
     uint32_t line;
 
-    PDRead_findString(reader, &filename, "filename", 0);
-    PDRead_findU32(reader, &line, "line", 0);
+    PDRead_find_string(reader, &filename, "filename", 0);
+    PDRead_find_u32(reader, &line, "line", 0);
 
     for (auto i = s->breakpoints.begin(), end = s->breakpoints.end(); i != end; ++i) {
         if ((*i)->line == (int)line && !strcmp((*i)->filename, filename)) {
@@ -361,7 +361,7 @@ static void doToggleBreakpoint(Session* s, PDReader* reader) {
 static void toggleBreakpoint(Session* s, PDReader* reader) {
     uint32_t event;
 
-    while ((event = PDRead_getEvent(reader)) != 0) {
+    while ((event = PDRead_get_event(reader)) != 0) {
         switch (event) {
             case PDEventType_SetBreakpoint:
             {
@@ -379,7 +379,7 @@ static void executeCommand(Session* s, PDReader* reader) {
     (void)s;
 
     const char* command;
-    PDRead_findString(reader, &command, "command", 0);
+    PDRead_find_string(reader, &command, "command", 0);
     ScriptState* scriptState;
     Script_createState(&scriptState);
     if (Script_loadString(scriptState, command))
@@ -405,7 +405,7 @@ static void executeCommand(Session* s, PDReader* reader) {
 static void updateScript(Session* s, PDReader* reader) {
     uint32_t event;
 
-    while ((event = PDRead_getEvent(reader)) != 0) {
+    while ((event = PDRead_get_event(reader)) != 0) {
         switch (event) {
             case PDEventType_ExecuteConsole:
             {
@@ -479,11 +479,11 @@ const char* getBackendState(PDReader* reader) {
     uint32_t state;
     const char* retState = "Unknown";
 
-    while ((event = PDRead_getEvent(reader)) != 0) {
+    while ((event = PDRead_get_event(reader)) != 0) {
         switch (event) {
             case PDEventType_SetStatus:
             {
-                PDRead_findU32(reader, &state, "state", 0);
+                PDRead_find_u32(reader, &state, "state", 0);
                 retState = getStateName((int)state);
                 goto end;
             }
@@ -654,18 +654,18 @@ struct ViewPluginInstance** Session_getViewPlugins(struct Session* session, int*
 // TODO: Somewhat temporay functions
 
 void Session_loadSourceFile(Session* s, const char* filename) {
-    PDWrite_eventBegin(s->currentWriter, PDEventType_SetExceptionLocation);
+    PDWrite_event_begin(s->currentWriter, PDEventType_SetExceptionLocation);
     PDWrite_string(s->currentWriter, "filename", filename);
     PDWrite_u32(s->currentWriter, "line", 0);
-    PDWrite_eventEnd(s->currentWriter);
+    PDWrite_event_end(s->currentWriter);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Session_toggleBreakpointCurrentLine(Session* s) {
-    PDWrite_eventBegin(s->currentWriter, PDEventType_ToggleBreakpointCurrentLine);
+    PDWrite_event_begin(s->currentWriter, PDEventType_ToggleBreakpointCurrentLine);
     PDWrite_u8(s->currentWriter, "dummy", 0);
-    PDWrite_eventEnd(s->currentWriter);
+    PDWrite_event_end(s->currentWriter);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -737,9 +737,9 @@ SessionStatus Session_onMenu(Session* session, int eventId) {
 
             // Write down
 
-            PDWrite_eventBegin(session->currentWriter, PDEventType_MenuEvent);
+            PDWrite_event_begin(session->currentWriter, PDEventType_MenuEvent);
             PDWrite_u32(session->currentWriter, "menu_id", (uint32_t)(eventId - pluginData->menuStart));
-            PDWrite_eventEnd(session->currentWriter);
+            PDWrite_event_end(session->currentWriter);
         }
     }
 

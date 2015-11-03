@@ -179,7 +179,7 @@ static void onMenu(PluginData* data, PDReader* reader) {
 
     (void)data;
 
-    PDRead_findU32(reader, &menuId, "menu_id", 0);
+    PDRead_find_u32(reader, &menuId, "menu_id", 0);
 
     switch (menuId) {
         case AMIGA_UAE_MENU_ATTACH_TO_UAE:
@@ -241,7 +241,7 @@ static uint32_t get_u32 (const uint8_t** data) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void writeRegister(PDWriter* writer, const char* name, uint8_t size, uint32_t reg, uint8_t readOnly) {
-    PDWrite_arrayEntryBegin(writer);
+    PDWrite_array_entry_begin(writer);
     PDWrite_string(writer, "name", name);
     PDWrite_u8(writer, "size", size);
 
@@ -250,7 +250,7 @@ static void writeRegister(PDWriter* writer, const char* name, uint8_t size, uint
 
     PDWrite_u32(writer, "register", reg);
 
-    PDWrite_arrayEntryEnd(writer);
+    PDWrite_entry_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -271,8 +271,8 @@ void getRegisters(PluginData* data, PDWriter* writer) {
 
     tdata++; // skip '$'
 
-    PDWrite_eventBegin(writer, PDEventType_SetRegisters);
-    PDWrite_arrayBegin(writer, "registers");
+    PDWrite_event_begin(writer, PDEventType_SetRegisters);
+    PDWrite_array_begin(writer, "registers");
 
     // d registers
 
@@ -300,8 +300,8 @@ void getRegisters(PluginData* data, PDWriter* writer) {
     writeRegister(writer, "sr", 4, sr, 0);
     writeRegister(writer, "pc", 4, pc, 0);
 
-    PDWrite_arrayEnd(writer);
-    PDWrite_eventEnd(writer);
+    PDWrite_array_end(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -337,8 +337,8 @@ static void getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer)
     (void)data;
     (void)writer;
 
-    PDRead_findU64(reader, &addressStart, "address_start", 0);
-    PDRead_findU32(reader, &instructionCount, "instruction_count", 0);
+    PDRead_find_u64(reader, &addressStart, "address_start", 0);
+    PDRead_find_u32(reader, &instructionCount, "instruction_count", 0);
 
     s_baseAddress = (uint32_t)addressStart;
 
@@ -366,23 +366,23 @@ static void getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer)
 
     disLength = 0;
 
-    PDWrite_eventBegin(writer, PDEventType_SetDisassembly);
-    PDWrite_arrayBegin(writer, "disassembly");
+    PDWrite_event_begin(writer, PDEventType_SetDisassembly);
+    PDWrite_array_begin(writer, "disassembly");
 
     while (disLength < s_disBufferLength - 3) {
         char tempBuffer[1024];
         int t = m68k_disassemble(tempBuffer, (uint32_t)addressStart + disLength, M68K_CPU_TYPE_68000);
 
-        PDWrite_arrayEntryBegin(writer);
+        PDWrite_array_entry_begin(writer);
         PDWrite_u32(writer, "address", (uint32_t)addressStart + disLength);
         PDWrite_string(writer, "line", tempBuffer);
-        PDWrite_arrayEntryEnd(writer);
+        PDWrite_entry_end(writer);
 
         disLength += t;
     }
 
-    PDWrite_arrayEnd(writer);
-    PDWrite_eventEnd(writer);
+    PDWrite_array_end(writer);
+    PDWrite_event_end(writer);
 
     printf("end dis........\n");
 }
@@ -390,10 +390,10 @@ static void getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void setExceptionLocation(PluginData* data, PDWriter* writer) {
-    PDWrite_eventBegin(writer, PDEventType_SetExceptionLocation);
+    PDWrite_event_begin(writer, PDEventType_SetExceptionLocation);
     PDWrite_u64(writer, "address", data->exceptionLocation);
     PDWrite_u8(writer, "address_size", 4);
-    PDWrite_eventEnd(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -446,7 +446,7 @@ PDDebugState update(void* user_data, PDAction action, PDReader* reader, PDWriter
 
     uint32_t event;
 
-    while ((event = PDRead_getEvent(reader))) {
+    while ((event = PDRead_get_event(reader))) {
         switch (event) {
             case PDEventType_GetRegisters:
             {

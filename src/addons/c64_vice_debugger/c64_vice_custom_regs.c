@@ -349,9 +349,9 @@ static void updateMemory(CustomRegsData* user_data, PDReader* reader) {
     uint64_t address = 0;
     uint64_t size = 0;
 
-    PDRead_findU64(reader, &address, "address", 0);
+    PDRead_find_u64(reader, &address, "address", 0);
 
-    if (PDRead_findData(reader, &data, &size, "data", 0) == PDReadStatus_notFound)
+    if (PDRead_find_data(reader, &data, &size, "data", 0) == PDReadStatus_NotFound)
         return;
 
     if (address != 0xd000 || size != 0x30)
@@ -369,13 +369,13 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
 
     data->requestMemory = false;
 
-    while ((event = PDRead_getEvent(reader)) != 0) {
+    while ((event = PDRead_get_event(reader)) != 0) {
         switch (event) {
             case PDEventType_SetExceptionLocation:
             {
                 uint64_t location = 0;
 
-                PDRead_findU64(reader, &location, "address", 0);
+                PDRead_find_u64(reader, &location, "address", 0);
 
                 if (location != data->location) {
                     data->location = location;
@@ -397,10 +397,10 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* wr
     showUI(data, uiFuncs);
 
     if (data->requestMemory) {
-        PDWrite_eventBegin(writer, PDEventType_GetMemory);
+        PDWrite_event_begin(writer, PDEventType_GetMemory);
         PDWrite_u64(writer, "address_start", 0xd000);
         PDWrite_u64(writer, "size", 0x30);
-        PDWrite_eventEnd(writer);
+        PDWrite_event_end(writer);
     }
 
     return 0;

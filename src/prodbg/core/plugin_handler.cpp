@@ -182,9 +182,9 @@ struct PluginPrivateData {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void registerPlugin(const char* type, void* plugin, void* private_data) {
-    PluginPrivateData* privData = (PluginPrivateData*)private_data;
+    PluginPrivateData* priv_data= (PluginPrivateData*)private_data;
 
-    const char* filename = privData->name;
+    const char* filename = priv_data->name;
 
     for (int i = 0; i < PRODBG_PLUGIN_COUNT; ++i) {
         if (strstr(type, s_pluginTypes[i])) {
@@ -197,8 +197,8 @@ static void registerPlugin(const char* type, void* plugin, void* private_data) {
             pluginData->plugin = plugin;
             pluginData->type = type;
             pluginData->filename = filename;
-            pluginData->fullFilename = privData->fullFilename;
-            pluginData->lib = privData->lib;
+            pluginData->fullFilename = priv_data->fullFilename;
+            pluginData->lib = priv_data->lib;
 
             return (void)array_push(s_plugins[i], pluginData);
         }

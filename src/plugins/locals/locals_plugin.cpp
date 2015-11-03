@@ -33,7 +33,7 @@ static void showInUI(LocalsData* data, PDReader* reader, PDUI* uiFuncs) {
     PDReaderIterator it;
     (void)data;
 
-    if (PDRead_findArray(reader, &it, "locals", 0) == PDReadStatus_notFound)
+    if (PDRead_find_array(reader, &it, "locals", 0) == PDReadStatus_NotFound)
         return;
 
     uiFuncs->text("");
@@ -43,14 +43,14 @@ static void showInUI(LocalsData* data, PDReader* reader, PDUI* uiFuncs) {
     uiFuncs->text("Value"); uiFuncs->next_column();
     uiFuncs->text("Type"); uiFuncs->next_column();
 
-    while (PDRead_getNextEntry(reader, &it)) {
+    while (PDRead_get_next_entry(reader, &it)) {
         const char* name = "";
         const char* value = "";
         const char* type = "";
 
-        PDRead_findString(reader, &name, "name", it);
-        PDRead_findString(reader, &value, "value", it);
-        PDRead_findString(reader, &type, "type", it);
+        PDRead_find_string(reader, &name, "name", it);
+        PDRead_find_string(reader, &value, "value", it);
+        PDRead_find_string(reader, &type, "type", it);
 
         uiFuncs->text(name); uiFuncs->next_column();
         uiFuncs->text(value); uiFuncs->next_column();
@@ -63,7 +63,7 @@ static void showInUI(LocalsData* data, PDReader* reader, PDUI* uiFuncs) {
 static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents) {
     uint32_t event = 0;
 
-    while ((event = PDRead_getEvent(inEvents)) != 0) {
+    while ((event = PDRead_get_event(inEvents)) != 0) {
         switch (event) {
             case PDEventType_SetLocals:
             {
@@ -76,9 +76,9 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     // Request callstack data
     // TODO: Dont' request locals all the time
 
-    PDWrite_eventBegin(outEvents, PDEventType_GetLocals);
+    PDWrite_event_begin(outEvents, PDEventType_GetLocals);
     PDWrite_u8(outEvents, "dummy_remove", 0);   // TODO: Remove me
-    PDWrite_eventEnd(outEvents);
+    PDWrite_event_end(outEvents);
 
     return 0;
 }

@@ -131,10 +131,10 @@ static void setExceptionLocation(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, So
 
     // TODO: How to show this? Tell user to switch to disassembly view?
 
-    if (PDRead_findString(inEvents, &filename, "filename", 0) == PDReadStatus_notFound)
+    if (PDRead_find_string(inEvents, &filename, "filename", 0) == PDReadStatus_NotFound)
         return;
 
-    if (PDRead_findU32(inEvents, &line, "line", 0) == PDReadStatus_notFound)
+    if (PDRead_find_u32(inEvents, &line, "line", 0) == PDReadStatus_NotFound)
         return;
 
     setSourceCodeFile(uiFuncs, sourceFuncs, data, filename, line);
@@ -169,10 +169,10 @@ static void toggleBreakpointCurrentLine(PDUISCInterface* sourceFuncs, SourceCode
 
     // TODO: Currenty we don't handly if we set breakpoints on a line we can't
 
-    PDWrite_eventBegin(writer, PDEventType_SetBreakpoint);
+    PDWrite_event_begin(writer, PDEventType_SetBreakpoint);
     PDWrite_string(writer, "filename", data->filename);
     PDWrite_u32(writer, "line", currentLine);
-    PDWrite_eventEnd(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -185,7 +185,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     SourceCodeData* data = (SourceCodeData*)user_data;
     PDUISCInterface* sourceFuncs = uiFuncs->sc_input_text("test", 800, 700, 0, 0);
 
-    while ((event = PDRead_getEvent(inEvents)) != 0) {
+    while ((event = PDRead_get_event(inEvents)) != 0) {
         switch (event) {
             case PDEventType_SetExceptionLocation:
             {
@@ -198,7 +198,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
             {
                 const char* filename;
 
-                if (PDRead_findString(inEvents, &filename, "filename", 0) == PDReadStatus_notFound)
+                if (PDRead_find_string(inEvents, &filename, "filename", 0) == PDReadStatus_NotFound)
                     break;
 
                 setSourceCodeFile(uiFuncs, sourceFuncs, data, filename, 0);
@@ -229,12 +229,12 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     //showInUI(data, uiFuncs);
 
-    PDWrite_eventBegin(writer, PDEventType_GetExceptionLocation);
-    PDWrite_eventEnd(writer);
+    PDWrite_event_begin(writer, PDEventType_GetExceptionLocation);
+    PDWrite_event_end(writer);
 
     if (!data->hasFiles && data->requestFiles) {
-        PDWrite_eventBegin(writer, PDEventType_GetSourceFiles);
-        PDWrite_eventEnd(writer);
+        PDWrite_event_begin(writer, PDEventType_GetSourceFiles);
+        PDWrite_event_end(writer);
     }
 
     return 0;

@@ -198,8 +198,8 @@ static void setCallstack(LLDBPlugin* plugin, PDWriter* writer)
 
     // TODO: Write type of callstack
 
-    PDWrite_eventBegin(writer, PDEventType_SetCallstack);
-    PDWrite_arrayBegin(writer, "callstack");
+    PDWrite_event_begin(writer, PDEventType_SetCallstack);
+    PDWrite_array_begin(writer, "callstack");
         
     for (int i = 0; i < frameCount; ++i)
     {
@@ -216,7 +216,7 @@ static void setCallstack(LLDBPlugin* plugin, PDWriter* writer)
 
         module.GetFileSpec().GetPath(moduleName, sizeof(moduleName));
 
-        PDWrite_arrayEntryBegin(writer);
+        PDWrite_array_entry_begin(writer);
 
         if (compileUnit.GetNumSupportFiles() > 0)
         {
@@ -234,11 +234,11 @@ static void setCallstack(LLDBPlugin* plugin, PDWriter* writer)
         PDWrite_string(writer, "module_name", moduleName);
         PDWrite_u64(writer, "address", address);
 
-        PDWrite_arrayEntryEnd(writer);
+        PDWrite_entry_end(writer);
     }
 
-    PDWrite_arrayEnd(writer);
-    PDWrite_eventEnd(writer);
+    PDWrite_array_end(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -269,10 +269,10 @@ static void setExceptionLocation(LLDBPlugin* plugin, PDWriter* writer)
     lldb::SBLineEntry entry(context.GetLineEntry());
     uint32_t line = entry.GetLine();
     
-    PDWrite_eventBegin(writer, PDEventType_SetExceptionLocation);
+    PDWrite_event_begin(writer, PDEventType_SetExceptionLocation);
     PDWrite_string(writer, "filename", filename);
     PDWrite_u32(writer, "line", line);
-    PDWrite_eventEnd(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -286,9 +286,9 @@ static void setTty(LLDBPlugin* plugin, PDWriter* writer)
 
     if (amountRead > 0)
     {
-        PDWrite_eventBegin(writer, PDEventType_SetTty);
+        PDWrite_event_begin(writer, PDEventType_SetTty);
         PDWrite_string(writer, "tty", buffer);
-        PDWrite_eventEnd(writer);    
+        PDWrite_event_end(writer);    
     }
 }
 
@@ -298,7 +298,7 @@ static void setExecutable(LLDBPlugin* plugin, PDReader* reader)
 {
     const char* filename = 0;
 
-    PDRead_findString(reader, &filename, "filename", 0);
+    PDRead_find_string(reader, &filename, "filename", 0);
 
     if (!filename)
     {
@@ -345,14 +345,14 @@ static void setLocals(LLDBPlugin* plugin, PDWriter* writer)
     if (count <= 0)
         return;
 
-    PDWrite_eventBegin(writer, PDEventType_SetLocals);
-    PDWrite_arrayBegin(writer, "locals");
+    PDWrite_event_begin(writer, PDEventType_SetLocals);
+    PDWrite_array_begin(writer, "locals");
         
     for (uint32_t i = 0; i < count; ++i)
     {
         lldb::SBValue value = variables.GetValueAtIndex(i);
 
-        PDWrite_arrayEntryBegin(writer);
+        PDWrite_array_entry_begin(writer);
         
         PDWrite_u64(writer, "address", value.GetAddress().GetFileAddress());
 
@@ -365,11 +365,11 @@ static void setLocals(LLDBPlugin* plugin, PDWriter* writer)
         if (value.GetName())
             PDWrite_string(writer, "name", value.GetName());
 
-        PDWrite_arrayEntryEnd(writer);
+        PDWrite_entry_end(writer);
     }
 
-    PDWrite_arrayEnd(writer);
-    PDWrite_eventEnd(writer);
+    PDWrite_array_end(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -381,8 +381,8 @@ static void setThreads(LLDBPlugin* plugin, PDWriter* writer)
     if (threadCount == 0)
     	return;
 
-    PDWrite_eventBegin(writer, PDEventType_SetThreads);
-    PDWrite_arrayBegin(writer, "threads");
+    PDWrite_event_begin(writer, PDEventType_SetThreads);
+    PDWrite_array_begin(writer, "threads");
 
     for (uint32_t i = 0; i < threadCount; ++i)
 	{
@@ -394,7 +394,7 @@ static void setThreads(LLDBPlugin* plugin, PDWriter* writer)
     	const char* queueName = thread.GetQueueName();
     	const char* functionName = frame.GetFunctionName();
 
-        PDWrite_arrayEntryBegin(writer);
+        PDWrite_array_entry_begin(writer);
 
         PDWrite_u64(writer, "id", threadId);
 
@@ -410,11 +410,11 @@ static void setThreads(LLDBPlugin* plugin, PDWriter* writer)
 		else
         	PDWrite_string(writer, "function", "unknown_function"); 
 
-        PDWrite_arrayEntryEnd(writer);
+        PDWrite_entry_end(writer);
 	}
 
-    PDWrite_arrayEnd(writer);
-    PDWrite_eventEnd(writer);
+    PDWrite_array_end(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -424,8 +424,8 @@ static void setBreakpoint(LLDBPlugin* plugin, PDReader* reader, PDWriter* writer
     const char* filename;
     uint32_t line;
 
-    PDRead_findString(reader, &filename, "filename", 0);
-    PDRead_findU32(reader, &line, "line", 0);
+    PDRead_find_string(reader, &filename, "filename", 0);
+    PDRead_find_u32(reader, &line, "line", 0);
 
     // TODO: Handle failure here
 
@@ -468,7 +468,7 @@ static void eventAction(LLDBPlugin* plugin, PDReader* reader)
 {
     uint32_t action = 0;
 
-    printf("LLDBPlugin; %d\n", (PDRead_findU32(reader, &action, "action", 0) & 0xff) >> 8);
+    printf("LLDBPlugin; %d\n", (PDRead_find_u32(reader, &action, "action", 0) & 0xff) >> 8);
     printf("LLDBPlugin: got action (from event) %d\n", action);
 
     doAction(plugin, (PDAction)action);
@@ -511,7 +511,7 @@ static void selectThread(LLDBPlugin* plugin, PDReader* reader, PDWriter* writer)
 {
 	uint64_t threadId;
 
-    PDRead_findU64(reader, &threadId, "thread_id", 0);
+    PDRead_find_u64(reader, &threadId, "thread_id", 0);
 
     printf("trying te set thread %llu\n", threadId);
 
@@ -524,9 +524,9 @@ static void selectThread(LLDBPlugin* plugin, PDReader* reader, PDWriter* writer)
 
 	setCallstack(plugin, writer); 
 
-    PDWrite_eventBegin(writer, PDEventType_SelectFrame);
+    PDWrite_event_begin(writer, PDEventType_SelectFrame);
     PDWrite_u32(writer, "frame", getThreadFrame(plugin, threadId));
-    PDWrite_eventEnd(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -537,7 +537,7 @@ static void selectFrame(LLDBPlugin* plugin, PDReader* reader, PDWriter* writer)
 
 	printf("selectFrame...\n");
 
-    PDRead_findU32(reader, &frameIndex, "frame", 0);
+    PDRead_find_u32(reader, &frameIndex, "frame", 0);
 
 	plugin->frameSelection[plugin->selectedThreadId] = frameIndex;
 
@@ -551,8 +551,8 @@ static void setSourceFiles(LLDBPlugin* plugin, PDWriter* writer)
 	if (!plugin->hasValidTarget)
 		return;
 
-    PDWrite_eventBegin(writer, PDEventType_SetSourceFiles);
-    PDWrite_arrayBegin(writer, "files");
+    PDWrite_event_begin(writer, PDEventType_SetSourceFiles);
+    PDWrite_array_begin(writer, "files");
 
     const uint32_t moduleCount = plugin->target.GetNumModules();
 
@@ -581,15 +581,15 @@ static void setSourceFiles(LLDBPlugin* plugin, PDWriter* writer)
         		if (filename[0] == 0)
         			continue;
 
-				PDWrite_arrayEntryBegin(writer);
+				PDWrite_array_entry_begin(writer);
 				PDWrite_string(writer, "file", filename);
-				PDWrite_arrayEntryEnd(writer);
+				PDWrite_entry_end(writer);
 			}
 		}
 	}
 
-    PDWrite_arrayEnd(writer);
-    PDWrite_eventEnd(writer);
+    PDWrite_array_end(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -598,7 +598,7 @@ static void processEvents(LLDBPlugin* plugin, PDReader* reader, PDWriter* writer
 {
     uint32_t event;
 
-    while ((event = PDRead_getEvent(reader)))
+    while ((event = PDRead_get_event(reader)))
     {
         //printf("LLDBPlugin: %d Got event %s\n", event, eventTypes[event]);
 

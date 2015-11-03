@@ -426,19 +426,19 @@ static bool findBreakpointById(PluginData* data, Breakpoint** breakpoint, int id
     int32_t id;
     Breakpoint* bp;
 
-    if (PDRead_findU32(reader, &id, "id", 0) == PDReadStatus_notFound)
+    if (PDRead_find_u32(reader, &id, "id", 0) == PDReadStatus_NotFound)
     {
-        PDWrite_eventBegin(writer, PDEventType_replyBreakpoint);
+        PDWrite_event_begin(writer, PDEventType_replyBreakpoint);
         PDWrite_string(writer, "error", "No ID being sent for breakpoint");
-        PDWrite_eventEnd(writer);
+        PDWrite_event_end(writer);
         return 0;
     }
 
-    if (PDRead_findU64(reader, address, "address", 0) == PDReadStatus_notFound)
+    if (PDRead_find_u64(reader, address, "address", 0) == PDReadStatus_NotFound)
     {
-        PDWrite_eventBegin(writer, PDEventType_replyBreakpoint);
+        PDWrite_event_begin(writer, PDEventType_replyBreakpoint);
         PDWrite_string(writer, "error", "prodNo address is being sent for breakpoint");
-        PDWrite_eventEnd(writer);
+        PDWrite_event_end(writer);
         return 0;
     }
 
@@ -525,10 +525,10 @@ static bool delBreakpointById(PluginData* data, int32_t id) {
 static bool delBreakpoint(PluginData* data, PDReader* reader, PDWriter* writer) {
     int32_t id;
 
-    if (PDRead_findS32(reader, &id, "id", 0) == PDReadStatus_notFound) {
-        PDWrite_eventBegin(writer, PDEventType_ReplyBreakpoint);
+    if (PDRead_find_s32(reader, &id, "id", 0) == PDReadStatus_NotFound) {
+        PDWrite_event_begin(writer, PDEventType_ReplyBreakpoint);
         PDWrite_string(writer, "error", "No ID being sent for breakpoint");
-        PDWrite_eventEnd(writer);
+        PDWrite_event_end(writer);
         return false;
     }
 
@@ -810,7 +810,7 @@ void destroyInstance(void* user_data) {
 static void onMenu(PluginData* data, PDReader* reader) {
     uint32_t menuId;
 
-    PDRead_findU32(reader, &menuId, "menu_id", 0);
+    PDRead_find_u32(reader, &menuId, "menu_id", 0);
 
     switch (menuId) {
         case C64_VICE_MENU_ATTACH_TO_VICE:
@@ -830,7 +830,7 @@ static void onMenu(PluginData* data, PDReader* reader) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void writeRegister(PDWriter* writer, const char* name, uint8_t size, uint16_t reg, uint8_t readOnly) {
-    PDWrite_arrayEntryBegin(writer);
+    PDWrite_array_entry_begin(writer);
     PDWrite_string(writer, "name", name);
     PDWrite_u8(writer, "size", size);
 
@@ -842,13 +842,13 @@ static void writeRegister(PDWriter* writer, const char* name, uint8_t size, uint
     else
         PDWrite_u8(writer, "register", (uint8_t)reg);
 
-    PDWrite_arrayEntryEnd(writer);
+    PDWrite_entry_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void writeStatusRegister(PDWriter* writer, const char* name, uint16_t reg) {
-    PDWrite_arrayEntryBegin(writer);
+    PDWrite_array_entry_begin(writer);
     PDWrite_string(writer, "name", name);
     PDWrite_u8(writer, "read_only", 1);
 
@@ -860,7 +860,7 @@ static void writeStatusRegister(PDWriter* writer, const char* name, uint16_t reg
 
     PDWrite_string(writer, "register_string", statusString);
 
-    PDWrite_arrayEntryEnd(writer);
+    PDWrite_entry_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -870,8 +870,8 @@ static void getMemory(PluginData* data, PDReader* reader, PDWriter* writer) {
     uint64_t size;
     size_t readSize = 0;
 
-    PDRead_findU64(reader, &address, "address_start", 0);
-    PDRead_findU64(reader, &size, "size", 0);
+    PDRead_find_u64(reader, &address, "address_start", 0);
+    PDRead_find_u64(reader, &size, "size", 0);
 
     // so this is a bit of a hack. If we request memory d000 we switch to io and then back
     // this isn't really correct but will do for now
@@ -891,10 +891,10 @@ static void getMemory(PluginData* data, PDReader* reader, PDWriter* writer) {
 
         log_debug("c64_vice: sending memory\n", "");
 
-        PDWrite_eventBegin(writer, PDEventType_SetMemory);
+        PDWrite_event_begin(writer, PDEventType_SetMemory);
         PDWrite_u64(writer, "address", address);
         PDWrite_data(writer, "data", memory + 2, (uint32_t)(readSize - 3));
-        PDWrite_eventEnd(writer);
+        PDWrite_event_end(writer);
 
         // writer takes a copy
 
@@ -939,7 +939,7 @@ bool parseSetExecutable(PluginData* plugin, const char* res, int len, PDReader* 
 static bool setExecutable(PluginData* data, PDReader* reader) {
     const char* filename = 0;
 
-    PDRead_findString(reader, &filename, "filename", 0);
+    PDRead_find_string(reader, &filename, "filename", 0);
 
     if (!filename) {
         log_debug("Unable to find filename %s\n", filename);
@@ -1061,8 +1061,8 @@ bool parseDisassemblyCall(PluginData* plugin, const char* res, int len, PDReader
 
     char* pch = strtok(s_tempBuffer, "\n");
 
-    PDWrite_eventBegin(writer, PDEventType_SetDisassembly);
-    PDWrite_arrayBegin(writer, "disassembly");
+    PDWrite_event_begin(writer, PDEventType_SetDisassembly);
+    PDWrite_array_begin(writer, "disassembly");
 
     bool hasAllDisasembly = false;
 
@@ -1083,17 +1083,17 @@ bool parseDisassemblyCall(PluginData* plugin, const char* res, int len, PDReader
 
         uint16_t address = (uint16_t)strtol(&line[3], 0, 16);
 
-        PDWrite_arrayEntryBegin(writer);
+        PDWrite_array_entry_begin(writer);
         PDWrite_u16(writer, "address", address);
         PDWrite_string(writer, "line", parseDisassemblyLine(&line[9]));
 
-        PDWrite_arrayEntryEnd(writer);
+        PDWrite_entry_end(writer);
 
         pch = strtok(0, "\n");
     }
 
-    PDWrite_arrayEnd(writer);
-    PDWrite_eventEnd(writer);
+    PDWrite_array_end(writer);
+    PDWrite_event_end(writer);
 
     return hasAllDisasembly;
 }
@@ -1114,8 +1114,8 @@ static bool getDisassembly(PluginData* data, PDReader* reader, PDWriter* writer)
     uint64_t addressStart = 0;
     uint32_t instructionCount = 0;
 
-    PDRead_findU64(reader, &addressStart, "address_start", 0);
-    PDRead_findU32(reader, &instructionCount, "instruction_count", 0);
+    PDRead_find_u64(reader, &addressStart, "address_start", 0);
+    PDRead_find_u32(reader, &instructionCount, "instruction_count", 0);
 
     // assume that one instruction is 3 bytes which is high but that gives us more data back than we need which is better than too little
 
@@ -1153,10 +1153,10 @@ static bool parseBreakpointCall(PluginData* data, const char* res, int len, PDRe
 
     // add data or update existing
 
-    PDWrite_eventBegin(writer, PDEventType_ReplyBreakpoint);
+    PDWrite_event_begin(writer, PDEventType_ReplyBreakpoint);
     PDWrite_u64(writer, "address", bp->address);
     PDWrite_u32(writer, "id", (uint32_t)id);
-    PDWrite_eventEnd(writer);
+    PDWrite_event_end(writer);
 
     log_debug("sending reply back: breakpoint %x - %d\n", bp->address, id);
 
@@ -1178,9 +1178,9 @@ static bool setBreakpoint(PluginData* data, PDReader* reader, PDWriter* writer) 
     int32_t id = -1;
     const char* condition = 0;
 
-    PDRead_findS32(reader, &id, "id", 0);
-    PDRead_findU64(reader, &address, "address", 0);
-    PDRead_findString(reader, &condition, "condition", 0);
+    PDRead_find_s32(reader, &id, "id", 0);
+    PDRead_find_u64(reader, &address, "address", 0);
+    PDRead_find_string(reader, &condition, "condition", 0);
 
     log_debug("got breakpoint %d %llu %s\n", id, address, condition);
 
@@ -1262,17 +1262,17 @@ static bool parseForCallstack(PluginData* data, const char* res, int length, PDR
     if (callStackCount == 0)
         return false;
 
-    PDWrite_eventBegin(writer, PDEventType_SetCallstack);
-    PDWrite_arrayBegin(writer, "callstack");
+    PDWrite_event_begin(writer, PDEventType_SetCallstack);
+    PDWrite_array_begin(writer, "callstack");
 
     for (int i = 0; i < callStackCount; ++i) {
-        PDWrite_arrayEntryBegin(writer);
+        PDWrite_array_entry_begin(writer);
         PDWrite_u16(writer, "address", callStackEntries[i]);
-        PDWrite_arrayEntryEnd(writer);
+        PDWrite_entry_end(writer);
     }
 
-    PDWrite_arrayEnd(writer);
-    PDWrite_eventEnd(writer);
+    PDWrite_array_end(writer);
+    PDWrite_event_end(writer);
 
     return true;
 }
@@ -1301,7 +1301,7 @@ static bool setCallstack(PluginData* data, PDReader* reader, PDWriter* writer) {
 static void processEvents(PluginData* data, PDReader* reader, PDWriter* writer) {
     uint32_t event;
 
-    while ((event = PDRead_getEvent(reader))) {
+    while ((event = PDRead_get_event(reader))) {
         switch (event) {
             //case PDEventType_getExceptionLocation : setExceptionLocation(plugin, writer); break;
             //case PDEventType_getCallstack : setCallstack(plugin, writer); break;
@@ -1591,8 +1591,8 @@ static PDDebugState update(void* user_data, PDAction action, PDReader* reader, P
     if (plugin->hasUpdatedRegistes) {
         log_debug("sending registens\n", "");
 
-        PDWrite_eventBegin(writer, PDEventType_SetRegisters);
-        PDWrite_arrayBegin(writer, "registers");
+        PDWrite_event_begin(writer, PDEventType_SetRegisters);
+        PDWrite_array_begin(writer, "registers");
 
         writeStatusRegister(writer, "flags", plugin->regs.flags);
         writeRegister(writer, "pc", 2, plugin->regs.pc, 1);
@@ -1601,15 +1601,15 @@ static PDDebugState update(void* user_data, PDAction action, PDReader* reader, P
         writeRegister(writer, "x", 1, plugin->regs.x, 0);
         writeRegister(writer, "y", 1, plugin->regs.y, 0);
 
-        PDWrite_arrayEnd(writer);
-        PDWrite_eventEnd(writer);
+        PDWrite_array_end(writer);
+        PDWrite_event_end(writer);
     }
 
     if (plugin->hasUpdatedExceptionLocation) {
-        PDWrite_eventBegin(writer, PDEventType_SetExceptionLocation);
+        PDWrite_event_begin(writer, PDEventType_SetExceptionLocation);
         PDWrite_u64(writer, "address", plugin->regs.pc);
         PDWrite_u8(writer, "address_size", 2);
-        PDWrite_eventEnd(writer);
+        PDWrite_event_end(writer);
     }
 
     return plugin->state;

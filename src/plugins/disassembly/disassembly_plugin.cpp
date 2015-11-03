@@ -140,15 +140,15 @@ void insertLine(DissassemblyData* data, uint64_t address, const char* text) {
 static void setDisassemblyCode(DissassemblyData* data, PDReader* reader) {
     PDReaderIterator it;
 
-    if (PDRead_findArray(reader, &it, "disassembly", 0) == PDReadStatus_notFound)
+    if (PDRead_find_array(reader, &it, "disassembly", 0) == PDReadStatus_NotFound)
         return;
 
-    while (PDRead_getNextEntry(reader, &it)) {
+    while (PDRead_get_next_entry(reader, &it)) {
         uint64_t address;
         const char* text;
 
-        PDRead_findU64(reader, &address, "address", it);
-        PDRead_findString(reader, &text, "line", it);
+        PDRead_find_u64(reader, &address, "address", it);
+        PDRead_find_string(reader, &text, "line", it);
 
         insertLine(data, address, text);
     }
@@ -198,16 +198,16 @@ void renderUI(DissassemblyData* data, PDUI* uiFuncs) {
 static void updateRegisters(DissassemblyData* data, PDReader* reader) {
     PDReaderIterator it;
 
-    if (PDRead_findArray(reader, &it, "registers", 0) == PDReadStatus_notFound)
+    if (PDRead_find_array(reader, &it, "registers", 0) == PDReadStatus_NotFound)
         return;
 
-    while (PDRead_getNextEntry(reader, &it)) {
+    while (PDRead_get_next_entry(reader, &it)) {
         const char* name = "";
 
-        PDRead_findString(reader, &name, "name", it);
+        PDRead_find_string(reader, &name, "name", it);
 
         if (!strcmp(name, "pc")) {
-            PDRead_findU64(reader, &data->pc, "register", it);
+            PDRead_find_u64(reader, &data->pc, "register", it);
         }
     }
 }
@@ -221,7 +221,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     data->requestDisassembly = false;
 
-    while ((event = PDRead_getEvent(inEvents)) != 0) {
+    while ((event = PDRead_get_event(inEvents)) != 0) {
         switch (event) {
             case PDEventType_SetDisassembly:
             {
@@ -233,14 +233,14 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
             {
                 uint64_t location = 0;
 
-                PDRead_findU64(inEvents, &location, "address", 0);
+                PDRead_find_u64(inEvents, &location, "address", 0);
 
                 if (location != data->location) {
                     data->location = location;
                     data->requestDisassembly = true;
                 }
 
-                PDRead_findU8(inEvents, &data->locationSize, "address_size", 0);
+                PDRead_find_u8(inEvents, &data->locationSize, "address_size", 0);
                 break;
             }
 
@@ -257,10 +257,10 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     if (data->requestDisassembly) {
         int pc = (int)(data->pc) & ~(BlockSize - 1);
-        PDWrite_eventBegin(writer, PDEventType_GetDisassembly);
+        PDWrite_event_begin(writer, PDEventType_GetDisassembly);
         PDWrite_u64(writer, "address_start", (uint64_t)pc);
         PDWrite_u32(writer, "instruction_count", (uint32_t)BlockSize / 3);
-        PDWrite_eventEnd(writer);
+        PDWrite_event_end(writer);
     }
 
     return 0;

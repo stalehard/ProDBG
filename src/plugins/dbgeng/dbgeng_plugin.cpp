@@ -262,19 +262,19 @@ static void setCallstack(DbgEngPlugin* plugin, PDWriter* writer) {
     if (framesFilled == 0)
         return;
 
-    PDWrite_eventBegin(writer, PDEventType_setCallstack);
-    PDWrite_arrayBegin(writer, "callstack");
+    PDWrite_event_begin(writer, PDEventType_setCallstack);
+    PDWrite_array_begin(writer, "callstack");
 
     for (ULONG i = 0; i < framesFilled; ++i) {
         const DEBUG_STACK_FRAME& frame = frames[i];
 
-        PDWrite_arrayEntryBegin(writer);
+        PDWrite_array_entry_begin(writer);
         PDWrite_u64(writer, "address", frame.InstructionOffset);
-        PDWrite_arrayEntryEnd(writer);
+        PDWrite_entry_end(writer);
     }
 
-    PDWrite_arrayEnd(writer);
-    PDWrite_eventEnd(writer);
+    PDWrite_array_end(writer);
+    PDWrite_event_end(writer);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -284,7 +284,7 @@ static void setExecutable(DbgEngPlugin* plugin, PDReader* reader) {
 
     const char* filename = 0;
 
-    PDRead_findString(reader, &filename, "filename", 0);
+    PDRead_find_string(reader, &filename, "filename", 0);
 
     if (!filename) {
         printf("Unable to find filename which is required when starting a LLDB debug session\n");
@@ -315,7 +315,7 @@ static void eventAction(DbgEngPlugin* plugin, PDReader* reader) {
 
     uint32_t action = 0;
 
-    printf("DbgEngPlugin; %d\n", (PDRead_findU32(reader, &action, "action", 0) & 0xff) >> 8);
+    printf("DbgEngPlugin; %d\n", (PDRead_find_u32(reader, &action, "action", 0) & 0xff) >> 8);
     printf("DbgEngPlugin: got action (from event) %d\n", action);
 
     doAction(plugin, (PDAction)action);
@@ -355,7 +355,7 @@ static void processEvents(DbgEngPlugin* plugin, PDReader* reader, PDWriter* writ
 
     PDEventType event;
 
-    while ((event = (PDEventType)PDRead_getEvent(reader))) {
+    while ((event = (PDEventType)PDRead_get_event(reader))) {
         printf("DbgEngPlugin: %d Got event %s\n", (int)event, eventTypes[event]);
 
         switch (event) {
