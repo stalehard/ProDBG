@@ -62,7 +62,7 @@ static int dummySaveState(void* userData, struct PDSaveState* saveState) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int dummyLoadState(void* userData, struct PDLoadState* loadState) {
+static int dummyLoadState(void* userData, struct PDLoadState* load_state) {
     int64_t v0;
     int64_t v1;
     double v2;
@@ -77,34 +77,34 @@ static int dummyLoadState(void* userData, struct PDLoadState* loadState) {
 
     (void)userData;
 
-    assert_int_equal(loadState->read_int(loadState->priv_data, &v0), PDLoadStatus_Ok);
+    assert_int_equal(load_state->read_int(load_state->priv_data, &v0), PDLoadStatus_Ok);
     assert_int_equal(v0, -1231);
 
-    assert_int_equal(loadState->read_int(loadState->priv_data, &v1), PDLoadStatus_Ok);
+    assert_int_equal(load_state->read_int(load_state->priv_data, &v1), PDLoadStatus_Ok);
     assert_int_equal(v1, 1);
 
-    assert_int_equal(loadState->read_double(loadState->priv_data, &v2), PDLoadStatus_Converted);
+    assert_int_equal(load_state->read_double(load_state->priv_data, &v2), PDLoadStatus_Converted);
     assert_int_equal((int)v2, 1231);
 
-    assert_int_equal(loadState->read_double(loadState->priv_data, &pi), PDLoadStatus_Ok);
+    assert_int_equal(load_state->read_double(load_state->priv_data, &pi), PDLoadStatus_Ok);
     assert_true(fabs(pi - 3.1415) < 0.0001);
 
-    assert_int_equal(loadState->read_int(loadState->priv_data, &v3), PDLoadStatus_Converted);
+    assert_int_equal(load_state->read_int(load_state->priv_data, &v3), PDLoadStatus_Converted);
     assert_int_equal((int)v3, 8);
 
-    assert_int_equal(loadState->read_string(loadState->priv_data, buffer0, sizeof(buffer0)), PDLoadStatus_Ok);
+    assert_int_equal(load_state->read_string(load_state->priv_data, buffer0, sizeof(buffer0)), PDLoadStatus_Ok);
     assert_string_equal(buffer0, "stoehus");
 
-    assert_int_equal(loadState->read_string(loadState->priv_data, buffer3, 0), PDLoadStatus_Fail);
-    assert_int_equal(loadState->read_string(loadState->priv_data, buffer3, 1), PDLoadStatus_Truncated);
+    assert_int_equal(load_state->read_string(load_state->priv_data, buffer3, 0), PDLoadStatus_Fail);
+    assert_int_equal(load_state->read_string(load_state->priv_data, buffer3, 1), PDLoadStatus_Truncated);
     assert_int_equal(buffer3[0], 0);
 
-    assert_int_equal(loadState->read_string(loadState->priv_data, buffer1, sizeof(buffer1)), PDLoadStatus_Truncated);
+    assert_int_equal(load_state->read_string(load_state->priv_data, buffer1, sizeof(buffer1)), PDLoadStatus_Truncated);
     assert_string_equal(buffer1, "longlong");
 
-    assert_int_equal(loadState->read_int(loadState->priv_data, &dummy), PDLoadStatus_OutOfData);
-    assert_int_equal(loadState->read_double(loadState->priv_data, &v4), PDLoadStatus_OutOfData);
-    assert_int_equal(loadState->read_string(loadState->priv_data, buffer2, sizeof(buffer2)), PDLoadStatus_OutOfData);
+    assert_int_equal(load_state->read_int(load_state->priv_data, &dummy), PDLoadStatus_OutOfData);
+    assert_int_equal(load_state->read_double(load_state->priv_data, &v4), PDLoadStatus_OutOfData);
+    assert_int_equal(load_state->read_string(load_state->priv_data, buffer2, sizeof(buffer2)), PDLoadStatus_OutOfData);
 
     return 1;
 }
@@ -246,7 +246,7 @@ static void session_save_plugin_state(void**) {
 
         saveFuncs.priv_data = array;
 
-        s_dummyPlugin.saveState(0, &saveFuncs);
+        s_dummyPlugin.save_state(0, &saveFuncs);
 
         json_dump_file(root, filename, JSON_COMPACT | JSON_INDENT(4) | JSON_PRESERVE_ORDER);
     }
@@ -266,12 +266,12 @@ static void session_save_plugin_state(void**) {
         json_t* pluginData = json_object_get(root, "plugin_data");
         assert_true(json_typeof(pluginData) == JSON_ARRAY);
 
-        SessionLoadState loadState = { pluginData, (int)json_array_size(pluginData), 0 };
+        SessionLoadState load_state = { pluginData, (int)json_array_size(pluginData), 0 };
 
         PluginIO_initLoadJson(&loadFuncs);
-        loadFuncs.priv_data = &loadState;
+        loadFuncs.priv_data = &load_state;
 
-        s_dummyPlugin.loadState(0, &loadFuncs);
+        s_dummyPlugin.load_state(0, &loadFuncs);
     }
 }
 

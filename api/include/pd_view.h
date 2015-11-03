@@ -21,19 +21,18 @@ struct PDLoadState;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDViewPlugin
-{
+typedef struct PDViewPlugin {
     const char* name;
 
-    void* (*createInstance)(PDUI* uiFuncs, ServiceFunc* serviceFunc);
-    void (*destroyInstance)(void* user_data);
+    void* (*create_instance)(PDUI* ui_funcs, ServiceFunc* servicefFunc);
+    void (*destroy_instance)(void* user_data);
 
     // Updates and Returns the current state of the plugin.
-    int (*update)(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* outEvents);
+    int (*update)(void* user_data, PDUI* uiFuncs, PDReader* reader, PDWriter* writer);
 
     // save/load state
-	int (*saveState)(void* user_data, struct PDSaveState* saveState);
-	int (*loadState)(void* user_data, struct PDLoadState* loadState);
+	int (*save_state)(void* user_data, struct PDSaveState* save_state);
+	int (*load_state)(void* user_data, struct PDLoadState* load_state);
 
 } PDViewPlugin;
 

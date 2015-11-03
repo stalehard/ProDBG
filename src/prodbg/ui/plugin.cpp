@@ -17,7 +17,7 @@ ViewPluginInstance* PluginUI::createViewPlugin(PluginData* pluginData) {
 
     PDViewPlugin* plugin = (PDViewPlugin*)pluginData->plugin;
 
-    void* userData = plugin->createInstance(&instance->ui, Service_getService);
+    void* userData = plugin->create_instance(&instance->ui, Service_getService);
     instance->plugin = plugin;
     instance->userData = userData;
     instance->count = pluginData->count;

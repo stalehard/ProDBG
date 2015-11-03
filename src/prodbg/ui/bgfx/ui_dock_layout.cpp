@@ -136,14 +136,14 @@ static void writeDocks(UIDockingGrid* grid, json_t* root) {
 
         PDViewPlugin* viewPlugin = (PDViewPlugin*)pluginData->plugin;
 
-        if (!viewPlugin->saveState)
+        if (!viewPlugin->save_state)
             continue;
 
         json_t* array = json_array();
 
         saveFuncs.priv_data = array;
 
-        viewPlugin->saveState(dock->view->userData, &saveFuncs);
+        viewPlugin->save_state(dock->view->userData, &saveFuncs);
 
         json_object_set_new(dockItem, "plugin_data", array);
     }
@@ -254,10 +254,10 @@ static void loadDocks(UIDockingGrid* grid, json_t* root) {
 
             json_t* pluginJsonData = json_object_get(item, "plugin_data");
 
-            if (pluginJsonData && viewPlugin && viewPlugin->loadState) {
-                SessionLoadState loadState = { pluginJsonData, (int)json_array_size(pluginJsonData), 0 };
-                loadFuncs.priv_data = &loadState;
-                viewPlugin->loadState(view->userData, &loadFuncs);
+            if (pluginJsonData && viewPlugin && viewPlugin->load_state) {
+                SessionLoadState load_state = { pluginJsonData, (int)json_array_size(pluginJsonData), 0 };
+                loadFuncs.priv_data = &load_state;
+                viewPlugin->load_state(view->userData, &loadFuncs);
             }
         }
 

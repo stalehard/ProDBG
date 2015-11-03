@@ -1993,14 +1993,14 @@ static void saveUserData(struct json_t* item, void* user_data) {
 
     PDViewPlugin* viewPlugin = (PDViewPlugin*)pluginData->plugin;
 
-    if (!viewPlugin->saveState)
+    if (!viewPlugin->save_state)
         return;
 
     json_t* array = json_array();
 
     saveFuncs.priv_data = array;
 
-    viewPlugin->saveState(view->userData, &saveFuncs);
+    viewPlugin->save_state(view->userData, &saveFuncs);
 
     json_object_set_new(item, "plugin_data", array);
 }
@@ -2032,10 +2032,10 @@ static void* loadUserData(struct json_t* item) {
 
         json_t* pluginJsonData = json_object_get(item, "plugin_data");
 
-        if (pluginJsonData && viewPlugin && viewPlugin->loadState) {
-            SessionLoadState loadState = { pluginJsonData, (int)json_array_size(pluginJsonData), 0 };
-            loadFuncs.priv_data = &loadState;
-            viewPlugin->loadState(view->userData, &loadFuncs);
+        if (pluginJsonData && viewPlugin && viewPlugin->load_state) {
+            SessionLoadState load_state = { pluginJsonData, (int)json_array_size(pluginJsonData), 0 };
+            loadFuncs.priv_data = &load_state;
+            viewPlugin->load_state(view->userData, &loadFuncs);
         }
     }
 
