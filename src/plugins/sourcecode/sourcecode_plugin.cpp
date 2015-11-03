@@ -106,8 +106,8 @@ static void setSourceCodeFile(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, Sourc
         PDUI_set_title(uiFuncs, filename);
 
         if (fileData) {
-            PDUI_SCSendCommand(sourceFuncs, SCI_CLEARALL, 0, 0);
-            PDUI_SCSendCommand(sourceFuncs, SCI_ADDTEXT, size, (intptr_t)fileData);
+            PDUI_sc_send_command(sourceFuncs, SCI_CLEARALL, 0, 0);
+            PDUI_sc_send_command(sourceFuncs, SCI_ADDTEXT, size, (intptr_t)fileData);
         }else {
             printf("Sourcecode_plugin: Unable to load %s\n", filename);
         }
@@ -118,7 +118,7 @@ static void setSourceCodeFile(PDUI* uiFuncs, PDUISCInterface* sourceFuncs, Sourc
         data->filename[sizeof(data->filename) - 1] = 0;
     }
 
-    PDUI_SCSendCommand(sourceFuncs, SCI_GOTOLINE, (uintptr_t)line, 0);
+    PDUI_sc_send_command(sourceFuncs, SCI_GOTOLINE, (uintptr_t)line, 0);
 
     data->line = (int)line;
 }
@@ -151,7 +151,7 @@ static void updateKeyboard(SourceCodeData* data, PDUISCInterface* sourceFuncs, P
     }
 
     if (uiFuncs->is_key_down_id(data->toggleBreakpointKey, 0)) {
-        PDUI_SCSendCommand(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
+        PDUI_sc_send_command(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
     }
 }
 
@@ -161,9 +161,9 @@ static void toggleBreakpointCurrentLine(PDUISCInterface* sourceFuncs, SourceCode
     (void)data;
     (void)writer;
 
-    PDUI_SCSendCommand(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
+    PDUI_sc_send_command(sourceFuncs, SCN_TOGGLE_BREAKPOINT, 0, 0);
 
-    uint32_t currentLine = (uint32_t)PDUI_SCSendCommand(sourceFuncs, SCN_GETCURRENT_LINE, 0, 0);
+    uint32_t currentLine = (uint32_t)PDUI_sc_send_command(sourceFuncs, SCN_GETCURRENT_LINE, 0, 0);
 
     printf("currentLine %d\n", currentLine);
 
@@ -224,8 +224,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 
     updateKeyboard(data, sourceFuncs, uiFuncs);
 
-    PDUI_SCUpdate(sourceFuncs);
-    PDUI_SCDraw(sourceFuncs);
+    PDUI_sc_update(sourceFuncs);
+    PDUI_sc_draw(sourceFuncs);
 
     //showInUI(data, uiFuncs);
 

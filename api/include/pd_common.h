@@ -18,8 +18,7 @@ typedef void RegisterPlugin(const char* type, void* data, void* private_data);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct PDPluginBase
-{
+struct PDPluginBase {
     const char* name;
 };
 

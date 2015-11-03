@@ -19,22 +19,19 @@ typedef void* PDUITextureID;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDVec2
-{
+typedef struct PDVec2 {
     float x, y;
 } PDVec2;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDVec4
-{
+typedef struct PDVec4 {
     float x, y, z, w;
 } PDVec4;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDRect
-{
+typedef struct PDRect {
 	float x, y;
 	float width, height;
 } PDRect;
@@ -53,8 +50,7 @@ typedef void* PDUIFont;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef enum PDUIStyleVar
-{
+typedef enum PDUIStyleVar {
     PDUIStyleVar_Invalid = 0,
     PDUIStyleVar_Alpha,             // float
     PDUIStyleVar_WindowPadding,     // PDVec2
@@ -69,8 +65,7 @@ typedef enum PDUIStyleVar
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum PDUIWindowFlags_
-{
+enum PDUIWindowFlags_ {
     // Default: 0
     PDUIWindowFlags_NoTitleBar             = 1 << 0,   // Disable title-bar
     PDUIWindowFlags_NoResize               = 1 << 1,   // Disable user resizing with the lower-right grip
@@ -87,8 +82,7 @@ enum PDUIWindowFlags_
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum PDUIInputTextFlags_
-{
+enum PDUIInputTextFlags_ {
     // Default: 0
     PDUIInputTextFlags_CharsDecimal        = 1 << 0,   // Allow 0123456789.+-*/
     PDUIInputTextFlags_CharsHexadecimal    = 1 << 1,   // Allow 0123456789ABCDEFabcdef
@@ -109,8 +103,7 @@ enum PDUIInputTextFlags_
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Flags for selectable()
 
-enum PDUISelectableFlags_
-{
+enum PDUISelectableFlags_ {
     // Default: 0
     PDUISelectableFlags_DontClosePopups    = 1 << 0,   // Clicking this don't close parent popup window
     PDUISelectableFlags_SpanAllColumns     = 1 << 1    // Selectable frame can span all columns (text will still fit in current column)
@@ -119,8 +112,7 @@ enum PDUISelectableFlags_
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Enumeration for push_style_color() / pop_style_color()
 
-typedef enum PDUICol
-{
+typedef enum PDUICol {
     PDUICol_Text,
     PDUICol_TextDisabled,
     PDUICol_WindowBg,
@@ -170,8 +162,7 @@ typedef enum PDUICol
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Enumeration for color_edit_mode()
 
-typedef enum PDUIColorEditMode
-{
+typedef enum PDUIColorEditMode {
     PDUIColorEditMode_UserSelect = -2,
     PDUIColorEditMode_UserSelectShowButton = -1,
     PDUIColorEditMode_RGB = 0,
@@ -182,8 +173,7 @@ typedef enum PDUIColorEditMode
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Enumeration for get_mouse_cursor()
 
-typedef enum PDUIMouseCursor
-{
+typedef enum PDUIMouseCursor {
     PDUIMouseCursor_Arrow = 0,
     PDUIMouseCursor_TextInput,         // When hovering over InputText, etc.
     PDUIMouseCursor_Move,              // Unused
@@ -197,8 +187,7 @@ typedef enum PDUIMouseCursor
 // Condition flags for setWindow***(), setNextWindow***(), setNextTreeNode***() functions
 // All those functions treat 0 as a shortcut to PDUISetCond_Always
 
-enum PDUISetCond_
-{
+enum PDUISetCond_ {
     PDUISetCond_Always        = 1 << 0, // Set the variable
     PDUISetCond_Once          = 1 << 1, // Only set the variable on the first call per runtime session
     PDUISetCond_FirstUseEver  = 1 << 2, // Only set the variable if the window doesn't exist in the .ini file
@@ -207,8 +196,7 @@ enum PDUISetCond_
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDUIInputTextCallbackData
-{
+typedef struct PDUIInputTextCallbackData {
     PDUIInputTextFlags event_flag;    // One of PDUIInputTextFlags_Callback* // Read-only
     PDUIInputTextFlags flags;        // What user passed to InputText()      // Read-only
     void* user_data;      			 // What user passed to InputText()      // Read-only
@@ -234,8 +222,7 @@ typedef int (*PDUITextEditCallback)(PDUIInputTextCallbackData* data);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDUISCInterface
-{
+typedef struct PDUISCInterface {
 	intptr_t (*send_command)(void* privData, unsigned int message, uintptr_t p0, intptr_t p1);
 	void (*update)(void* privData);
 	void (*draw)(void* privData);
@@ -244,8 +231,7 @@ typedef struct PDUISCInterface
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDUI
-{
+typedef struct PDUI {
 	// Window
 	
 	void (*set_title)(void* private_data, const char* title);
@@ -524,12 +510,11 @@ typedef struct PDUI
 #define PDUI_text_wrapped(uiFuncs, format, ...) uiFuncs->text_wrapped(format, __VA_ARGS__)
 
 #define PDUI_button(uiFuncs, label) uiFuncs->button(label)
-//#define PDUI_buttonSmall(uiFuncs, label) uiFuncs->buttonSmall(label)
-#define PDUI_buttonSize(uiFuncs, label, w, h) uiFuncs->button(label, w, h)
+#define PDUI_button_size(uiFuncs, label, w, h) uiFuncs->button(label, w, h)
 
-#define PDUI_SCSendCommand(funcs, msg, p0, p1) funcs->send_command(funcs->private_data, msg, p0, p1)
-#define PDUI_SCDraw(funcs) funcs->update(funcs->private_data)
-#define PDUI_SCUpdate(funcs) funcs->draw(funcs->private_data)
+#define PDUI_sc_send_command(funcs, msg, p0, p1) funcs->send_command(funcs->private_data, msg, p0, p1)
+#define PDUI_sc_draw(funcs) funcs->update(funcs->private_data)
+#define PDUI_sc_update(funcs) funcs->draw(funcs->private_data)
 
 #define PDUI_set_title(funcs, title) funcs->set_title(funcs->private_data, title)
 

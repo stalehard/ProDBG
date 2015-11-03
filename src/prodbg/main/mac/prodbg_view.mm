@@ -411,13 +411,13 @@ void buildSubMenu(NSMenu* menu, PDMenuItem menuDesc[], int idOffset) {
             NSMenuItem* newItem = [[NSMenuItem alloc] initWithTitle:name action:@selector(onMenuPress:) keyEquivalent:@""];
             [newItem setTag:(menuId)];
 
-            if (desc->macMod & PRODBG_KEY_COMMAND)
+            if (desc->mac_mod & PRODBG_KEY_COMMAND)
                 mask |= NSCommandKeyMask;
-            if (desc->macMod & PRODBG_KEY_SHIFT)
+            if (desc->mac_mod & PRODBG_KEY_SHIFT)
                 mask |= NSShiftKeyMask;
-            if (desc->macMod & PRODBG_KEY_CTRL)
+            if (desc->mac_mod & PRODBG_KEY_CTRL)
                 mask |= NSControlKeyMask;
-            if (desc->macMod & PRODBG_KEY_ALT)
+            if (desc->mac_mod & PRODBG_KEY_ALT)
                 mask |= NSAlternateKeyMask;
 
             NSString* key = 0;
@@ -543,8 +543,8 @@ PDMenuItem* buildPluginsMenu(PluginData** plugins, int count) {
             entry->key = '1' + i;
         }
 
-        entry->macMod = PRODBG_KEY_COMMAND;
-        entry->winMod = PRODBG_KEY_CTRL;
+        entry->mac_mod = PRODBG_KEY_COMMAND;
+        entry->win_mod = PRODBG_KEY_CTRL;
     }
 
     return menu;

@@ -11,8 +11,7 @@ typedef uint64_t PDReaderIterator;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef enum PDReadType
-{
+typedef enum PDReadType {
     /// Default type that represnts no type
     PDReadType_None,
     /// signed 8 bit value
@@ -53,8 +52,7 @@ typedef enum PDReadType
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum PDReadStatus
-{
+enum PDReadStatus {
     // Read operation completed without any problems
     PDReadStatus_Ok = (1 << 8),
     // Read operation completed but value was converted (for example u16 -> u8 which may cause issues)
@@ -71,8 +69,7 @@ enum PDReadStatus
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef enum PDWriteStatus
-{
+typedef enum PDWriteStatus {
     // Returns if a write operation completed ok
     PDWriteStatus_ok,
     // Generic error if write operation failed
@@ -82,8 +79,7 @@ typedef enum PDWriteStatus
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDWriter
-{
+typedef struct PDWriter {
     /**
      * Private data used by the writer
      **/
@@ -386,8 +382,7 @@ typedef struct PDWriter
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct PDReader
-{
+typedef struct PDReader {
     /**
      * Private data for the reader
      */
