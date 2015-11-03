@@ -1998,7 +1998,7 @@ static void saveUserData(struct json_t* item, void* user_data) {
 
     json_t* array = json_array();
 
-    saveFuncs.privData = array;
+    saveFuncs.priv_data = array;
 
     viewPlugin->saveState(view->userData, &saveFuncs);
 
@@ -2034,7 +2034,7 @@ static void* loadUserData(struct json_t* item) {
 
         if (pluginJsonData && viewPlugin && viewPlugin->loadState) {
             SessionLoadState loadState = { pluginJsonData, (int)json_array_size(pluginJsonData), 0 };
-            loadFuncs.privData = &loadState;
+            loadFuncs.priv_data = &loadState;
             viewPlugin->loadState(view->userData, &loadFuncs);
         }
     }

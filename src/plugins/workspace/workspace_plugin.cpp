@@ -184,8 +184,8 @@ static int saveState(void* user_data, PDSaveState* ss) {
     WorkspaceData* data = (WorkspaceData*)user_data;
 
     for (int i = 0; i < array_size(data->paths); ++i) {
-        PDIO_writeString(ss, "path");
-        PDIO_writeString(ss, data->paths[i]);
+        PDIO_write_string(ss, "path");
+        PDIO_write_string(ss, data->paths[i]);
     }
 
     return 0;
@@ -198,9 +198,9 @@ static int loadState(void* user_data, PDLoadState* ls) {
 
     WorkspaceData* data = (WorkspaceData*)user_data;
 
-    while (PDIO_readString(ls, stringData, sizeof(stringData)) != PDLoadStatus_outOfData) {
+    while (PDIO_read_string(ls, stringData, sizeof(stringData)) != PDLoadStatus_OutOfData) {
         if (string_equal(stringData, "path")) {
-            PDIO_readString(ls, stringData, sizeof(stringData));
+            PDIO_read_string(ls, stringData, sizeof(stringData));
             array_push(data->paths, string_clone(stringData));
             populatePath(data, stringData);
         }

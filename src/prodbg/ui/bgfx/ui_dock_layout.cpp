@@ -141,7 +141,7 @@ static void writeDocks(UIDockingGrid* grid, json_t* root) {
 
         json_t* array = json_array();
 
-        saveFuncs.privData = array;
+        saveFuncs.priv_data = array;
 
         viewPlugin->saveState(dock->view->userData, &saveFuncs);
 
@@ -256,7 +256,7 @@ static void loadDocks(UIDockingGrid* grid, json_t* root) {
 
             if (pluginJsonData && viewPlugin && viewPlugin->loadState) {
                 SessionLoadState loadState = { pluginJsonData, (int)json_array_size(pluginJsonData), 0 };
-                loadFuncs.privData = &loadState;
+                loadFuncs.priv_data = &loadState;
                 viewPlugin->loadState(view->userData, &loadFuncs);
             }
         }

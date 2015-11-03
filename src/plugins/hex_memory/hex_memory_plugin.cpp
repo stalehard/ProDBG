@@ -277,8 +277,8 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
 static int saveState(void* user_data, struct PDSaveState* saveState) {
     HexMemoryData* data = (HexMemoryData*)user_data;
 
-    PDIO_writeString(saveState, data->startAddress);
-    PDIO_writeString(saveState, data->endAddress);
+    PDIO_write_string(saveState, data->startAddress);
+    PDIO_write_string(saveState, data->endAddress);
 
     return 1;
 }
@@ -288,8 +288,8 @@ static int saveState(void* user_data, struct PDSaveState* saveState) {
 static int loadState(void* user_data, struct PDLoadState* loadState) {
     HexMemoryData* data = (HexMemoryData*)user_data;
 
-    PDIO_readString(loadState, data->startAddress, sizeof(data->startAddress));
-    PDIO_readString(loadState, data->endAddress, sizeof(data->endAddress));
+    PDIO_read_string(loadState, data->startAddress, sizeof(data->startAddress));
+    PDIO_read_string(loadState, data->endAddress, sizeof(data->endAddress));
 
     return 1;
 }
