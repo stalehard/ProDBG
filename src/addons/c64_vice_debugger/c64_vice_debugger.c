@@ -181,15 +181,17 @@ void* load_to_memory(const char* filename, size_t* size) {
     fseek(f, 0, SEEK_END);
     long ts = ftell(f);
 
-    if (ts < 0)
+    if (ts < 0) {
         goto end;
+	}
 
     s = (size_t)ts;
 
     data = malloc(s);
 
-    if (!data)
+    if (!data) {
         goto end;
+	}
 
     fseek(f, 0, SEEK_SET);
 
@@ -212,8 +214,9 @@ int parse_prg(const char* filename) {
 
     const char* data = (const char*)load_to_memory(filename, &size);
 
-    if (!data)
+    if (!data) {
         return -1;
+	}
 
     if (size < 10) {
         free((void*)data);
@@ -233,7 +236,6 @@ int parse_prg(const char* filename) {
 
     return runAddress;
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -264,8 +266,9 @@ static void load_config(PluginData* data, const char* filename) {
 
     json_t* root = json_load_file(filename, 0, &error);
 
-    if (!root || !json_is_object(root))
+    if (!root || !json_is_object(root)) {
         return;
+	}
 
     log_debug("loaded config\n", "");
 
@@ -275,17 +278,21 @@ static void load_config(PluginData* data, const char* filename) {
                 "kickass_symbols", &kick_ass_symbols,
                 "breakpoints_file", &breakpoint_file);
 
-    if (vice_exe && vice_exe[0] != 0)
+    if (vice_exe && vice_exe[0] != 0) {
         data->config.vice_exe = strdup(vice_exe);
+	}
 
-    if (prg_file && prg_file[0] != 0)
+    if (prg_file && prg_file[0] != 0) {
         data->config.prg_file = strdup(prg_file);
+	}
 
-    if (breakpoint_file && breakpoint_file[0] != 0)
+    if (breakpoint_file && breakpoint_file[0] != 0) {
         data->config.breakpoint_file = strdup(breakpoint_file);
+	}
 
-    if (kick_ass_symbols && kick_ass_symbols[0] != 0)
+    if (kick_ass_symbols && kick_ass_symbols[0] != 0) {
         data->config.kick_ass_symbols = strdup(kick_ass_symbols);
+	}
 
     json_decref(root);
 }
@@ -302,8 +309,9 @@ static void send_command(PluginData* data, const char* format, ...) {
 
     int len = (int)strlen(buffer);
 
-    if (!data->conn)
+    if (!data->conn) {
         return;
+	}
 
     int ret = VICEConnection_send(data->conn, buffer, len, 0);
     (void)ret;
@@ -323,8 +331,9 @@ static bool get_dataToBuffer(PluginData* data, char* resBuffer, int bufferSize, 
     int res = 0;
     int lenCount = 0;
 
-    if (!data->conn)
+    if (!data->conn) {
         return false;
+	}
 
     memset(resBuffer, 0, bufferSize);
 
