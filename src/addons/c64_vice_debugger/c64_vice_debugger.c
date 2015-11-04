@@ -207,7 +207,7 @@ void* load_to_memory(const char* filename, size_t* size) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int parsePrg(const char* filename) {
+int parse_prg(const char* filename) {
     size_t size = 0;
 
     const char* data = (const char*)load_to_memory(filename, &size);
@@ -710,14 +710,14 @@ uint16_t get_basic_start(PluginData* data) {
 
     log_debug("\n", "");
 
-    uint16_t startAddress = (uint16_t)strtol(address, 0, 10);
+    uint16_t start_address = (uint16_t)strtol(address, 0, 10);
 
     log_debug("basic: address to start from (text) %s\n", address);
-    log_debug("start address %d %x\n", startAddress, startAddress);
+    log_debug("start address %d %x\n", start_address, start_address);
 
     free(memory);
 
-    return startAddress;
+    return start_address;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -881,13 +881,15 @@ static void get_memory(PluginData* data, PDReader* reader, PDWriter* writer) {
     // so this is a bit of a hack. If we request memory d000 we switch to io and then back
     // this isn't really correct but will do for now
 
-    if (address == 0xdd00)
+    if (address == 0xdd00) {
         send_command(data, "bank io\n");
+	}
 
     uint8_t* memory = get_memory_internal(data, data->temp_file_full, &read_size, (uint16_t)(address), (uint16_t)(address + size));
 
-    if (address == 0xdd00)
+    if (address == 0xdd00) {
         send_command(data, "bank ram\n");
+	}
 
     if (memory) {
         // Lets do this!
@@ -912,7 +914,6 @@ static void get_memory(PluginData* data, PDReader* reader, PDWriter* writer) {
 static bool should_send_command(PluginData* data) {
     bool t0 = data->state != PDDebugState_Running;
     bool t1 = VICEConnection_isConnected(data->conn);
-
     return t0 && t1;
 }
 
@@ -924,7 +925,6 @@ bool parse_set_executable(PluginData* plugin, const char* res, int len, PDReader
     (void)reader;
     (void)writer;
     (void)res;
-
     return strstr(RECV_BUFFER, "Loading") && strstr(RECV_BUFFER, "(C:$");
 }
 
@@ -953,20 +953,22 @@ static bool set_executable(PluginData* data, PDReader* reader) {
 
     log_debug("set_executable %s\n", filename);
 
-    int startAddress = parsePrg(filename);
+    int start_address = parse_prg(filename);
 
-    if (startAddress == -1)
+    if (start_address == -1) {
         return false;
+	}
 
-    log_debug("loading %s and running from $%x\n", filename, startAddress);
+    log_debug("loading %s and running from $%x\n", filename, start_address);
 
     char temp[2048];
     sprintf(temp, "load \"%s\" 0\n", filename);
 
-    if (!send_command_get_data(data, temp, parse_set_executable, reader, 0, 20))
+    if (!send_command_get_data(data, temp, parse_set_executable, reader, 0, 20)) {
         return false;
+	}
 
-    send_command(data, "g $%x\n", startAddress);
+    send_command(data, "g $%x\n", start_address);
 
     return true;
 }
@@ -1116,15 +1118,15 @@ bool parse_disassassembly_call(PluginData* plugin, const char* res, int len, PDR
 static bool get_disassembly(PluginData* data, PDReader* reader, PDWriter* writer) {
     char temp[2048];
 
-    uint64_t addressStart = 0;
-    uint32_t instructionCount = 0;
+    uint64_t address_start = 0;
+    uint32_t instruction_count = 0;
 
-    PDRead_find_u64(reader, &addressStart, "address_start", 0);
-    PDRead_find_u32(reader, &instructionCount, "instruction_count", 0);
+    PDRead_find_u64(reader, &address_start, "address_start", 0);
+    PDRead_find_u32(reader, &instruction_count, "instruction_count", 0);
 
     // assume that one instruction is 3 bytes which is high but that gives us more data back than we need which is better than too little
 
-    sprintf(temp, "disass $%04x $%04x\n", (uint16_t)addressStart, (uint16_t)(addressStart + instructionCount * 3));
+    sprintf(temp, "disass $%04x $%04x\n", (uint16_t)address_start, (uint16_t)(address_start + instruction_count * 3));
 
     return send_command_get_data(data, temp, parse_disassassembly_call, reader, writer, 20);
 }
@@ -1194,10 +1196,11 @@ static bool set_breakpoint(PluginData* data, PDReader* reader, PDWriter* writer)
 
     char temp[1024];
 
-    if (condition)
+    if (condition) {
         sprintf(temp, "break $%04x if %s\n", (uint16_t)address, condition);
-    else
+	} else {
         sprintf(temp, "break $%04x\n", (uint16_t)address);
+	}
 
     return send_command_get_data(data, temp, parse_breakpoint_call, reader, writer, 20);
 }
@@ -1236,7 +1239,7 @@ static bool find_parentheses(const char* text, const char** start, const char** 
 
 static bool parse_for_callstack(PluginData* data, const char* res, int length, PDReader* reader, PDWriter* writer) {
     uint16_t callstack_entries[256];
-    int callStackCount = 0;
+    int callstack_count = 0;
 
     (void)data;
     (void)reader;
@@ -1259,18 +1262,18 @@ static bool parse_for_callstack(PluginData* data, const char* res, int length, P
         uint16_t offset = (uint16_t)atoi(startText + 1);
         uint16_t address = (uint16_t)strtol(endText + 2, 0, 16);
 
-        callstack_entries[callStackCount++] = address + offset;
+        callstack_entries[callstack_count++] = address + offset;
 
         pch = strtok(0, "\n");
     }
 
-    if (callStackCount == 0)
+    if (callstack_count == 0)
         return false;
 
     PDWrite_event_begin(writer, PDEventType_SetCallstack);
     PDWrite_array_begin(writer, "callstack");
 
-    for (int i = 0; i < callStackCount; ++i) {
+    for (int i = 0; i < callstack_count; ++i) {
         PDWrite_array_entry_begin(writer);
         PDWrite_u16(writer, "address", callstack_entries[i]);
         PDWrite_entry_end(writer);
@@ -1398,8 +1401,9 @@ static uint16_t find_register_in_string(const char* str, const char* needle) {
 static uint16_t find_status_in_string(const char* str) {
     const char* offset = strstr(str, "SP:");
 
-    if (!offset)
+    if (!offset) {
         return 0;
+	}
 
     // Expected string to look like this;
     // SP:XX ..-...Z. and here we jump so we are at this pos: ..-...Z.
@@ -1424,8 +1428,9 @@ static void stop_on_exec(PluginData* plugin, const char* data) {
     const char* stop_on_exec = "Stop on  exec";
     char* found = 0;
 
-    if (!(found = strstr(data, stop_on_exec)))
+    if (!(found = strstr(data, stop_on_exec))) {
         return;
+	}
 
     int execLen = (int)strlen(stop_on_exec);
     found += execLen;
@@ -1481,7 +1486,7 @@ void update_events(PluginData* plugin) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool parse_on_step_call(PluginData* plugin, const char* res, int len, PDReader* reader, PDWriter* writer) {
-    const char* regStart;
+    const char* reg_start;
     const char* step = strstr(res, ".C");
 
     (void)reader;
@@ -1491,17 +1496,17 @@ bool parse_on_step_call(PluginData* plugin, const char* res, int len, PDReader* 
     if (!step)
         return false;
 
-    if (!(regStart = find_reg_start(res)))
+    if (!(reg_start = find_reg_start(res)))
         return false;
 
     // return data from VICE is of the follwing format:
     // .C:0811  EE 20 D0    INC $D020      - A:00 X:17 Y:17 SP:f6 ..-.....   19262882
 
     plugin->regs.pc = (uint16_t)strtol(&step[3], 0, 16);
-    plugin->regs.a = (uint8_t)find_register_in_string(regStart, "A:");
-    plugin->regs.x = (uint8_t)find_register_in_string(regStart, "X:");
-    plugin->regs.y = (uint8_t)find_register_in_string(regStart, "Y:");
-    plugin->regs.sp = (uint8_t)find_register_in_string(regStart, "SP:");
+    plugin->regs.a = (uint8_t)find_register_in_string(reg_start, "A:");
+    plugin->regs.x = (uint8_t)find_register_in_string(reg_start, "X:");
+    plugin->regs.y = (uint8_t)find_register_in_string(reg_start, "Y:");
+    plugin->regs.sp = (uint8_t)find_register_in_string(reg_start, "SP:");
     plugin->regs.flags = (uint8_t)find_status_in_string(res);
 
     plugin->has_updated_registers = true;
@@ -1578,7 +1583,6 @@ static void on_action(PluginData* plugin, PDAction action) {
     }
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static PDDebugState update(void* user_data, PDAction action, PDReader* reader, PDWriter* writer) {
@@ -1622,8 +1626,7 @@ static PDDebugState update(void* user_data, PDAction action, PDReader* reader, P
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDMenuItem MENU_0[] =
-{
+static PDMenuItem MENU_0[] = {
     { "Attach To VICE", C64_VICE_MENU_ATTACH_TO_VICE, 0, 0, 0 },
     { "Start With Config", C64_VICE_MENU_START_WITH_CONFIG, 256 + 3, 0, 0 }, // key hack
     { "Detach From VICE", C64_VICE_MENU_DETACH_FROM_VICE, 0, 0, 0 },
@@ -1632,8 +1635,7 @@ static PDMenuItem MENU_0[] =
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDMenu MENUS[] =
-{
+static PDMenu MENUS[] = {
     { "C64 VICE", (PDMenuItem*)&MENU_0 },
     { 0, 0 },
 };
