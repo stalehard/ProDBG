@@ -9,3 +9,4 @@ api/rust/prodbg/target
 src/prodbg/tests/rust_api_test/debug
 src/prodbg/tests/rust_api_test/target
 src/prodbg/tests/rust_api_test/deps
+target/
