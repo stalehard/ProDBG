@@ -10,6 +10,7 @@ pub mod service;
 pub mod message_service;
 pub mod capstone_service;
 pub mod dialogs;
+pub mod ui_ffi;
 pub mod ui;
 
 pub use backend::*;
