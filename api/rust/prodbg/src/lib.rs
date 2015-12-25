@@ -10,6 +10,7 @@ pub mod service;
 pub mod message_service;
 pub mod capstone_service;
 pub mod dialogs;
+pub mod ui;
 
 pub use backend::*;
 pub use read_write::*;
@@ -18,4 +19,5 @@ pub use service::*;
 pub use capstone_service::*;
 pub use message_service::*;
 pub use dialogs::*;
+pub use ui::*;
 
