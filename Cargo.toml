@@ -3,6 +3,9 @@ name = "prodbg_main"
 version = "0.1.0"
 authors = ["Daniel Collin <daniel@collin.com>"]
 
+# Call tundra to build all native code
+build = "build.rs"
+
 [[bin]]
 name = "prodbg"
 
