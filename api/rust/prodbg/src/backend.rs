@@ -54,8 +54,6 @@ pub fn update_backend_instance<T: Backend>(ptr: *mut c_void,
 
     let mut writer = Writer { api: c_writer };
 
-    println!("writer.api {:?}", writer.api);
-
     backend.update(action as i32, &mut reader, &mut writer);
 }
 
