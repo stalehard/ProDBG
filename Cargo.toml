@@ -1,0 +1,11 @@
+[package]
+name = "prodbg_main"
+version = "0.1.0"
+authors = ["Daniel Collin <daniel@collin.com>"]
+
+[[bin]]
+name = "prodbg"
+
+[dependencies]
+api_test = { path = "src/prodbg/tests/rust_api_test" }
+
