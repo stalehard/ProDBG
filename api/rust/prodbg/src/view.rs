@@ -1,6 +1,11 @@
 use service::*;
+use read_write::*;
+use ui::*;
+use ui_ffi::*;
+use libc::{c_void, c_uchar};
+use std::mem::transmute;
 
-pub static API_VERSION: &'static str = "ProDBG View 1";
+pub static VIEW_API_VERSION: &'static str = "ProDBG View 1";
 
 pub trait View {
     fn new(ui: &Ui, service: &Service) -> Self;
@@ -38,7 +43,7 @@ pub fn destroy_view_instance<T: View>(ptr: *mut c_void) {
     // implicitly dropped
 }
 
-pub fn update_view_instance<T: Backend>(ptr: *mut c_void,
+pub fn update_view_instance<T: View>(ptr: *mut c_void,
                                         ui_api: *mut c_void,
                                         reader_api: *mut c_void,
                                         writer_api: *mut c_void) {
@@ -54,19 +59,19 @@ pub fn update_view_instance<T: Backend>(ptr: *mut c_void,
     let mut writer = Writer { api: c_writer };
     let ui = Ui { api: c_ui };
 
-    backend.update(&ui, &mut reader, &mut writer);
+    view.update(&ui, &mut reader, &mut writer);
 }
 
 #[macro_export]
-macro_rules! define_backend_plugin {
+macro_rules! define_view_plugin {
     ($x:ty) => {
         {
             static S: &'static [u8] = b"Test UI\0";
-            let mut plugin = CBackendCallbacks {
+            let mut plugin = CViewCallbacks {
                 name: S.as_ptr(), 
                 create_instance: Some(prodbg::view::create_view_instance::<$x>),
                 destroy_instance: Some(prodbg::view::destroy_view_instance::<$x>),
-                update: Some(prodbg::view::update_backend_instance::<$x>)
+                update: Some(prodbg::view::update_view_instance::<$x>)
              };
 
             Box::new(plugin)
