@@ -1,3 +1,7 @@
+// [ImGui] this is a slightly modified version of stb_truetype.h 1.4
+// [ImGui] we made a fix for using the END key on multi-line text edit, see https://github.com/ocornut/imgui/issues/275
+// [ImGui] we made a fix for using keyboard while using mouse, see https://github.com/nothings/stb/pull/209
+
 // stb_textedit.h - v1.4  - public domain - Sean Barrett
 // Development of this library was sponsored by RAD Game Tools
 //
@@ -434,6 +438,8 @@ static void stb_textedit_click(STB_TEXTEDIT_STRING *str, STB_TexteditState *stat
 static void stb_textedit_drag(STB_TEXTEDIT_STRING *str, STB_TexteditState *state, float x, float y)
 {
    int p = stb_text_locate_coord(str, x, y);
+   if (state->select_start == state->select_end)
+      state->select_start = state->cursor;
    state->cursor = state->select_end = p;
 }
 
@@ -957,6 +963,8 @@ retry:
          stb_textedit_move_to_first(state);
          stb_textedit_find_charpos(&find, str, state->cursor, state->single_line);
          state->cursor = find.first_char + find.length;
+         if (find.length > 0 && STB_TEXTEDIT_GETCHAR(str, state->cursor-1) == STB_TEXTEDIT_NEWLINE)
+            state->cursor--;
          state->has_preferred_x = 0;
          break;
       }
@@ -977,6 +985,8 @@ retry:
          stb_textedit_prep_selection_at_cursor(state);
          stb_textedit_find_charpos(&find, str, state->cursor, state->single_line);
          state->cursor = state->select_end = find.first_char + find.length;
+         if (find.length > 0 && STB_TEXTEDIT_GETCHAR(str, state->cursor-1) == STB_TEXTEDIT_NEWLINE)
+            state->cursor = state->select_end = state->cursor - 1;
          state->has_preferred_x = 0;
          break;
       }

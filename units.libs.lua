@@ -398,6 +398,9 @@ StaticLibrary {
     Name = "imgui",
 
     Env = { 
+        CXXOPTS = {
+        	{ "-Wno-everything"; Config = "macosx-*-*" },
+        },
         CPPPATH = { 
 			"src/external/scintilla/include",
         },
