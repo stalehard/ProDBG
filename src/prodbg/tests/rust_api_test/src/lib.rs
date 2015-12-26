@@ -119,5 +119,5 @@ impl Backend for MyBackend {
 pub fn init_plugin(plugin_handler: &mut PluginHandler) {
     println!("R: init_plugin");
     let mut plugin = define_backend_plugin!(MyBackend);
-    plugin_handler.register(BACKEND_API_VERSION, &mut plugin);
+    plugin_handler.register(&mut plugin);
 }

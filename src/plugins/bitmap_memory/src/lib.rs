@@ -25,5 +25,5 @@ impl View for BitmapView {
 pub fn init_plugin(plugin_handler: &mut PluginHandler) {
     println!("R: init_plugin");
     let mut plugin = define_view_plugin!(BitmapView);
-    plugin_handler.register_view(VIEW_API_VERSION, &mut plugin);
+    plugin_handler.register_view(&mut plugin);
 }
