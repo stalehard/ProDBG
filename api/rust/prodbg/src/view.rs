@@ -24,6 +24,9 @@ pub struct CViewCallbacks {
                           ui: *mut c_void,
                           reader: *mut c_void,
                           writer: *mut c_void)>,
+
+    pub save_state: Option<fn(*mut c_void)>,
+    pub load_state: Option<fn(*mut c_void)>,
 }
 
 pub fn create_view_instance<T: View>(ui_api: *const c_void,
@@ -71,7 +74,9 @@ macro_rules! define_view_plugin {
                 name: S.as_ptr(), 
                 create_instance: Some(prodbg::view::create_view_instance::<$x>),
                 destroy_instance: Some(prodbg::view::destroy_view_instance::<$x>),
-                update: Some(prodbg::view::update_view_instance::<$x>)
+                update: Some(prodbg::view::update_view_instance::<$x>),
+                save_state: None,
+                load_state: None
              };
 
             Box::new(plugin)
