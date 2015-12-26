@@ -5,7 +5,7 @@ use ui_ffi::*;
 use libc::{c_void, c_uchar};
 use std::mem::transmute;
 
-pub static VIEW_API_VERSION: &'static str = "ProDBG View 1";
+pub static VIEW_API_VERSION: &'static [u8] = b"ProDBG View 1\0";
 
 pub trait View {
     fn new(ui: &Ui, service: &Service) -> Self;

@@ -3,7 +3,7 @@ use service::*;
 use libc::*;
 use std::mem::transmute;
 
-pub static BACKEND_API_VERSION: &'static str = "ProDBG Backend 1";
+pub static BACKEND_API_VERSION: &'static [u8] = b"ProDBG Backend 1\0";
 
 pub trait Backend {
     fn new(service: &Service) -> Self;
