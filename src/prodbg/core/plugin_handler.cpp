@@ -201,6 +201,8 @@ static void registerPlugin(const char* type, void* plugin, int pluginSize, void*
             void* new_plugin = malloc((size_t)pluginSize);
             memcpy(new_plugin, plugin, (size_t)pluginSize);
 
+            printf("plugin name (%s) %s (size %d)\n", plugin_name, type, pluginSize);
+
 			// TODO: Fix this memory leak
 			((PDPluginBase*)plugin)->name = strdup(plugin_name);
 
@@ -208,7 +210,7 @@ static void registerPlugin(const char* type, void* plugin, int pluginSize, void*
 
             PluginData* pluginData = (PluginData*)alloc_zero(sizeof(PluginData));
             pluginData->plugin = new_plugin;
-            pluginData->type = type;
+            pluginData->type = strdup(type);
             pluginData->filename = filename;
             pluginData->fullFilename = priv_data->fullFilename;
             pluginData->lib = priv_data->lib;
