@@ -1,4 +1,4 @@
-use std::ffi::{CString};
+use std::ffi::{CString, CStr};
 use std::mem;
 use std::ptr;
 use ui_ffi::*;
@@ -39,27 +39,21 @@ impl StringHandler {
         }
     }
 
-    /*
-    pub fn as_ptr(&self) -> *const u8 {
+    pub fn as_ptr(&mut self) -> *const u8 {
         if self.local {
             self.local_string.as_ptr()
         } else {
-            self.heap_string.unwrap().as_ptr() as *const u8
+            self.heap_string.as_mut().unwrap().as_ptr() as *const u8
         }
     }
-    */
 }
 
 impl Ui {
     pub fn button(&self, title: &str) -> bool {
         unsafe { 
-            let t = StringHandler::new(title);
+            let mut t = StringHandler::new(title);
             let s = PDVec2 { x: 0.0, y: 0.0 };
-            if t.local {
-                ((*self.api).button)(t.local_string.as_ptr(), s) != 0
-            } else {
-                ((*self.api).button)(t.heap_string.unwrap().as_ptr() as *const u8, s) != 0
-            }
+            ((*self.api).button)(t.as_ptr(), s) != 0
         }
     }
 }
@@ -67,11 +61,9 @@ impl Ui {
 
 // Only used in tests
 #[allow(dead_code)]
-/*
-fn get_string(handler: &StringHandler) -> String {
+fn get_string(handler: &mut StringHandler) -> String {
     unsafe { CStr::from_ptr(handler.as_ptr() as *const i8).to_string_lossy().into_owned() }
 }
-*/
 
 #[test]
 fn test_string_handler() {
