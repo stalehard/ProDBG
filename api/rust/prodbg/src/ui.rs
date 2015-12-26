@@ -68,6 +68,12 @@ fn get_string(handler: &StringHandler) -> String {
 #[test]
 fn test_string_handler() {
     {
+        let short_string = "";
+        let t = StringHandler::new(short_string);
+        assert_eq!(t.local, true);
+        assert_eq!(get_string(&t), short_string);
+    }
+    {
         let short_string = "test_local";
         let t = StringHandler::new(short_string);
         assert_eq!(t.local, true);
