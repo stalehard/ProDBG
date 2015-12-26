@@ -9,13 +9,13 @@ struct BitmapView {
 
 impl View for BitmapView {
     fn new(_: &Ui, _: &Service) -> Self {
-        BitmapView { 
-            dummy: 0 
-        }
+        BitmapView { dummy: 0 }
     }
 
     fn update(&mut self, ui: &Ui, _: &mut Reader, _: &mut Writer) {
-        ui.button("test");
+        if ui.button("test") {
+            println!("yah");
+        }
         self.dummy += 1;
     }
 }

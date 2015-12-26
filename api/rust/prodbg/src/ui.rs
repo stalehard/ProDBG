@@ -51,14 +51,14 @@ impl StringHandler {
 }
 
 impl Ui {
-    pub fn button(&self, title: &str) {
+    pub fn button(&self, title: &str) -> bool {
         unsafe { 
             let t = StringHandler::new(title);
             let s = PDVec2 { x: 0.0, y: 0.0 };
             if t.local {
-                ((*self.api).button)(t.local_string.as_ptr(), s);
+                ((*self.api).button)(t.local_string.as_ptr(), s) != 0
             } else {
-                ((*self.api).button)(t.heap_string.unwrap().as_ptr() as *const u8, s);
+                ((*self.api).button)(t.heap_string.unwrap().as_ptr() as *const u8, s) != 0
             }
         }
     }
