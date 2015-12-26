@@ -50,7 +50,7 @@ impl StringHandler {
 
 impl Ui {
     pub fn button(&self, title: &str) {
-        unsafe {
+        unsafe { 
             let t = StringHandler::new(title);
             let s = PDVec2 { x: 0.0, y: 0.0 };
             ((*self.api).button)(t.as_ptr(), s);
