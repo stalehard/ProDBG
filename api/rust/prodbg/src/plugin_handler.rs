@@ -1,5 +1,6 @@
 use libc::*;
 use backend::*;
+use view::*;
 use std::mem::transmute;
 use std::ffi::CString;
 
@@ -14,6 +15,13 @@ impl PluginHandler {
         unsafe {
             let s = CString::new(plugin_type).unwrap();
             (self.c_register_plugin)(s.as_ptr(), transmute(plugin), ::std::mem::size_of::<CBackendCallbacks>() as c_int, (self.private_data));
+        }
+    }
+
+    pub fn register_view(&self, plugin_type: &str, plugin: &mut CViewCallbacks) {
+        unsafe {
+            let s = CString::new(plugin_type).unwrap();
+            (self.c_register_plugin)(s.as_ptr(), transmute(plugin), ::std::mem::size_of::<CViewCallbacks>() as c_int, (self.private_data));
         }
     }
 }
