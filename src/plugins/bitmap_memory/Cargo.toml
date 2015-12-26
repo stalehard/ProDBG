@@ -1,0 +1,13 @@
+[package]
+name = "bitmap_memory"
+version = "0.1.0"
+authors = ["Daniel Collin <daniel@collin.com>"]
+
+# Type
+[lib]
+name = "bitmap_memory"
+crate-type = ["dylib"]
+
+# Depends
+[dependencies]
+prodbg = { path = "../../../api/rust/prodbg" }

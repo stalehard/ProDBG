@@ -3,6 +3,7 @@ name = "prodbg_main"
 version = "0.1.0"
 dependencies = [
  "api_test 0.1.0",
+ "bitmap_memory 0.1.0",
 ]
 
 [[package]]
@@ -25,6 +26,13 @@ dependencies = [
 name = "bitflags"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "bitmap_memory"
+version = "0.1.0"
+dependencies = [
+ "prodbg 0.1.0",
+]
 
 [[package]]
 name = "gcc"

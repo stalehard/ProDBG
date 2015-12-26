@@ -11,4 +11,5 @@ name = "prodbg"
 
 [dependencies]
 api_test = { path = "src/prodbg/tests/rust_api_test" }
+bitmap_memory = { path = "src/plugins/bitmap_memory" }
 
