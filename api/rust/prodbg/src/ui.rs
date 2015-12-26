@@ -1,4 +1,4 @@
-use std::ffi::{CString, CStr};
+use std::ffi::{CString};
 use std::mem;
 use std::ptr;
 use ui_ffi::*;
@@ -12,7 +12,7 @@ const STRING_SIZE: usize = 512;
 struct StringHandler {
     pub local: bool,
     pub local_string: [u8; STRING_SIZE],
-    pub heap_string: CString,
+    pub heap_string: Option<CString>,
 }
 
 impl StringHandler {
@@ -23,7 +23,7 @@ impl StringHandler {
                 let mut handler = StringHandler {
                     local: true,
                     local_string: mem::uninitialized(),
-                    heap_string: mem::uninitialized(),
+                    heap_string: None,
                 };
 
                 ptr::copy(name.as_ptr(), handler.local_string.as_mut_ptr(), name_len);
@@ -33,19 +33,21 @@ impl StringHandler {
                 StringHandler {
                     local: false,
                     local_string: mem::uninitialized(),
-                    heap_string: CString::new(name).unwrap(),
+                    heap_string: Some(CString::new(name).unwrap()),
                 }
             }
         }
     }
 
+    /*
     pub fn as_ptr(&self) -> *const u8 {
         if self.local {
             self.local_string.as_ptr()
         } else {
-            self.heap_string.as_ptr() as *const u8
+            self.heap_string.unwrap().as_ptr() as *const u8
         }
     }
+    */
 }
 
 impl Ui {
@@ -53,7 +55,11 @@ impl Ui {
         unsafe { 
             let t = StringHandler::new(title);
             let s = PDVec2 { x: 0.0, y: 0.0 };
-            ((*self.api).button)(t.as_ptr(), s);
+            if t.local {
+                ((*self.api).button)(t.local_string.as_ptr(), s);
+            } else {
+                ((*self.api).button)(t.heap_string.unwrap().as_ptr() as *const u8, s);
+            }
         }
     }
 }
@@ -61,9 +67,11 @@ impl Ui {
 
 // Only used in tests
 #[allow(dead_code)]
+/*
 fn get_string(handler: &StringHandler) -> String {
     unsafe { CStr::from_ptr(handler.as_ptr() as *const i8).to_string_lossy().into_owned() }
 }
+*/
 
 #[test]
 fn test_string_handler() {
