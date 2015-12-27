@@ -429,6 +429,9 @@ extern "C" void prodbg_event(int eventId) {
     }
 }
 
+extern "C" int main_run(void* arg) { (void)arg; return 0; }
+extern "C" void main_shutdown() { }
+
 
 
 

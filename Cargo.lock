@@ -4,6 +4,7 @@ version = "0.1.0"
 dependencies = [
  "api_test 0.1.0",
  "bitmap_memory 0.1.0",
+ "libc 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -46,6 +47,11 @@ dependencies = [
 [[package]]
 name = "libc"
 version = "0.1.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "libc"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]

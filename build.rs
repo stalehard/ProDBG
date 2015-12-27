@@ -29,12 +29,29 @@ fn main() {
             command = "linux-gcc-release";
         }
     }
-    
+
     let _ = Command::new(tundra)
                 .arg("-v")
                 .arg(command)
                 .output()
-                .unwrap_or_else(|e| { 
-        panic!("Unable to execute tundra: {}", e)
-    });
+                .unwrap_or_else(|e| panic!("Unable to execute tundra: {}", e));
+
+    // Lib path
+    println!("cargo:rustc-link-search=native=t2-output/{}-default",
+             command);
+
+    // Ugly but hey!
+    let libs_to_link = ["main_lib", "core", "ui", "api", "session",
+                        "jansson", "lua", "remote_api", "stb", "bgfx",
+                        "uv", "imgui", "remotery", "foundation_lib",
+                        "scintilla", "tinyxml2", "i3wm_docking", "capstone"];
+
+    for lib in libs_to_link.iter() {
+        println!("cargo:rustc-link-lib=static={}", *lib);
+    }
+
+    println!("cargo:rustc-flags=-l dylib=stdc++");
+    println!("cargo:rustc-flags=-l framework=Cocoa");
+
+    //println!("cargo:rustc-link-lib=static=stdc++");
 }
