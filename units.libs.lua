@@ -768,4 +768,75 @@ StaticLibrary {
 	IdeGenerationHints = { Msvc = { SolutionFolder = "Libs" } },
 }
 
+-----------------------------------------------------------------------------------------------------------------------
+
+StaticLibrary {
+    Name = "main_lib",
+
+    Env = {
+        CPPPATH = { 
+			"src/external/remotery/lib",
+			"src/external/foundation_lib",
+			"src/external/jansson/include",
+            "src/external/lua/src",
+			"src/external/libuv/include",
+            "src/external/bgfx/include", 
+            "src/external/bx/include",
+            "src/external/stb",
+            "src/external/i3wm_docking",
+            "src/prodbg", 
+        	"api/include",
+            "src/frontend",
+        },
+
+        PROGOPTS = {
+            { "/SUBSYSTEM:WINDOWS", "/DEBUG"; Config = { "win32-*-*", "win64-*-*" } },
+        },
+
+        CXXOPTS = { 
+			{ 
+			  "-Wno-conversion",
+			  "-Wno-gnu-anonymous-struct",
+			  "-Wno-global-constructors",
+			  "-Wno-nested-anon-types",
+			  "-Wno-float-equal",
+			  "-Wno-cast-align",
+			  "-Wno-exit-time-destructors",
+			  "-Wno-format-nonliteral",
+			  "-Wno-documentation",	-- Because clang warnings in a bad manner even if the doc is correct
+			  "-std=c++11" ; Config = "macosx-clang-*" },
+			{ "/EHsc"; Config = "win64-*-*" },
+        },
+
+        CCOPTS = {
+			{ "-Wno-c11-extensions"; Config = "macosx-clang-*" },
+        	{ 
+        	  "/wd4201" -- namless struct/union
+			  ; Config = "win64-*-*" },
+        },
+
+		PROGCOM = {
+			{ "-lstdc++"; Config = "linux-gcc-*" },
+			{ "-lm -lrt -lpthread -ldl -lX11 -lGL"; Config = "linux-*-*" },
+		},
+    },
+
+    Sources = { 
+        FGlob {
+            Dir = "src/prodbg/main_lib",
+            Extensions = { ".c", ".cpp", ".m", ".mm", ".h" },
+            Filters = {
+                { Pattern = "mac"; Config = { "macosx-*-*", "macosx_test-*-*" } },
+                { Pattern = "windows"; Config = "win64-*-*" },
+                { Pattern = "linux"; Config = "linux-*-*" },
+            },
+
+            Recursive = true,
+        },
+    },
+
+	IdeGenerationHints = { Msvc = { SolutionFolder = "Libs" } },
+}
+
+
 
