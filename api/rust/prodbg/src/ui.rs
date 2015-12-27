@@ -1,60 +1,17 @@
-use std::ffi::{CString, CStr};
-use std::mem;
 use std::ptr;
 use ui_ffi::*;
+
+use CFixedString;
 
 pub struct Ui {
     pub api: *mut CPdUI,
 }
 
-const STRING_SIZE: usize = 512;
-
-struct StringHandler {
-    pub local: bool,
-    pub local_string: [i8; STRING_SIZE],
-    pub heap_string: Option<CString>,
-}
-
-impl StringHandler {
-    pub fn new(name: &str) -> StringHandler {
-        unsafe {
-            let name_len = name.len();
-            if name_len <= STRING_SIZE - 1 {
-                let mut handler = StringHandler {
-                    local: true,
-                    local_string: mem::uninitialized(),
-                    heap_string: None,
-                };
-
-                ptr::copy(name.as_ptr(),
-                          handler.local_string.as_mut_ptr() as *mut u8,
-                          name_len);
-                handler.local_string[name_len] = 0;
-                handler
-            } else {
-                StringHandler {
-                    local: false,
-                    local_string: mem::uninitialized(),
-                    heap_string: Some(CString::new(name).unwrap()),
-                }
-            }
-        }
-    }
-
-    pub fn as_ptr(&mut self) -> *const i8 {
-        if self.local {
-            self.local_string.as_ptr()
-        } else {
-            self.heap_string.as_mut().unwrap().as_ptr()
-        }
-    }
-}
-
 impl Ui {
     pub fn set_title(&self, title: &str) {
         unsafe {
-            let mut t = StringHandler::new(title);
-            ((*self.api).set_title)((*self.api).private_data, t.as_ptr());
+            let t = CFixedString::from_str(title).as_ptr();
+            ((*self.api).set_title)((*self.api).private_data, t);
         }
     }
 
@@ -70,7 +27,7 @@ impl Ui {
 
     pub fn begin_child(&self, id: &str, pos: Option<PDVec2>, border: bool, flags: u32) {
         unsafe {
-            let t = StringHandler::new(id).as_ptr();
+            let t = CFixedString::from_str(id).as_ptr();
             match pos {
                 Some(p) => ((*self.api).begin_child)(t, p, border as i32, flags as i32),
                 None => {
@@ -144,110 +101,57 @@ impl Ui {
 
     pub fn text(&self, text: &str) {
         unsafe {
-            let t = StringHandler::new(text).as_ptr();
+            let t = CFixedString::from_str(text).as_ptr();
             ((*self.api).text)(t);
         }
     }
 
     pub fn text_colored(&self, color: u32, text: &str) {
         unsafe {
-            let t = StringHandler::new(text).as_ptr();
+            let t = CFixedString::from_str(text).as_ptr();
             ((*self.api).text_colored)(color, t);
         }
     }
 
     pub fn text_disabled(&self, text: &str) {
         unsafe {
-            let t = StringHandler::new(text).as_ptr();
+            let t = CFixedString::from_str(text).as_ptr();
             ((*self.api).text_disabled)(t);
         }
     }
 
     pub fn text_wrapped(&self, text: &str) {
         unsafe {
-            let t = StringHandler::new(text).as_ptr();
+            let t = CFixedString::from_str(text).as_ptr();
             ((*self.api).text_wrapped)(t);
         }
     }
 
+	pub fn columns(&self, count: isize, id: Option<&str>, border: bool) {
+	    unsafe {
+            match id {
+                Some(p) => {
+                    let t = CFixedString::from_str(p).as_ptr();
+                    ((*self.api).columns)(count as i32, t, border as i32)
+                }
+                None => ((*self.api).columns)(count as i32, ptr::null(), border as i32),
+            }
+        }
+    }
+
+    #[inline]
+    pub fn next_column(&self) {
+        unsafe { ((*self.api).next_column)() }
+    }
+
     pub fn button(&self, title: &str, pos: Option<PDVec2>) -> bool {
         unsafe {
-            let mut t = StringHandler::new(title);
+            let t = CFixedString::from_str(title).as_ptr();
             match pos {
-                Some(p) => ((*self.api).button)(t.as_ptr(), p) != 0,
-                None => ((*self.api).button)(t.as_ptr(), PDVec2 { x: 0.0, y: 0.0 }) != 0,
+                Some(p) => ((*self.api).button)(t, p) != 0,
+                None => ((*self.api).button)(t, PDVec2 { x: 0.0, y: 0.0 }) != 0,
             }
         }
     }
 }
 
-
-// Only used in tests
-#[allow(dead_code)]
-fn get_string(handler: &mut StringHandler) -> String {
-    unsafe { CStr::from_ptr(handler.as_ptr() as *const i8).to_string_lossy().into_owned() }
-}
-
-#[test]
-fn test_string_handler() {
-    {
-        let short_string = "";
-        let t = StringHandler::new(short_string);
-        assert_eq!(t.local, true);
-        assert_eq!(get_string(&t), short_string);
-    }
-    {
-        let short_string = "test_local";
-        let t = StringHandler::new(short_string);
-        assert_eq!(t.local, true);
-        assert_eq!(get_string(&t), short_string);
-    }
-    {
-        let short_string = "test_local stoheusthsotheost";
-        let t = StringHandler::new(short_string);
-        assert_eq!(t.local, true);
-        assert_eq!(get_string(&t), short_string);
-    }
-    {
-        // this string (with 511) buffer should just fit
-        let test_511_string = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuu\
-                               uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                               uuuueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaa\
-                               aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooo\
-                               oooooooooooooooooooooooooooooooooeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\
-                               eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                               uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
-                               oooooooooooooooooooooooooooooooooooooooacd";
-        let t = StringHandler::new(test_511_string);
-        assert_eq!(t.local, true);
-        assert_eq!(get_string(&t), test_511_string);
-    }
-    {
-        // this string (with 512) buffer should no fit
-        let test_512_string = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuu\
-                               uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                               uuuueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaa\
-                               aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooo\
-                               oooooooooooooooooooooooooooooooooeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\
-                               eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                               uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
-                               oooooooooooooooooooooooooooooooooooooooabcd";
-        let t = StringHandler::new(test_512_string);
-        assert_eq!(t.local, false);
-        assert_eq!(get_string(&t), test_512_string);
-    }
-    {
-        // this string (with 513) buffer should no fit
-        let test_513_string = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuu\
-                               uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                               uuuueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaa\
-                               aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooo\
-                               oooooooooooooooooooooooooooooooooeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\
-                               eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                               uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
-                               oooooooooooooooooooooooooooooooooooooooabcd";
-        let t = StringHandler::new(test_513_string);
-        assert_eq!(t.local, false);
-        assert_eq!(get_string(&t), test_513_string);
-    }
-}

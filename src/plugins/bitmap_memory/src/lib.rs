@@ -21,9 +21,7 @@ impl View for BitmapView {
 }
 
 #[no_mangle]
-#[allow(unused_mut)] // likely due to compiler bug
 pub fn init_plugin(plugin_handler: &mut PluginHandler) {
-    println!("R: init_plugin");
-    let mut plugin = define_view_plugin!(BitmapView);
-    plugin_handler.register_view(&mut plugin);
+    let plugin = define_view_plugin!("Bitmap View", BitmapView);
+    plugin_handler.register_view(&plugin);
 }

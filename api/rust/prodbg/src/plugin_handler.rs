@@ -13,7 +13,7 @@ pub struct PluginHandler {
 }
 
 impl PluginHandler {
-    pub fn register(&self, plugin: &mut CBackendCallbacks) {
+    pub fn register_backend(&self, plugin: &CBackendCallbacks) {
         unsafe {
             (self.c_register_plugin)(BACKEND_API_VERSION.as_ptr() as *const i8,
                                      transmute(plugin),
@@ -22,7 +22,7 @@ impl PluginHandler {
         }
     }
 
-    pub fn register_view(&self, plugin: &mut CViewCallbacks) {
+    pub fn register_view(&self, plugin: &CViewCallbacks) {
         unsafe {
             (self.c_register_plugin)(VIEW_API_VERSION.as_ptr() as *const i8,
                                      transmute(plugin),

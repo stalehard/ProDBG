@@ -59,11 +59,10 @@ pub fn update_backend_instance<T: Backend>(ptr: *mut c_void,
 
 #[macro_export]
 macro_rules! define_backend_plugin {
-    ($x:ty) => {
+    ($name:expr, $x:ty) => {
         {
-            static S: &'static [u8] = b"Test\0";
-            let mut plugin = CBackendCallbacks {
-                name: S.as_ptr(), 
+            let plugin = CBackendCallbacks {
+                name: CFixedString::from_str($name).as_ptr() as *const u8, 
                 create_instance: Some(prodbg::backend::create_backend_instance::<$x>),
                 destroy_instance: Some(prodbg::backend::destroy_backend_instance::<$x>),
                 register_menu: None,

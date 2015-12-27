@@ -67,11 +67,10 @@ pub fn update_view_instance<T: View>(ptr: *mut c_void,
 
 #[macro_export]
 macro_rules! define_view_plugin {
-    ($x:ty) => {
+    ($name:expr, $x:ty) => {
         {
-            static S: &'static [u8] = b"Test UI\0";
-            let mut plugin = CViewCallbacks {
-                name: S.as_ptr(), 
+            let plugin = CViewCallbacks {
+                name: CFixedString::from_str($name).as_ptr() as *const u8, 
                 create_instance: Some(prodbg::view::create_view_instance::<$x>),
                 destroy_instance: Some(prodbg::view::destroy_view_instance::<$x>),
                 update: Some(prodbg::view::update_view_instance::<$x>),

@@ -115,8 +115,7 @@ impl Backend for MyBackend {
 }
 
 #[no_mangle]
-#[allow(unused_mut)] // likely due to compiler bug
 pub fn init_plugin(plugin_handler: &mut PluginHandler) {
-    let mut plugin = define_backend_plugin!(MyBackend);
-    plugin_handler.register(&mut plugin);
+    let plugin = define_backend_plugin!("backend_test", MyBackend);
+    plugin_handler.register_backend(&plugin);
 }
