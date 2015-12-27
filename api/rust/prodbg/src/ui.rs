@@ -140,6 +140,36 @@ impl Ui {
         unsafe { ((*self.api).push_style_var_vec)(index as u32, val) }
     }
 
+    // Text
+
+    pub fn text(&self, text: &str) {
+        unsafe {
+            let t = StringHandler::new(text).as_ptr();
+            ((*self.api).text)(t);
+        }
+    }
+
+    pub fn text_colored(&self, color: u32, text: &str) {
+        unsafe {
+            let t = StringHandler::new(text).as_ptr();
+            ((*self.api).text_colored)(color, t);
+        }
+    }
+
+    pub fn text_disabled(&self, text: &str) {
+        unsafe {
+            let t = StringHandler::new(text).as_ptr();
+            ((*self.api).text_disabled)(t);
+        }
+    }
+
+    pub fn text_wrapped(&self, text: &str) {
+        unsafe {
+            let t = StringHandler::new(text).as_ptr();
+            ((*self.api).text_wrapped)(t);
+        }
+    }
+
     pub fn button(&self, title: &str, pos: Option<PDVec2>) -> bool {
         unsafe {
             let mut t = StringHandler::new(title);
