@@ -287,8 +287,8 @@ void saveTree(Con* con, json_t* item, json_t* parentArray)
 	if (con->window && con->window->userData)
 	{
 		json_object_set_new(item, "userdata", json_true());
-		if (g_callbacks && g_callbacks->saveUserData)
-			g_callbacks->saveUserData(item, con->window->userData);
+		if (g_callbacks && g_callbacks->save_user_data)
+			g_callbacks->save_user_data(item, con->window->userData);
 	}
 	else
 		json_object_set_new(item, "userdata", json_false());
@@ -416,12 +416,12 @@ static void loadData(json_t* item, Con* con)
 
 	if (hasUserData)
 	{
-		if (g_callbacks && g_callbacks->loadUserData)
+		if (g_callbacks && g_callbacks->load_user_data)
 		{
 			// TODO: Remove window? Doesn't really look like we need it
     		i3Window* window = malloc(sizeof(i3Window));
 			memset(window, 0, sizeof(i3Window));
-			window->userData = g_callbacks->loadUserData(item);
+			window->userData = g_callbacks->load_user_data(item);
 			con->window = window;
 		}
 	}

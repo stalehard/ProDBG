@@ -626,13 +626,13 @@ static void setCursorStyle(DockSysCursor cursor)
     if (!g_callbacks)
         return;
 
-    if (!g_callbacks->setCursorStyle)
+    if (!g_callbacks->set_cursor_style)
         return;
 
     if (s_oldCursor == cursor)
         return;
 
-    g_callbacks->setCursorStyle(cursor);
+    g_callbacks->set_cursor_style(cursor);
 
     s_oldCursor = cursor;
 }

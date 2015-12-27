@@ -52,14 +52,14 @@ static void updateRenderCallback(Con* child)
     if (!g_callbacks)
         return;
 
-    if (!g_callbacks->updateWindowSize)
+    if (!g_callbacks->update_window_size)
         return;
 
     if (child->window)
         userData = child->window->userData;
 
     if (userData)
-        g_callbacks->updateWindowSize(userData, child->rect.x, child->rect.y, child->rect.width, child->rect.height);
+        g_callbacks->update_window_size(userData, child->rect.x, child->rect.y, child->rect.width, child->rect.height);
 }
 
 /*
