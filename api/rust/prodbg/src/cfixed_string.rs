@@ -53,21 +53,21 @@ fn get_string(handler: &mut CFixedString) -> String {
 fn test_string_handler() {
     {
         let short_string = "";
-        let t = CFixedString::from_str(short_string);
-        assert_eq!(t.local, true);
-        assert_eq!(get_string(&t), short_string);
+        let mut t = CFixedString::from_str(short_string);
+        assert_eq!(t.heap_string.is_none(), true);
+        assert_eq!(get_string(&mut t), short_string);
     }
     {
         let short_string = "test_local";
-        let t = CFixedString::from_str(short_string);
-        assert_eq!(t.local, true);
-        assert_eq!(get_string(&t), short_string);
+        let mut t = CFixedString::from_str(short_string);
+        assert_eq!(t.heap_string.is_none(), true);
+        assert_eq!(get_string(&mut t), short_string);
     }
     {
         let short_string = "test_local stoheusthsotheost";
-        let t = CFixedString::from_str(short_string);
-        assert_eq!(t.local, true);
-        assert_eq!(get_string(&t), short_string);
+        let mut t = CFixedString::from_str(short_string);
+        assert_eq!(t.heap_string.is_none(), true);
+        assert_eq!(get_string(&mut t), short_string);
     }
     {
         // this string (with 511) buffer should just fit
@@ -79,9 +79,9 @@ fn test_string_handler() {
                                eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
                                uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
                                oooooooooooooooooooooooooooooooooooooooacd";
-        let t = CFixedString::from_str(test_511_string);
-        assert_eq!(t.local, true);
-        assert_eq!(get_string(&t), test_511_string);
+        let mut t = CFixedString::from_str(test_511_string);
+        assert_eq!(t.heap_string.is_none(), true);
+        assert_eq!(get_string(&mut t), test_511_string);
     }
     {
         // this string (with 512) buffer should no fit
@@ -93,9 +93,9 @@ fn test_string_handler() {
                                eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
                                uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
                                oooooooooooooooooooooooooooooooooooooooabcd";
-        let t = CFixedString::from_str(test_512_string);
-        assert_eq!(t.local, false);
-        assert_eq!(get_string(&t), test_512_string);
+        let mut t = CFixedString::from_str(test_512_string);
+        assert_eq!(t.heap_string.is_some(), true);
+        assert_eq!(get_string(&mut t), test_512_string);
     }
     {
         // this string (with 513) buffer should no fit
@@ -107,9 +107,9 @@ fn test_string_handler() {
                                eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
                                uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
                                oooooooooooooooooooooooooooooooooooooooabcd";
-        let t = CFixedString::from_str(test_513_string);
-        assert_eq!(t.local, false);
-        assert_eq!(get_string(&t), test_513_string);
+        let mut t = CFixedString::from_str(test_513_string);
+        assert_eq!(t.heap_string.is_some(), true);
+        assert_eq!(get_string(&mut t), test_513_string);
     }
 }
 
