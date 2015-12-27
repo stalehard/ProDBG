@@ -2331,7 +2331,7 @@ void BgfxPluginUI::destroy() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_setMousePos(float x, float y) {
+extern "C" void prodbg_set_mouse_pos(float x, float y) {
     InputState* state = InputState_getState();
 
     state->mousePos.x = x;
@@ -2342,7 +2342,7 @@ void ProDBG_setMousePos(float x, float y) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_setMouseState(int button, int state) {
+extern "C" void prodbg_set_mouse_state(int button, int state) {
     InputState* inputState = InputState_getState();
     inputState->mouseDown[0] = !!state;
 
@@ -2351,14 +2351,14 @@ void ProDBG_setMouseState(int button, int state) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_setScroll(float x, float y) {
+extern "C" void prodbg_set_scroll(float x, float y) {
     (void)x;
     IMGUI_setScroll(y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_keyDown(int key, int modifier) {
+extern "C" void prodbg_key_down(int key, int modifier) {
     InputState* state = InputState_getState();
 
     state->keysDown[key] = true;
@@ -2376,7 +2376,7 @@ void ProDBG_keyDownMods(int modifier) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_keyUp(int key, int modifier) {
+extern "C" void prodbg_key_up(int key, int modifier) {
     InputState* state = InputState_getState();
 
     state->keysDown[key] = false;
@@ -2387,13 +2387,13 @@ void ProDBG_keyUp(int key, int modifier) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_addChar(unsigned short c) {
+extern "C" void prodbg_add_char(unsigned short c) {
     IMGUI_addInputCharacter(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_setWindowSize(int width, int height) {
+extern "C" void prodbg_set_window_size(int width, int height) {
     Context* context = &s_context;
 
     context->width = width;

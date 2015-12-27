@@ -32,7 +32,7 @@ void Window_setTitle(const char* title);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 -(void) updateMain {
-    ProDBG_timedUpdate();
+    prodbg_timed_update();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ void Window_setTitle(const char* title);
     if (self == nil)
         return nil;
 
-    ProDBG_create(0, (int)frame.size.width, (int)frame.size.height);
+    prodbg_create(0, (int)frame.size.width, (int)frame.size.height);
     const float framerate = 60;
     const float frequency = 1.0f / framerate;
     [NSTimer scheduledTimerWithTimeInterval:frequency target:self selector:@selector(updateMain) userInfo:nil repeats:YES];
@@ -77,8 +77,7 @@ void Window_setTitle(const char* title);
 - (void)drawRect:(NSRect)frame {
     (void)frame;
 
-    ProDBG_setWindowSize((int)frame.size.width, (int)frame.size.height);
-    //ProDBG_update();
+    prodbg_set_window_size((int)frame.size.width, (int)frame.size.height);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -250,13 +249,13 @@ static int translateKey(unsigned int key) {
     const int key = translateKey([event keyCode]);
     const int mods = getModifierFlags([event modifierFlags]);
 
-    ProDBG_keyDown(key, mods);
+    prodbg_key_down(key, mods);
 
     NSString* characters = [event characters];
     NSUInteger i, length = [characters length];
 
     for (i = 0; i < length; i++)
-        ProDBG_addChar([characters characterAtIndex:i]);
+        prodbg_add_char([characters characterAtIndex:i]);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -282,9 +281,9 @@ static int translateKey(unsigned int key) {
     state->modifierFlags = modifierFlags;
 
     if (release)
-        ProDBG_keyUp(key, mods);
+        prodbg_key_up(key, mods);
     else
-        ProDBG_keyDown(key, mods);
+        prodbg_key_down(key, mods);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,7 +292,7 @@ static int translateKey(unsigned int key) {
     const int key = translateKey([event keyCode]);
     const int mods = getModifierFlags([event modifierFlags]);
 
-    ProDBG_keyUp(key, mods);
+    prodbg_key_up(key, mods);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -319,11 +318,11 @@ static int translateKey(unsigned int key) {
     NSPoint location = [window mouseLocationOutsideOfEventStream];
     NSRect adjustFrame = [NSWindow contentRectForFrameRect: originalFrame styleMask: NSTitledWindowMask];
 
-    ProDBG_setMousePos(location.x, adjustFrame.size.height - location.y);
+    prodbg_set_mouse_pos(location.x, adjustFrame.size.height - location.y);
 
     (void)event;
 
-    ProDBG_setMousePos(location.x, adjustFrame.size.height - location.y);
+    prodbg_set_mouse_pos(location.x, adjustFrame.size.height - location.y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -336,7 +335,7 @@ static int translateKey(unsigned int key) {
 
     (void)event;
 
-    ProDBG_setMousePos(location.x, adjustFrame.size.height - location.y);
+    prodbg_set_mouse_pos(location.x, adjustFrame.size.height - location.y);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -345,14 +344,14 @@ static int translateKey(unsigned int key) {
     float x = (float)[event deltaX];
     float y = (float)[event deltaY];
     //int flags = getModifierFlags([theEvent modifierFlags]);
-    ProDBG_setScroll(x, y);
+    prodbg_set_scroll(x, y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)mouseUp:(NSEvent*)event {
     (void)event;
-    ProDBG_setMouseState(0, 0);
+    prodbg_set_mouse_state(0, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -369,8 +368,8 @@ static int translateKey(unsigned int key) {
 
     (void)event;
 
-    ProDBG_setMousePos(location.x, adjustFrame.size.height - location.y);
-    ProDBG_setMouseState(0, 1);
+    prodbg_set_mouse_pos(location.x, adjustFrame.size.height - location.y);
+    prodbg_set_mouse_state(0, 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -383,7 +382,7 @@ static int translateKey(unsigned int key) {
 
 - (void)onMenuPress:(id)sender {
     int id = (int)((NSButton*)sender).tag;
-    ProDBG_event(id);
+    prodbg_event(id);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

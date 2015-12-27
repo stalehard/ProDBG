@@ -52,6 +52,7 @@ static Context s_context;
 
 static const char* s_plugins[] =
 {
+    "bitmap_memory",
     "sourcecode_plugin",
     "disassembly_plugin",
     "locals_plugin",
@@ -187,7 +188,7 @@ static bool findDataDirectory() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_create(void* window, int width, int height) {
+extern "C" void prodbg_create(void* window, int width, int height) {
     Context* context = &s_context;
     //Rect settingsRect;
     //
@@ -226,7 +227,7 @@ void ProDBG_create(void* window, int width, int height) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_update() {
+extern "C" void prodbg_update() {
     Context* context = &s_context;
 
     //uint64_t currentTime = time_current();
@@ -248,7 +249,7 @@ void ProDBG_update() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_applicationLaunched() {
+extern "C" void prodbg_application_launched() {
     int pluginCount = 0;
     // NOTE(marco): this is where the native menu is created. We need to abstract this
     // so that we can use ImGUI to render the menu, while also being able to allow the
@@ -259,7 +260,7 @@ void ProDBG_applicationLaunched() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_destroy() {
+extern "C" void prodbg_destroy() {
     Context* context = &s_context;
 
     //rmt_DestroyGlobalInstance(s_remotery);
@@ -277,8 +278,8 @@ void ProDBG_destroy() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ProDBG_timedUpdate() {
-    ProDBG_update();
+extern "C" void prodbg_timed_update() {
+    prodbg_update();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -308,7 +309,7 @@ Con* getCoveredCon(int x, int y) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Events
 
-void ProDBG_event(int eventId) {
+extern "C" void prodbg_event(int eventId) {
     Context* context = &s_context;
 
     int count;

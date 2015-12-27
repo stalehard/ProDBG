@@ -1,8 +1,11 @@
 #import "delegate.h"
 
 void Window_buildMenu();
-void ProDBG_destroy();
-void ProDBG_applicationLaunched();
+
+extern "C" {
+void prodbg_destroy();
+void prodbg_application_launched();
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,7 +22,7 @@ void ProDBG_applicationLaunched();
 
 - (void)applicationDidFinishLaunching:(NSNotification*)aNotification {
     Window_buildMenu();
-    ProDBG_applicationLaunched();
+    prodbg_application_launched();
 
     (void)aNotification;
 }
@@ -34,7 +37,7 @@ void ProDBG_applicationLaunched();
 
 - (void)applicationWillTerminate:(NSNotification*)aNotification {
     (void)aNotification;
-    ProDBG_destroy();
+    prodbg_destroy();
 }
 
 @end
