@@ -43,36 +43,39 @@ pub struct CBackendPlugin {
                          >,
 }
 
+#[repr(C)]
+pub struct CBasePlugin {
+    pub name: *const c_char,
+}
+
+
 // We will need version handling for plugins later on but should be fine for now.
-struct Plugin<T> {
-    lib: Rc<Library>,
-    path: PathBuf,
-    plugin_funcs: *mut T,
+pub struct Plugin {
+    pub lib: Rc<Library>,
+    pub path: PathBuf,
+    pub name: String,
+    pub plugin_funcs: *mut CBasePlugin,
 }
 
 pub struct PluginHandler<'a> {
-    view_plugins: Vec<Plugin<CViewPlugin>>,
-    backend_plugins: Vec<Plugin<CBackendPlugin>>,
+    view_plugins: Vec<Plugin>,
+    backend_plugins: Vec<Plugin>,
     search_paths: &'a [&'static str],
 }
 
 pub struct CallbackData<'a> {
-    handler: &'a PluginHandler<'a>,
+    handler: &'a mut PluginHandler<'a>,
     lib: Rc<Library>,
     path: PathBuf,
 }
 
-type RegisterPlugin = unsafe fn(pt: *const c_char,
-                                plugin: *mut c_void,
-                                size: c_int,
-                                data: *mut CallbackData)
-                               ;
+type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, size: c_int, data: *mut CallbackData);
 
-unsafe fn add_plugin<T>(plugins: &mut Vec<Plugin<T>>,
-                        plugin_type: *const c_char,
-                        plugin: *mut c_void,
-                        cb: &mut CallbackData,
-                        type_name: &str) {
+unsafe fn add_plugin(plugins: &mut Vec<Plugin>,
+                     plugin_type: *const c_char,
+                     plugin: *mut c_void,
+                     cb: &CallbackData,
+                     type_name: &str) {
     for plugin in plugins.iter() {
         if cb.path == plugin.path {
             return;
@@ -85,22 +88,25 @@ unsafe fn add_plugin<T>(plugins: &mut Vec<Plugin<T>>,
         return;
     }
 
-    let plugin = Plugin {
+    let plugin_funcs: *mut CBasePlugin = transmute(plugin);
+
+    let p = Plugin {
+        name: CStr::from_ptr((*plugin_funcs).name).to_string_lossy().into_owned(),
         path: cb.path.clone(),
         lib: cb.lib.clone(),
-        plugin_funcs: transmute(plugin), 
+        plugin_funcs: plugin_funcs,
     };
 
-    plugins.push(plugin);
+    plugins.push(p);
 }
 
 unsafe fn register_plugin_callback(plugin_type: *const c_char,
                                    plugin: *mut c_void,
-                                   size: c_int,
+                                   _: c_int,
                                    ph: *mut CallbackData) {
-    let t = &mut (*ph); 
-    add_plugin::<CViewPlugin>(&mut t.handler.view_plugins, plugin_type, plugin, t, "View");
-    add_plugin::<CBackendPlugin>(&mut t.handler.backend_plugins, plugin_type, plugin, t, "Backend");
+    let t = &mut (*ph);
+    add_plugin(&mut t.handler.view_plugins, plugin_type, plugin, &(*ph), "View");
+    add_plugin(&mut t.handler.backend_plugins, plugin_type, plugin, &(*ph), "Backend");
 }
 
 impl<'a> PluginHandler<'a> {
@@ -128,10 +134,10 @@ impl<'a> PluginHandler<'a> {
         None
     }
 
-    unsafe fn load_plugin(&mut self, path: PathBuf) -> bool {
+    unsafe fn load_plugin(&'a mut self, path: PathBuf) -> bool {
         match Library::new(&path) {
-            Ok(library) => {
-                let lib = Rc::new(library);
+            Ok(lib) => {
+                let lib = Rc::new(lib);
 
                 let init_plugin: Result<Symbol<extern "C" fn(RegisterPlugin, *mut CallbackData)>> =
                     lib.get(b"InitPlugin");
@@ -163,7 +169,7 @@ impl<'a> PluginHandler<'a> {
         }
     }
 
-    pub fn add_plugin(&mut self, clean_name: &str) -> bool {
+    pub fn add_plugin(&'a mut self, clean_name: &str) -> bool {
         let name = Self::format_name(clean_name);
 
         if let Some(plugin_path) = Self::search_plugin(self, &name) {
@@ -193,7 +199,7 @@ impl<'a> PluginHandler<'a> {
         format!("lib{}.so", name)
     }
 
-    pub fn add_non_standard(name: &str) {}
+    pub fn add_non_standard(_: &str) {}
 }
 
 
