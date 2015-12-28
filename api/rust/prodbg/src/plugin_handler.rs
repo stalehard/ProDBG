@@ -51,8 +51,6 @@ pub extern "C" fn InitPlugin(cb: extern "C" fn(pt: *const c_char,
         c_register_plugin: cb,
     };
 
-    println!("Rust: InitPlugin");
-
     unsafe {
         init_plugin(&mut plugin_handler);
     }
