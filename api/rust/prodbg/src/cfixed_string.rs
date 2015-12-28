@@ -1,4 +1,4 @@
-use std::ffi::{CString, CStr};
+use std::ffi::CString;
 use std::mem;
 use std::ptr;
 
@@ -43,83 +43,87 @@ impl CFixedString {
     }
 }
 
-// Only used in tests
-#[allow(dead_code)]
-fn get_string(handler: &mut CFixedString) -> String {
-    unsafe { CStr::from_ptr(handler.as_ptr()).to_string_lossy().into_owned() }
-}
+#[cfg(test)]
+mod tests {
+    use std::ffi::CStr;
+    use super::*;
 
-#[test]
-fn test_empty_handler() {
-    let short_string = "";
-    let mut t = CFixedString::from_str(short_string);
-    assert_eq!(t.heap_string.is_none(), true);
-    assert_eq!(get_string(&mut t), short_string);
-}
+    fn get_string(handler: &mut CFixedString) -> String {
+        unsafe { CStr::from_ptr(handler.as_ptr()).to_string_lossy().into_owned() }
+    }
+
+    #[test]
+    fn test_empty_handler() {
+        let short_string = "";
+        let mut t = CFixedString::from_str(short_string);
+        assert_eq!(t.heap_string.is_none(), true);
+        assert_eq!(get_string(&mut t), short_string);
+    }
 
 
-#[test]
-fn test_short_1() {
-    let short_string = "test_local";
-    let mut t = CFixedString::from_str(short_string);
-    assert_eq!(t.heap_string.is_none(), true);
-    assert_eq!(get_string(&mut t), short_string);
-}
+    #[test]
+    fn test_short_1() {
+        let short_string = "test_local";
+        let mut t = CFixedString::from_str(short_string);
+        assert_eq!(t.heap_string.is_none(), true);
+        assert_eq!(get_string(&mut t), short_string);
+    }
 
-#[test]
-fn test_short_2() {
-    let short_string = "test_local stoheusthsotheost";
-    let mut t = CFixedString::from_str(short_string);
-    assert_eq!(t.heap_string.is_none(), true);
-    assert_eq!(get_string(&mut t), short_string);
-}
+    #[test]
+    fn test_short_2() {
+        let short_string = "test_local stoheusthsotheost";
+        let mut t = CFixedString::from_str(short_string);
+        assert_eq!(t.heap_string.is_none(), true);
+        assert_eq!(get_string(&mut t), short_string);
+    }
 
-#[test]
-fn test_511() {
-    // this string (with 511) buffer should just fit
-    let test_511_string = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuu\
-                            uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                            uuuueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaa\
-                            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooo\
-                            oooooooooooooooooooooooooooooooooeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\
-                            eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                            uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
-                            oooooooooooooooooooooooooooooooooooooooacd";
-    let mut t = CFixedString::from_str(test_511_string);
-    assert_eq!(t.heap_string.is_none(), true);
-    assert_eq!(get_string(&mut t), test_511_string);
-}
+    #[test]
+    fn test_511() {
+        // this string (with 511) buffer should just fit
+        let test_511_string = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuu\
+                                uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\
+                                uuuueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaa\
+                                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooo\
+                                oooooooooooooooooooooooooooooooooeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\
+                                eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
+                                uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
+                                oooooooooooooooooooooooooooooooooooooooacd";
+        let mut t = CFixedString::from_str(test_511_string);
+        assert_eq!(t.heap_string.is_none(), true);
+        assert_eq!(get_string(&mut t), test_511_string);
+    }
 
-#[test]
-fn test_512() {
-    // this string (with 512) buffer should no fit
-    let test_512_string = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuu\
-                            uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                            uuuueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaa\
-                            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooo\
-                            oooooooooooooooooooooooooooooooooeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\
-                            eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                            uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
-                            oooooooooooooooooooooooooooooooooooooooabcd";
-    let mut t = CFixedString::from_str(test_512_string);
-    assert_eq!(t.heap_string.is_some(), true);
-    assert_eq!(get_string(&mut t), test_512_string);
-}
+    #[test]
+    fn test_512() {
+        // this string (with 512) buffer should no fit
+        let test_512_string = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuu\
+                                uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\
+                                uuuueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaa\
+                                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooo\
+                                oooooooooooooooooooooooooooooooooeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\
+                                eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
+                                uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
+                                oooooooooooooooooooooooooooooooooooooooabcd";
+        let mut t = CFixedString::from_str(test_512_string);
+        assert_eq!(t.heap_string.is_some(), true);
+        assert_eq!(get_string(&mut t), test_512_string);
+    }
 
-#[test]
-fn test_513() {
-    // this string (with 513) buffer should no fit
-    let test_513_string = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuu\
-                            uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                            uuuueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaa\
-                            aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooo\
-                            oooooooooooooooooooooooooooooooooeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\
-                            eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
-                            uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
-                            oooooooooooooooooooooooooooooooooooooooabcd";
-    let mut t = CFixedString::from_str(test_513_string);
-    assert_eq!(t.heap_string.is_some(), true);
-    assert_eq!(get_string(&mut t), test_513_string);
+    #[test]
+    fn test_513() {
+        // this string (with 513) buffer should no fit
+        let test_513_string = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuu\
+                                uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu\
+                                uuuueeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeaaaaaaaaaaaa\
+                                aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaoooooooooooooooooooooooooooooo\
+                                oooooooooooooooooooooooooooooooooeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\
+                                eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeuuuuuuuuuuuuuuuuuuuuuuuuuu\
+                                uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuoooooooooooooooooooooooooooooo\
+                                oooooooooooooooooooooooooooooooooooooooabcd";
+        let mut t = CFixedString::from_str(test_513_string);
+        assert_eq!(t.heap_string.is_some(), true);
+        assert_eq!(get_string(&mut t), test_513_string);
+    }
 }
 
 
