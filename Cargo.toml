@@ -12,6 +12,9 @@ name = "prodbg"
 [dependencies]
 notify = "^2.5.0"
 libc = "0.2.0"
-api_test = { path = "src/prodbg/tests/rust_api_test" }
-bitmap_memory = { path = "src/plugins/bitmap_memory" }
+libloading = "0.2.0"
+
+# These are here to get
+# api_test = { path = "src/prodbg/tests/rust_api_test" }
+# bitmap_memory = { path = "src/plugins/bitmap_memory" }
 
