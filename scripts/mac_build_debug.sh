@@ -1,9 +1,6 @@
 #!/bin/bash 
 bin/macosx/tundra/tundra2 -v macosx-clang-debug
 cargo build
-cd src/plugins/bitmap_memory
-cargo build
-cd ../../prodbg/tests/rust_api_test
-cargo build
-cd ../../../../
+cargo build --manifest-path=src/plugins/bitmap_memory/Cargo.toml
+cargo build --manifest-path=src/prodbg/tests/rust_api_test/Cargo.toml
 
