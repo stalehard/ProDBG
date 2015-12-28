@@ -60,7 +60,7 @@ pub struct Plugin {
 pub struct PluginHandler<'a> {
     view_plugins: Vec<Plugin>,
     backend_plugins: Vec<Plugin>,
-    search_paths: &'a [&'static str],
+    search_paths: Vec<&'a str>, 
 }
 
 pub struct CallbackData<'a> {
@@ -110,7 +110,7 @@ unsafe fn register_plugin_callback(plugin_type: *const c_char,
 }
 
 impl<'a> PluginHandler<'a> {
-    pub fn new(search_paths: &'a [&'static str]) -> PluginHandler<'a> {
+    pub fn new(search_paths: Vec<&str>) -> PluginHandler {
         PluginHandler {
             backend_plugins: Vec::new(),
             view_plugins: Vec::new(),
@@ -134,7 +134,7 @@ impl<'a> PluginHandler<'a> {
         None
     }
 
-    unsafe fn load_plugin(&'a mut self, path: PathBuf) -> bool {
+    unsafe fn load_plugin(&mut self, path: PathBuf) -> bool {
         match Library::new(&path) {
             Ok(lib) => {
                 let lib = Rc::new(lib);
@@ -145,7 +145,7 @@ impl<'a> PluginHandler<'a> {
                 match init_plugin {
                     Ok(init_fun) => {
                         let mut callback_data = CallbackData {
-                            handler: self,
+                            handler: transmute(self), 
                             lib: lib.clone(),
                             path: path,
                         };
@@ -169,7 +169,7 @@ impl<'a> PluginHandler<'a> {
         }
     }
 
-    pub fn add_plugin(&'a mut self, clean_name: &str) -> bool {
+    pub fn add_plugin(&mut self, clean_name: &str) -> bool {
         let name = Self::format_name(clean_name);
 
         if let Some(plugin_path) = Self::search_plugin(self, &name) {
@@ -210,8 +210,8 @@ mod tests {
     #[test]
     fn test_serach_paths_find() {
         // This actually doesn't search for a plugin file but that doesn't really matter
-        let search_paths: [&str; 2] = ["src", "other_path"];
-        let plugin_handler = PluginHandler::new(&search_paths);
+        let search_paths = vec!["src", "other_path"];
+        let plugin_handler = PluginHandler::new(search_paths);
         assert_eq!(plugin_handler.search_plugin(&"main.rs".to_string()).is_some(),
                    true);
     }
@@ -219,18 +219,21 @@ mod tests {
     #[test]
     fn test_serach_paths_no_find() {
         // This actually doesn't search for a plugin file but that doesn't really matter
-        let search_paths: [&str; 2] = ["src", "other_path"];
-        let plugin_handler = PluginHandler::new(&search_paths);
+        let search_paths = vec!["src", "other_path"];
+        let plugin_handler = PluginHandler::new(search_paths);
         assert_eq!(plugin_handler.search_plugin(&"main_no_find.rs".to_string()).is_none(),
                    true);
     }
 
     #[test]
     fn test_load_plugin_init() {
-        let search_paths: [&str; 1] = ["t2-output/macosx-clang-debug-default"];
-        let mut plugin_handler = PluginHandler::new(&search_paths);
-        assert_eq!(plugin_handler.add_plugin(&"breakpoints_plugin".to_string()),
-                   true);
+        let search_paths = vec!["t2-output/macosx-clang-debug-default"];
+        let mut plugin_handler = PluginHandler::new(search_paths);
+        assert_eq!(plugin_handler.view_plugins.len(), 0);
+        plugin_handler.add_plugin(&"breakpoints_plugin".to_string());
+        assert_eq!(plugin_handler.view_plugins.len(), 1);
+        plugin_handler.add_plugin(&"breakpoints_plugin".to_string());
+        assert_eq!(plugin_handler.view_plugins.len(), 1);
     }
 
     #[test]
