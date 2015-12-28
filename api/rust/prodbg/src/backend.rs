@@ -21,8 +21,7 @@ pub struct CBackendCallbacks {
     pub update: Option<fn(ptr: *mut c_void,
                           a: *mut c_int,
                           ra: *mut c_void,
-                          wa: *mut c_void)
-                         >,
+                          wa: *mut c_void)>,
 }
 
 unsafe impl Sync for CBackendCallbacks {}
