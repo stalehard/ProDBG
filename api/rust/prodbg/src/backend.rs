@@ -25,6 +25,8 @@ pub struct CBackendCallbacks {
                          >,
 }
 
+unsafe impl Sync for CBackendCallbacks {}
+
 pub fn create_backend_instance<T: Backend>(service_func: extern "C" fn(service: *const c_uchar)
                                                                        -> *mut c_void)
                                            -> *mut c_void {
@@ -59,17 +61,13 @@ pub fn update_backend_instance<T: Backend>(ptr: *mut c_void,
 
 #[macro_export]
 macro_rules! define_backend_plugin {
-    ($name:expr, $x:ty) => {
-        {
-            let plugin = CBackendCallbacks {
-                name: CFixedString::from_str($name).as_ptr() as *const u8, 
-                create_instance: Some(prodbg::backend::create_backend_instance::<$x>),
-                destroy_instance: Some(prodbg::backend::destroy_backend_instance::<$x>),
-                register_menu: None,
-                update: Some(prodbg::backend::update_backend_instance::<$x>)
-             };
-
-            Box::new(plugin)
-        }
+    ($p_name:ident, $name:expr, $x:ty) => {
+        static $p_name: CBackendCallbacks = CBackendCallbacks {
+            name: $name as *const u8, 
+            create_instance: Some(prodbg::backend::create_backend_instance::<$x>),
+            destroy_instance: Some(prodbg::backend::destroy_backend_instance::<$x>),
+            register_menu: None,
+            update: Some(prodbg::backend::update_backend_instance::<$x>)
+        };
     }
 }

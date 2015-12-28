@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate prodbg;
-
 use prodbg::*;
 
 static CODE: &'static [u8] = b"\x55\x48\x8b\x05\xb8\x13\x00\x00";
@@ -116,6 +115,6 @@ impl Backend for MyBackend {
 
 #[no_mangle]
 pub fn init_plugin(plugin_handler: &mut PluginHandler) {
-    let plugin = define_backend_plugin!("backend_test", MyBackend);
-    plugin_handler.register_backend(&plugin);
+    define_backend_plugin!(PLUGIN, b"backend_test\0", MyBackend);
+    plugin_handler.register_backend(&PLUGIN);
 }
