@@ -22,6 +22,6 @@ impl View for BitmapView {
 
 #[no_mangle]
 pub fn init_plugin(plugin_handler: &mut PluginHandler) {
-    let plugin = define_view_plugin!("Bitmap View", BitmapView);
-    plugin_handler.register_view(&plugin);
+    define_view_plugin!(PLUGIN, b"Bitmap View\0", BitmapView);
+    plugin_handler.register_view(&PLUGIN);
 }

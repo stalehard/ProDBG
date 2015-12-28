@@ -29,6 +29,8 @@ pub struct CViewCallbacks {
     pub load_state: Option<fn(*mut c_void)>,
 }
 
+unsafe impl Sync for CViewCallbacks {}
+
 pub fn create_view_instance<T: View>(ui_api: *const c_void,
                                      service_func: extern "C" fn(service: *const c_uchar)
                                                                  -> *mut c_void)
@@ -67,18 +69,14 @@ pub fn update_view_instance<T: View>(ptr: *mut c_void,
 
 #[macro_export]
 macro_rules! define_view_plugin {
-    ($name:expr, $x:ty) => {
-        {
-            let plugin = CViewCallbacks {
-                name: CFixedString::from_str($name).as_ptr() as *const u8, 
+    ($p_name:ident, $name:expr, $x:ty) => {
+        static $p_name: CViewCallbacks = CViewCallbacks {
+                name: $name as *const u8, 
                 create_instance: Some(prodbg::view::create_view_instance::<$x>),
                 destroy_instance: Some(prodbg::view::destroy_view_instance::<$x>),
                 update: Some(prodbg::view::update_view_instance::<$x>),
                 save_state: None,
                 load_state: None
-             };
-
-            Box::new(plugin)
-        }
+        };
     }
 }
