@@ -39,8 +39,7 @@ extern "C" {
 #[allow(non_snake_case)]
 pub extern "C" fn InitPlugin(cb: extern "C" fn(pt: *const c_char,
                                                plugin: *mut c_void,
-                                               data: *mut c_void)
-                                              ,
+                                               data: *mut c_void),
                              priv_data: *mut c_void) {
     let mut plugin_handler = PluginHandler {
         private_data: priv_data,

@@ -1,0 +1,10 @@
+[package]
+name = "core"
+version = "0.1.0"
+authors = ["Daniel Collin <daniel@collin.com>"]
+
+[dependencies]
+notify = "^2.5.0"
+libc = "0.2.0"
+libloading = "0.2.0"
+
