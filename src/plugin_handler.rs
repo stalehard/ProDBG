@@ -9,47 +9,11 @@ use std::fs;
 
 use self::libloading::*;
 
-// static STANDARD_PLUGIN_TYPES: [&'static str; 2] = ["ProDBG View", "ProDBG Backend"];
-
-#[repr(C)]
-pub struct CViewPlugin {
-    pub name: *const c_char,
-    pub create_instance: Option<fn(ui_api: *const c_void,
-                                   service_func: extern "C" fn(service: *const c_char)
-                                                               -> *mut c_void)
-                                   -> *mut c_void>,
-    pub destroy_instance: Option<fn(*mut c_void)>,
-    pub update: Option<fn(ptr: *mut c_void,
-                          ui: *mut c_void,
-                          reader: *mut c_void,
-                          writer: *mut c_void)
-                         >,
-    pub save_state: Option<fn(*mut c_void)>,
-    pub load_state: Option<fn(*mut c_void)>,
-}
-
-#[repr(C)]
-pub struct CBackendPlugin {
-    pub name: *const c_char,
-    pub create_instance: Option<fn(service_func: extern "C" fn(service: *const c_char)
-                                                               -> *mut c_void)
-                                   -> *mut c_void>,
-    pub destroy_instance: Option<fn(*mut c_void)>,
-    pub register_menu: Option<fn() -> *mut c_void>,
-    pub update: Option<fn(ptr: *mut c_void,
-                          a: *mut c_int,
-                          ra: *mut c_void,
-                          wa: *mut c_void)
-                         >,
-}
-
 #[repr(C)]
 pub struct CBasePlugin {
     pub name: *const c_char,
 }
 
-
-// We will need version handling for plugins later on but should be fine for now.
 pub struct Plugin {
     pub lib: Rc<Library>,
     pub path: PathBuf,
@@ -60,7 +24,7 @@ pub struct Plugin {
 pub struct PluginHandler<'a> {
     view_plugins: Vec<Plugin>,
     backend_plugins: Vec<Plugin>,
-    search_paths: Vec<&'a str>, 
+    search_paths: Vec<&'a str>,
 }
 
 pub struct CallbackData<'a> {
@@ -118,7 +82,20 @@ impl<'a> PluginHandler<'a> {
         }
     }
 
-    fn search_plugin(&self, name: &String) -> Option<PathBuf> {
+    ///
+    /// Searches the paths given at the new function for the specified file
+    /// and returns Option<PathBuf> if found otherwise None
+    ///
+    /// Example:
+    ///
+    /// ```ignore
+    /// if let Some(file_path) = Self::fine_file(self, "file.txt") {
+    ///     println!("found file {}", file_path.to_str().unwrap());
+    /// } else {
+    ///     println!("Unable to find plugin {}", clean_name);
+    /// }
+    /// ```
+    fn fine_file(&self, name: &String) -> Option<PathBuf> {
         for p in self.search_paths.iter() {
             let path = Path::new(p).join(name);
             match fs::metadata(&path) {
@@ -134,6 +111,21 @@ impl<'a> PluginHandler<'a> {
         None
     }
 
+    ///
+    /// Loads a plugin for ProDBG. A plugin (currently) is a shared object file (dll/so/dylib)
+    /// and looks for a "InitPlugin" entry point. The entry point looks like this
+    /// 
+    /// init_plugin(callback, private_data)
+    ///
+    /// As the API is in C here is how the callback function looks like
+    /// 
+    /// RegisterPlugin(const char* type, void* plugin, int pluginSize, void* private_data)
+    ///
+    /// Register plugin will be called from the plugin itself making it possible to register
+    /// more than one plugin in one shared object
+    ///
+    /// Returns true if we managed to load the plugin and everything went ok
+    ///
     unsafe fn load_plugin(&mut self, path: PathBuf) -> bool {
         match Library::new(&path) {
             Ok(lib) => {
@@ -145,7 +137,7 @@ impl<'a> PluginHandler<'a> {
                 match init_plugin {
                     Ok(init_fun) => {
                         let mut callback_data = CallbackData {
-                            handler: transmute(self), 
+                            handler: transmute(self),
                             lib: lib.clone(),
                             path: path,
                         };
@@ -169,10 +161,17 @@ impl<'a> PluginHandler<'a> {
         }
     }
 
+    /// Tries to add a plugin to the plugin manager.
+    /// 
+    /// The code will search the search paths and tries to find the file
+    /// in the search_paths given to the PluginHandler::new call
+    ///
+    /// Returns true if everything went ok, otherwise fals
+    /// 
     pub fn add_plugin(&mut self, clean_name: &str) -> bool {
         let name = Self::format_name(clean_name);
 
-        if let Some(plugin_path) = Self::search_plugin(self, &name) {
+        if let Some(plugin_path) = Self::fine_file(self, &name) {
             unsafe { Self::load_plugin(self, plugin_path) }
         } else {
             println!("Unable to find plugin {}", clean_name);
@@ -180,16 +179,19 @@ impl<'a> PluginHandler<'a> {
         }
     }
 
+    /// Formats dll name on Windows ("test_foo" -> "test_foo.dll")
     #[cfg(target_os="windows")]
     fn format_name(name: &str) -> String {
         format!("{}.dll", name)
     }
 
+    /// Formats dll name on Mac ("test_foo" -> "libtest_foo.dylib")
     #[cfg(target_os="macos")]
     fn format_name(name: &str) -> String {
         format!("lib{}.dylib", name)
     }
 
+    /// Formats dll name on *nix ("test_foo" -> "libtest_foo.so")
     #[cfg(any(target_os="linux",
               target_os="freebsd",
               target_os="dragonfly",
@@ -202,6 +204,7 @@ impl<'a> PluginHandler<'a> {
     pub fn add_non_standard(_: &str) {}
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(test)]
 mod tests {
@@ -212,7 +215,7 @@ mod tests {
         // This actually doesn't search for a plugin file but that doesn't really matter
         let search_paths = vec!["src", "other_path"];
         let plugin_handler = PluginHandler::new(search_paths);
-        assert_eq!(plugin_handler.search_plugin(&"main.rs".to_string()).is_some(),
+        assert_eq!(plugin_handler.fine_file(&"main.rs".to_string()).is_some(),
                    true);
     }
 
@@ -221,7 +224,7 @@ mod tests {
         // This actually doesn't search for a plugin file but that doesn't really matter
         let search_paths = vec!["src", "other_path"];
         let plugin_handler = PluginHandler::new(search_paths);
-        assert_eq!(plugin_handler.search_plugin(&"main_no_find.rs".to_string()).is_none(),
+        assert_eq!(plugin_handler.fine_file(&"main_no_find.rs".to_string()).is_none(),
                    true);
     }
 
