@@ -234,7 +234,7 @@ int main(int, char**) { return 0; }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
-	registerPlugin(PD_VIEW_API_VERSION, &plugin, sizeof(PDViewPlugin), private_data);
+	registerPlugin(PD_VIEW_API_VERSION, &plugin, private_data);
 }
 
 }

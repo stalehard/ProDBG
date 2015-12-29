@@ -1,6 +1,6 @@
 extern crate libloading;
 
-use libc::{c_char, c_void, c_int};
+use libc::{c_char, c_void};
 use std::path::{Path, PathBuf};
 use std::ffi::CStr;
 use std::rc::Rc;
@@ -33,7 +33,7 @@ pub struct CallbackData<'a> {
     path: PathBuf,
 }
 
-type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, size: c_int, data: *mut CallbackData);
+type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, data: *mut CallbackData);
 
 unsafe fn add_plugin(plugins: &mut Vec<Plugin>,
                      plugin_type: *const c_char,
@@ -66,7 +66,6 @@ unsafe fn add_plugin(plugins: &mut Vec<Plugin>,
 
 unsafe fn register_plugin_callback(plugin_type: *const c_char,
                                    plugin: *mut c_void,
-                                   _: c_int,
                                    ph: *mut CallbackData) {
     let t = &mut (*ph);
     add_plugin(&mut t.handler.view_plugins, plugin_type, plugin, &(*ph), "View");

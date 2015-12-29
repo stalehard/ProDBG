@@ -8,7 +8,6 @@ pub struct PluginHandler {
     pub private_data: *mut c_void,
     pub c_register_plugin: extern "C" fn(pt: *const c_char,
                                          plugin: *mut c_void,
-                                         size: c_int,
                                          priv_data: *mut c_void)
 }
 
@@ -17,7 +16,6 @@ impl PluginHandler {
         unsafe {
             (self.c_register_plugin)(BACKEND_API_VERSION.as_ptr() as *const i8,
                                      transmute(plugin),
-                                     ::std::mem::size_of::<CBackendCallbacks>() as c_int,
                                      (self.private_data));
         }
     }
@@ -26,7 +24,6 @@ impl PluginHandler {
         unsafe {
             (self.c_register_plugin)(VIEW_API_VERSION.as_ptr() as *const i8,
                                      transmute(plugin),
-                                     ::std::mem::size_of::<CViewCallbacks>() as c_int,
                                      (self.private_data));
         }
     }
@@ -42,7 +39,6 @@ extern "C" {
 #[allow(non_snake_case)]
 pub extern "C" fn InitPlugin(cb: extern "C" fn(pt: *const c_char,
                                                plugin: *mut c_void,
-                                               size: c_int,
                                                data: *mut c_void)
                                               ,
                              priv_data: *mut c_void) {
