@@ -56,6 +56,9 @@ extern {
     fn bgfx_imgui_set_window_pos(x: c_float, y: c_float);
     fn bgfx_imgui_set_window_size(x: c_float, y: c_float);
 
+    fn bgfx_get_screen_width() -> f32;
+    fn bgfx_get_screen_height() -> f32;
+
     fn bgfx_set_context(context: *mut c_void); 
     fn bgfx_get_context() -> *mut c_void;
 }
@@ -81,7 +84,7 @@ pub unsafe extern fn prodbg_timed_update() {
 
     for instance in t.plugin_handler.view_instances.iter() {
         bgfx_imgui_set_window_pos(0.0, 0.0);
-        bgfx_imgui_set_window_size(600.0, 600.0);
+        bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
 
         bgfx_imgui_begin(1);
 
