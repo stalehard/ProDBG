@@ -37,7 +37,7 @@ pub struct PluginHandler<'a> {
     pub backend_plugins: Vec<Rc<Plugin>>,
     pub view_instances: Vec<ViewInstance>,
     pub search_paths: Vec<&'a str>,
-    pub watcher: Option<RecommendedWatcher>, 
+    pub watcher: Option<RecommendedWatcher>,
     pub watch_recv: Receiver<Event>,
     pub watch_send: Sender<Event>,
 }
@@ -51,23 +51,23 @@ pub struct CallbackData<'a> {
 #[repr(C)]
 pub struct CViewPlugin {
     pub name: *const c_uchar,
-    pub create_instance: Option<fn(ui_api: *const c_void, service: *const c_void)
-    //pub create_instance: Option<fn(ui_api: *const c_void,
-    //                              service_func: extern "C" fn(service: *const c_uchar)
-    //                                                          -> *mut c_void)
-                                   -> *mut c_void>,
+    pub create_instance: Option<fn(ui_api: *const c_void, service: *const c_void) -> *mut c_void>,
     pub destroy_instance: Option<fn(*mut c_void)>,
     pub update: fn(ptr: *mut c_void,
-                          ui: *const c_void,
-                          reader: *const c_void,
-                          writer: *const c_void),
+                   ui: *const c_void,
+                   reader: *const c_void,
+                   writer: *const c_void)
+                  ,
 
     pub save_state: Option<fn(*mut c_void)>,
     pub load_state: Option<fn(*mut c_void)>,
 }
 
 
-type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, data: *mut CallbackData);
+type RegisterPlugin = unsafe fn(pt: *const c_char,
+                                plugin: *mut c_void,
+                                data: *mut CallbackData)
+                               ;
 
 unsafe fn add_plugin(plugins: &mut Vec<Rc<Plugin>>,
                      plugin_type: *const c_char,
@@ -102,8 +102,16 @@ unsafe fn register_plugin_callback(plugin_type: *const c_char,
                                    plugin: *mut c_void,
                                    ph: *mut CallbackData) {
     let t = &mut (*ph);
-    add_plugin(&mut t.handler.view_plugins, plugin_type, plugin, &(*ph), "View");
-    add_plugin(&mut t.handler.backend_plugins, plugin_type, plugin, &(*ph), "Backend");
+    add_plugin(&mut t.handler.view_plugins,
+               plugin_type,
+               plugin,
+               &(*ph),
+               "View");
+    add_plugin(&mut t.handler.backend_plugins,
+               plugin_type,
+               plugin,
+               &(*ph),
+               "Backend");
 }
 
 impl<'a> PluginHandler<'a> {
@@ -182,8 +190,9 @@ impl<'a> PluginHandler<'a> {
             Ok(lib) => {
                 let lib = Rc::new(lib);
 
-                let init_plugin: libloading::Result<Symbol<extern "C" fn(RegisterPlugin, *mut CallbackData)>> =
-                    lib.get(b"InitPlugin");
+                let init_plugin: libloading::Result<Symbol<extern "C" fn(RegisterPlugin,
+                                                                         *mut CallbackData)
+                                                                        >> = lib.get(b"InitPlugin");
 
                 match init_plugin {
                     Ok(init_fun) => {
@@ -237,7 +246,7 @@ impl<'a> PluginHandler<'a> {
             };
 
             let instance = ViewInstance {
-                user_data: user_data, 
+                user_data: user_data,
                 x: 0.0,
                 y: 0.0,
                 width: 0.0,
@@ -294,7 +303,7 @@ impl<'a> PluginHandler<'a> {
     pub fn add_non_standard(_: &str) {}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #[cfg(test)]
 mod tests {
