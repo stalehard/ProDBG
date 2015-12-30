@@ -80,6 +80,13 @@ pub unsafe extern fn prodbg_timed_update() {
     let context = bgfx_get_context() as *mut Context;
     let t = &mut (*context);
 
+    // check if someone has poked our file!
+
+    match t.plugin_handler.watch_recv.try_recv() {
+        Ok(file) => println!("Poked file! {}", file.path.unwrap().to_str().unwrap()),
+        _ => (),
+    }
+
     bgfx_pre_update();
 
     for instance in t.plugin_handler.view_instances.iter() {

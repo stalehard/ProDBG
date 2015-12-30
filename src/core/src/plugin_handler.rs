@@ -1,5 +1,7 @@
 extern crate libloading;
 
+use notify::{RecommendedWatcher, Error, Watcher, Event};
+use std::sync::mpsc::{channel, Receiver, Sender};
 use libc::{c_char, c_void, c_uchar};
 use std::path::{Path, PathBuf};
 use std::ffi::CStr;
@@ -7,8 +9,7 @@ use std::rc::Rc;
 use std::mem::transmute;
 use std::fs;
 use std::ptr;
-
-use self::libloading::*;
+use self::libloading::{Library, Symbol};
 
 #[repr(C)]
 pub struct CBasePlugin {
@@ -36,6 +37,9 @@ pub struct PluginHandler<'a> {
     pub backend_plugins: Vec<Rc<Plugin>>,
     pub view_instances: Vec<ViewInstance>,
     pub search_paths: Vec<&'a str>,
+    pub watcher: Option<RecommendedWatcher>, 
+    pub watch_recv: Receiver<Event>,
+    pub watch_send: Sender<Event>,
 }
 
 pub struct CallbackData<'a> {
@@ -104,12 +108,29 @@ unsafe fn register_plugin_callback(plugin_type: *const c_char,
 
 impl<'a> PluginHandler<'a> {
     pub fn new(search_paths: Vec<&str>) -> PluginHandler {
-        PluginHandler {
+        let (tx, rx) = channel();
+
+        let mut ph = PluginHandler {
             backend_plugins: Vec::new(),
             view_plugins: Vec::new(),
             view_instances: Vec::new(),
             search_paths: search_paths,
-        }
+            watch_recv: rx,
+            watch_send: tx,
+            watcher: None,
+        };
+
+        let w: Result<RecommendedWatcher, Error> = Watcher::new(ph.watch_send.clone());
+
+        ph.watcher = match w {
+            Ok(watcher) => Some(watcher),
+            Err(_) => {
+                println!("Unable to create file watcher, no dynamic reloading will be done");
+                None
+            }
+        };
+
+        ph
     }
 
     ///
@@ -161,11 +182,19 @@ impl<'a> PluginHandler<'a> {
             Ok(lib) => {
                 let lib = Rc::new(lib);
 
-                let init_plugin: Result<Symbol<extern "C" fn(RegisterPlugin, *mut CallbackData)>> =
+                let init_plugin: libloading::Result<Symbol<extern "C" fn(RegisterPlugin, *mut CallbackData)>> =
                     lib.get(b"InitPlugin");
 
                 match init_plugin {
                     Ok(init_fun) => {
+
+                        // Watch if someone changes the plugin
+
+                        if self.watcher.is_some() {
+                            println!("Added watch on {}", path.to_str().unwrap());
+                            let _ = self.watcher.as_mut().unwrap().watch(&path);
+                        }
+
                         let mut callback_data = CallbackData {
                             handler: transmute(self),
                             lib: lib.clone(),
@@ -173,6 +202,9 @@ impl<'a> PluginHandler<'a> {
                         };
 
                         init_fun(register_plugin_callback, &mut callback_data);
+
+                        println!("after init\n");
+
                         true
                     }
                     Err(e) => {
