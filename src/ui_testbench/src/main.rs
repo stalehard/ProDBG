@@ -1,15 +1,30 @@
 extern crate core;
 extern crate libc;
 
+#[macro_use]
+extern crate lazy_static;
+
 use libc::{c_void, c_int, c_char, c_float};
 use core::plugin_handler::*;
 use std::ptr;
 
-fn main() {
+#[repr(C)]
+struct Context<'a> {
+    plugin_handler: PluginHandler<'a>,
+}
 
-    //let search_paths = vec!["t2-output/macosx-clang-debug", "target-debug"];
+fn main() {
+    let search_paths = vec!["t2-output/macosx-clang-debug", "target-debug"];
+
+    let mut context = Box::new(Context {
+        plugin_handler: PluginHandler::new(search_paths),
+    });
+
+    context.plugin_handler.add_plugin(&"breakpoints_plugin".to_string());
 
     unsafe {
+        // this is kinda ugly but we have no good way to pass this around
+        bgfx_set_context(&mut *context);
         prodbg_main(0, ptr::null())
     }
 
@@ -38,6 +53,9 @@ extern {
 
     fn bgfx_imgui_set_window_pos(x: c_float, y: c_float);
     fn bgfx_imgui_set_window_size(x: c_float, y: c_float);
+
+    fn bgfx_set_context(context: *mut Context); 
+    fn bgfx_get_context() -> *mut Context;
 }
 
 ///
@@ -53,11 +71,12 @@ pub extern fn prodbg_create(window: *const c_void, width: c_int, height: c_int) 
 }
 
 #[no_mangle]
-pub extern fn prodbg_timed_update() {
-    unsafe {
-        bgfx_pre_update();
-        bgfx_post_update();
-    }
+pub unsafe extern fn prodbg_timed_update() {
+    let context = bgfx_get_context();
+    let t = &mut (*context);
+
+    bgfx_pre_update();
+    bgfx_post_update();
 }
 
 #[no_mangle]

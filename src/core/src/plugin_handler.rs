@@ -6,6 +6,7 @@ use std::ffi::CStr;
 use std::rc::Rc;
 use std::mem::transmute;
 use std::fs;
+//use std::ptr;
 
 use self::libloading::*;
 
@@ -21,10 +22,21 @@ pub struct Plugin {
     pub plugin_funcs: *mut CBasePlugin,
 }
 
+pub struct ViewInstance {
+    //pub user_data: *mut c_void,
+    //pub plugin_funcs: *mut CBasePlugin,
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32,
+    pub plugin_type: Rc<Plugin>,
+}
+
 pub struct PluginHandler<'a> {
-    view_plugins: Vec<Plugin>,
-    backend_plugins: Vec<Plugin>,
-    search_paths: Vec<&'a str>,
+    pub view_plugins: Vec<Rc<Plugin>>,
+    pub backend_plugins: Vec<Rc<Plugin>>,
+    pub view_instances: Vec<ViewInstance>,
+    pub search_paths: Vec<&'a str>,
 }
 
 pub struct CallbackData<'a> {
@@ -35,7 +47,7 @@ pub struct CallbackData<'a> {
 
 type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, data: *mut CallbackData);
 
-unsafe fn add_plugin(plugins: &mut Vec<Plugin>,
+unsafe fn add_plugin(plugins: &mut Vec<Rc<Plugin>>,
                      plugin_type: *const c_char,
                      plugin: *mut c_void,
                      cb: &CallbackData,
@@ -54,12 +66,12 @@ unsafe fn add_plugin(plugins: &mut Vec<Plugin>,
 
     let plugin_funcs: *mut CBasePlugin = transmute(plugin);
 
-    let p = Plugin {
+    let p = Rc::new(Plugin {
         name: CStr::from_ptr((*plugin_funcs).name).to_string_lossy().into_owned(),
         path: cb.path.clone(),
         lib: cb.lib.clone(),
         plugin_funcs: plugin_funcs,
-    };
+    });
 
     plugins.push(p);
 }
@@ -77,6 +89,7 @@ impl<'a> PluginHandler<'a> {
         PluginHandler {
             backend_plugins: Vec::new(),
             view_plugins: Vec::new(),
+            view_instances: Vec::new(),
             search_paths: search_paths,
         }
     }
@@ -157,6 +170,27 @@ impl<'a> PluginHandler<'a> {
                 println!("Unable to load {} error: {}", path.to_str().unwrap(), e);
                 false
             }
+        }
+    }
+
+    pub fn create_view_instance(&mut self, plugin_type: &'static str) {
+        for t in self.view_plugins.iter() {
+            if t.name == plugin_type {
+                continue;
+            }
+
+            let instance = ViewInstance {
+                //user_data: ptr::null() as *mut c_void,
+                x: 0.0,
+                y: 0.0,
+                width: 0.0,
+                height: 0.0,
+                plugin_type: t.clone(),
+            };
+
+            self.view_instances.push(instance);
+
+            return;
         }
     }
 
