@@ -1,12 +1,12 @@
 extern crate libloading;
 
-use libc::{c_char, c_void};
+use libc::{c_char, c_void, c_uchar};
 use std::path::{Path, PathBuf};
 use std::ffi::CStr;
 use std::rc::Rc;
 use std::mem::transmute;
 use std::fs;
-//use std::ptr;
+use std::ptr;
 
 use self::libloading::*;
 
@@ -23,8 +23,7 @@ pub struct Plugin {
 }
 
 pub struct ViewInstance {
-    //pub user_data: *mut c_void,
-    //pub plugin_funcs: *mut CBasePlugin,
+    pub user_data: *mut c_void,
     pub x: f32,
     pub y: f32,
     pub width: f32,
@@ -44,6 +43,25 @@ pub struct CallbackData<'a> {
     lib: Rc<Library>,
     path: PathBuf,
 }
+
+#[repr(C)]
+pub struct CViewPlugin {
+    pub name: *const c_uchar,
+    pub create_instance: Option<fn(ui_api: *const c_void, service: *const c_void)
+    //pub create_instance: Option<fn(ui_api: *const c_void,
+    //                              service_func: extern "C" fn(service: *const c_uchar)
+    //                                                          -> *mut c_void)
+                                   -> *mut c_void>,
+    pub destroy_instance: Option<fn(*mut c_void)>,
+    pub update: Option<fn(ptr: *mut c_void,
+                          ui: *const c_void,
+                          reader: *const c_void,
+                          writer: *const c_void)>,
+
+    pub save_state: Option<fn(*mut c_void)>,
+    pub load_state: Option<fn(*mut c_void)>,
+}
+
 
 type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, data: *mut CallbackData);
 
@@ -175,12 +193,19 @@ impl<'a> PluginHandler<'a> {
 
     pub fn create_view_instance(&mut self, plugin_type: &'static str) {
         for t in self.view_plugins.iter() {
-            if t.name == plugin_type {
+            if t.name != plugin_type {
                 continue;
             }
 
+            println!("Trying to create instance...");
+
+            let user_data = unsafe {
+                let callbacks = t.plugin_funcs as *mut CViewPlugin;
+                (*callbacks).create_instance.unwrap()(ptr::null(), ptr::null())
+            };
+
             let instance = ViewInstance {
-                //user_data: ptr::null() as *mut c_void,
+                user_data: user_data, 
                 x: 0.0,
                 y: 0.0,
                 width: 0.0,

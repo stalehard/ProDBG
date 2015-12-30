@@ -14,13 +14,14 @@ struct Context<'a> {
 }
 
 fn main() {
-    let search_paths = vec!["t2-output/macosx-clang-debug", "target-debug"];
+    let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
 
     let mut context = Box::new(Context {
         plugin_handler: PluginHandler::new(search_paths),
     });
 
-    context.plugin_handler.add_plugin(&"breakpoints_plugin".to_string());
+    context.plugin_handler.add_plugin("bitmap_memory");
+    context.plugin_handler.create_view_instance("Bitmap View");
 
     unsafe {
         // this is kinda ugly but we have no good way to pass this around
@@ -76,6 +77,19 @@ pub unsafe extern fn prodbg_timed_update() {
     let t = &mut (*context);
 
     bgfx_pre_update();
+
+    for instance in t.plugin_handler.view_instances.iter() {
+        bgfx_imgui_set_window_pos(0.0, 0.0);
+        bgfx_imgui_set_window_size(600.0, 600.0);
+
+        bgfx_imgui_begin(1);
+
+        plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewPlugin; 
+        (*plugin_funcs).update.unwrap()(instance.user_data, bgfx_get_ui_funcs(), ptr::null(), ptr::null());
+
+        bgfx_imgui_end();
+    }
+
     bgfx_post_update();
 }
 
