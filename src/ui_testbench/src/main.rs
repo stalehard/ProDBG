@@ -7,6 +7,7 @@ extern crate lazy_static;
 use libc::{c_void, c_int, c_char, c_float};
 use core::plugin_handler::*;
 use std::ptr;
+use std::mem::transmute;
 
 #[repr(C)]
 struct Context<'a> {
@@ -25,7 +26,7 @@ fn main() {
 
     unsafe {
         // this is kinda ugly but we have no good way to pass this around
-        bgfx_set_context(&mut *context);
+        bgfx_set_context(transmute(&mut *context));
         prodbg_main(0, ptr::null())
     }
 
@@ -55,8 +56,8 @@ extern {
     fn bgfx_imgui_set_window_pos(x: c_float, y: c_float);
     fn bgfx_imgui_set_window_size(x: c_float, y: c_float);
 
-    fn bgfx_set_context(context: *mut Context); 
-    fn bgfx_get_context() -> *mut Context;
+    fn bgfx_set_context(context: *mut c_void); 
+    fn bgfx_get_context() -> *mut c_void;
 }
 
 ///
@@ -73,7 +74,7 @@ pub extern fn prodbg_create(window: *const c_void, width: c_int, height: c_int) 
 
 #[no_mangle]
 pub unsafe extern fn prodbg_timed_update() {
-    let context = bgfx_get_context();
+    let context = bgfx_get_context() as *mut Context;
     let t = &mut (*context);
 
     bgfx_pre_update();
@@ -84,8 +85,8 @@ pub unsafe extern fn prodbg_timed_update() {
 
         bgfx_imgui_begin(1);
 
-        plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewPlugin; 
-        (*plugin_funcs).update.unwrap()(instance.user_data, bgfx_get_ui_funcs(), ptr::null(), ptr::null());
+        let plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewPlugin; 
+        ((*plugin_funcs).update)(instance.user_data, bgfx_get_ui_funcs(), ptr::null(), ptr::null());
 
         bgfx_imgui_end();
     }

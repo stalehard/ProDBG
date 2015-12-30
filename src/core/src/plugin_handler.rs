@@ -53,10 +53,10 @@ pub struct CViewPlugin {
     //                                                          -> *mut c_void)
                                    -> *mut c_void>,
     pub destroy_instance: Option<fn(*mut c_void)>,
-    pub update: Option<fn(ptr: *mut c_void,
+    pub update: fn(ptr: *mut c_void,
                           ui: *const c_void,
                           reader: *const c_void,
-                          writer: *const c_void)>,
+                          writer: *const c_void),
 
     pub save_state: Option<fn(*mut c_void)>,
     pub load_state: Option<fn(*mut c_void)>,
