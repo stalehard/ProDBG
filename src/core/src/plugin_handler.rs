@@ -1,7 +1,8 @@
 extern crate libloading;
+extern crate tempdir;
 
 use notify::{RecommendedWatcher, Error, Watcher, Event};
-use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::mpsc::{channel, Receiver};
 use libc::{c_char, c_void, c_uchar};
 use std::path::{Path, PathBuf};
 use std::ffi::CStr;
@@ -10,6 +11,8 @@ use std::mem::transmute;
 use std::fs;
 use std::ptr;
 use self::libloading::{Library, Symbol};
+use self::libloading::Result as LibRes; 
+use self::tempdir::TempDir;
 
 #[repr(C)]
 pub struct CBasePlugin {
@@ -38,15 +41,17 @@ pub struct PluginHandler<'a> {
     pub view_instances: Vec<ViewInstance>,
     pub search_paths: Vec<&'a str>,
     pub watcher: Option<RecommendedWatcher>,
+    pub shadow_dir: Option<TempDir>,
     pub watch_recv: Receiver<Event>,
-    pub watch_send: Sender<Event>,
 }
 
 pub struct CallbackData<'a> {
     handler: &'a mut PluginHandler<'a>,
     lib: Rc<Library>,
-    path: PathBuf,
+    loaded_path: PathBuf,
+    orginal_path: Option<PathBuf>,
 }
+
 
 #[repr(C)]
 pub struct CViewPlugin {
@@ -57,17 +62,13 @@ pub struct CViewPlugin {
                    ui: *const c_void,
                    reader: *const c_void,
                    writer: *const c_void)
-                  ,
-
-    pub save_state: Option<fn(*mut c_void)>,
-    pub load_state: Option<fn(*mut c_void)>,
+        ,
+        pub save_state: Option<fn(*mut c_void)>,
+        pub load_state: Option<fn(*mut c_void)>,
 }
 
 
-type RegisterPlugin = unsafe fn(pt: *const c_char,
-                                plugin: *mut c_void,
-                                data: *mut CallbackData)
-                               ;
+type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, data: *mut CallbackData);
 
 unsafe fn add_plugin(plugins: &mut Vec<Rc<Plugin>>,
                      plugin_type: *const c_char,
@@ -75,7 +76,7 @@ unsafe fn add_plugin(plugins: &mut Vec<Rc<Plugin>>,
                      cb: &CallbackData,
                      type_name: &str) {
     for plugin in plugins.iter() {
-        if cb.path == plugin.path {
+        if cb.loaded_path == plugin.path {
             return;
         }
     }
@@ -90,7 +91,7 @@ unsafe fn add_plugin(plugins: &mut Vec<Rc<Plugin>>,
 
     let p = Rc::new(Plugin {
         name: CStr::from_ptr((*plugin_funcs).name).to_string_lossy().into_owned(),
-        path: cb.path.clone(),
+        loaded_path: cb.path.clone(),
         lib: cb.lib.clone(),
         plugin_funcs: plugin_funcs,
     });
@@ -115,22 +116,12 @@ unsafe fn register_plugin_callback(plugin_type: *const c_char,
 }
 
 impl<'a> PluginHandler<'a> {
-    pub fn new(search_paths: Vec<&str>) -> PluginHandler {
+    pub fn new(search_paths: Vec<&'a str>, shadow_dir: Option<&'static str>) -> PluginHandler<'a> {
         let (tx, rx) = channel();
 
-        let mut ph = PluginHandler {
-            backend_plugins: Vec::new(),
-            view_plugins: Vec::new(),
-            view_instances: Vec::new(),
-            search_paths: search_paths,
-            watch_recv: rx,
-            watch_send: tx,
-            watcher: None,
-        };
+        let w: Result<RecommendedWatcher, Error> = Watcher::new(tx);
 
-        let w: Result<RecommendedWatcher, Error> = Watcher::new(ph.watch_send.clone());
-
-        ph.watcher = match w {
+        let watcher = match w {
             Ok(watcher) => Some(watcher),
             Err(_) => {
                 println!("Unable to create file watcher, no dynamic reloading will be done");
@@ -138,7 +129,30 @@ impl<'a> PluginHandler<'a> {
             }
         };
 
-        ph
+        // Create a temporary directory for shadow plugins
+
+        let sd = match shadow_dir {
+            Some(dir) => {
+                match TempDir::new_in(dir, "shadow_plugins") {
+                    Ok(td) => Some(td),
+                    Err(er) => {
+                        println!("Unable to create tempdir {}", er);
+                        None
+                    }
+                }
+            }
+            None => None,
+        };
+
+        PluginHandler {
+            backend_plugins: Vec::new(),
+            view_plugins: Vec::new(),
+            view_instances: Vec::new(),
+            search_paths: search_paths,
+            shadow_dir: sd,
+            watch_recv: rx,
+            watcher: watcher,
+        }
     }
 
     ///
@@ -185,48 +199,57 @@ impl<'a> PluginHandler<'a> {
     ///
     /// Returns true if we managed to load the plugin and everything went ok
     ///
-    unsafe fn load_plugin(&mut self, path: PathBuf) -> bool {
+    unsafe fn load_plugin(&mut self, filename: &String, full_path: PathBuf) -> bool {
+        let path;
+        let loaded_lib;
+        let shadow_dir;
+
+        if let Some(shadow_dir) = self.shadow_dir.as_mut() {
+            path = shadow_dir.path().join(filename);
+            let _ = fs::copy(full_path, &path);
+            shadow_dir = Some(path.clone());
+        } else {
+            path = full_path;
+            shadow_dir = None;
+        }
+
         match Library::new(&path) {
-            Ok(lib) => {
-                let lib = Rc::new(lib);
-
-                let init_plugin: libloading::Result<Symbol<extern "C" fn(RegisterPlugin,
-                                                                         *mut CallbackData)
-                                                                        >> = lib.get(b"InitPlugin");
-
-                match init_plugin {
-                    Ok(init_fun) => {
-
-                        // Watch if someone changes the plugin
-
-                        if self.watcher.is_some() {
-                            println!("Added watch on {}", path.to_str().unwrap());
-                            let _ = self.watcher.as_mut().unwrap().watch(&path);
-                        }
-
-                        let mut callback_data = CallbackData {
-                            handler: transmute(self),
-                            lib: lib.clone(),
-                            path: path,
-                        };
-
-                        init_fun(register_plugin_callback, &mut callback_data);
-
-                        println!("after init\n");
-
-                        true
-                    }
-                    Err(e) => {
-                        println!("Unable to find InitPlugin in {} error: {}",
-                                 path.to_str().unwrap(),
-                                 e);
-                        false
-                    }
-                }
-            }
-
+            Ok(l) => loaded_lib = l,
             Err(e) => {
                 println!("Unable to load {} error: {}", path.to_str().unwrap(), e);
+                return false;
+            }
+        }
+
+        let lib = Rc::new(loaded_lib);
+
+        let init_plugin: LibRes<Symbol<extern "C" fn(RegisterPlugin, *mut CallbackData)>> 
+            = lib.get(b"InitPlugin");
+
+        match init_plugin {
+            Ok(init_fun) => {
+                // Watch if someone changes the plugin
+
+                let mut callback_data = CallbackData {
+                    handler: transmute(self),
+                    lib: lib.clone(),
+                    path: path,
+                    shadow_dir: shadow_dir,
+                };
+
+                if let (Some(w), Some(s)) = (self.watcher, shadow_dir) {
+                    println!("Added watch on {}", shadow_dir.to_str().unwrap());
+                    let _ = self.watcher.as_mut().unwrap().watch(&s);
+                }
+
+                init_fun(register_plugin_callback, &mut callback_data);
+
+                true
+            }
+            Err(e) => {
+                println!("Unable to find InitPlugin in {} error: {}",
+                            path.to_str().unwrap(),
+                            e);
                 false
             }
         }
@@ -271,7 +294,7 @@ impl<'a> PluginHandler<'a> {
         let name = Self::format_name(clean_name);
 
         if let Some(plugin_path) = Self::fine_file(self, &name) {
-            unsafe { Self::load_plugin(self, plugin_path) }
+            unsafe { Self::load_plugin(self, &name, plugin_path) }
         } else {
             println!("Unable to find plugin {}", clean_name);
             false
@@ -296,9 +319,9 @@ impl<'a> PluginHandler<'a> {
               target_os="dragonfly",
               target_os="netbsd",
               target_os="openbsd"))]
-    fn format_name(name: &str) -> String {
-        format!("lib{}.so", name)
-    }
+        fn format_name(name: &str) -> String {
+            format!("lib{}.so", name)
+        }
 
     pub fn add_non_standard(_: &str) {}
 }
@@ -315,7 +338,7 @@ mod tests {
         let search_paths = vec!["src", "other_path"];
         let plugin_handler = PluginHandler::new(search_paths);
         assert_eq!(plugin_handler.fine_file(&"main.rs".to_string()).is_some(),
-                   true);
+        true);
     }
 
     #[test]
@@ -324,7 +347,7 @@ mod tests {
         let search_paths = vec!["src", "other_path"];
         let plugin_handler = PluginHandler::new(search_paths);
         assert_eq!(plugin_handler.fine_file(&"main_no_find.rs".to_string()).is_none(),
-                   true);
+        true);
     }
 
     #[test]
@@ -357,8 +380,8 @@ mod tests {
               target_os="bitrig",
               target_os="netbsd",
               target_os="openbsd"))]
-    fn test_format_name() {
-        assert_eq!("libtest_plugin.so",
-                   PluginHandler::format_name("test_plugin"));
-    }
+        fn test_format_name() {
+            assert_eq!("libtest_plugin.so",
+                       PluginHandler::format_name("test_plugin"));
+        }
 }

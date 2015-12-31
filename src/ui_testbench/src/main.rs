@@ -18,7 +18,7 @@ fn main() {
     let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
 
     let mut context = Box::new(Context {
-        plugin_handler: PluginHandler::new(search_paths),
+        plugin_handler: PluginHandler::new(search_paths, Some("t2-output")),
     });
 
     context.plugin_handler.add_plugin("bitmap_memory");
@@ -29,8 +29,6 @@ fn main() {
         bgfx_set_context(transmute(&mut *context));
         prodbg_main(0, ptr::null())
     }
-
-    //println!("Hello, world!");
 }
 
 ///
@@ -117,6 +115,12 @@ pub extern fn prodbg_event(event_id: c_int) {
 pub extern fn prodbg_destroy() {
     unsafe {
         bgfx_destroy();
+
+        // This is kinda ugly. Hopefully this can be sorted later
+        let context = bgfx_get_context() as *mut Context;
+        let t = &mut (*context);
+
+        drop(t);
     }
 }
 
