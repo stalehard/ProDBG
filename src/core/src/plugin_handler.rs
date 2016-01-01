@@ -19,9 +19,16 @@ pub struct CBasePlugin {
     pub name: *const c_char,
 }
 
+///
+/// This holds infomation of a plugin along with loaded library
+/// which path it was loaded from
+/// The original path is the path where the file was before
+/// shadow copy
+///
 pub struct Plugin {
     pub lib: Rc<Library>,
     pub path: PathBuf,
+    pub original_path: Option<PathBuf>,
     pub name: String,
     pub plugin_funcs: *mut CBasePlugin,
 }
@@ -45,11 +52,20 @@ pub struct PluginHandler<'a> {
     pub watch_recv: Receiver<Event>,
 }
 
+
+///
+/// Holds temporary data when reloading instances 
+///
+
+struct ReloadData {
+    pub name: String,
+}
+
 pub struct CallbackData<'a> {
     handler: &'a mut PluginHandler<'a>,
     lib: Rc<Library>,
     loaded_path: PathBuf,
-    orginal_path: Option<PathBuf>,
+    original_path: Option<PathBuf>,
 }
 
 
@@ -61,10 +77,9 @@ pub struct CViewPlugin {
     pub update: fn(ptr: *mut c_void,
                    ui: *const c_void,
                    reader: *const c_void,
-                   writer: *const c_void)
-        ,
-        pub save_state: Option<fn(*mut c_void)>,
-        pub load_state: Option<fn(*mut c_void)>,
+                   writer: *const c_void),
+    pub save_state: Option<fn(*mut c_void)>,
+    pub load_state: Option<fn(*mut c_void)>,
 }
 
 
@@ -91,7 +106,8 @@ unsafe fn add_plugin(plugins: &mut Vec<Rc<Plugin>>,
 
     let p = Rc::new(Plugin {
         name: CStr::from_ptr((*plugin_funcs).name).to_string_lossy().into_owned(),
-        loaded_path: cb.path.clone(),
+        path: cb.loaded_path.clone(),
+        original_path: cb.original_path.clone(),
         lib: cb.lib.clone(),
         plugin_funcs: plugin_funcs,
     });
@@ -199,18 +215,19 @@ impl<'a> PluginHandler<'a> {
     ///
     /// Returns true if we managed to load the plugin and everything went ok
     ///
-    unsafe fn load_plugin(&mut self, filename: &String, full_path: PathBuf) -> bool {
+    unsafe fn load_plugin(&mut self, full_path: &PathBuf) -> bool {
         let path;
         let loaded_lib;
-        let shadow_dir;
+        let original_path;
 
-        if let Some(shadow_dir) = self.shadow_dir.as_mut() {
-            path = shadow_dir.path().join(filename);
-            let _ = fs::copy(full_path, &path);
-            shadow_dir = Some(path.clone());
+        if let Some(sd) = self.shadow_dir.as_mut() {
+            path = sd.path().join(full_path.file_name().unwrap());
+            let _ = fs::copy(&full_path, &path);
+            println!("Copy from {} {}", full_path.to_str().unwrap(), path.to_str().unwrap());
+            original_path = Some(full_path.clone());
         } else {
-            path = full_path;
-            shadow_dir = None;
+            original_path = None;
+            path = full_path.clone();
         }
 
         match Library::new(&path) {
@@ -228,19 +245,20 @@ impl<'a> PluginHandler<'a> {
 
         match init_plugin {
             Ok(init_fun) => {
+
+                if let Some(w) = self.watcher.as_mut() {
+                    println!("Added watch on {}", full_path.to_str().unwrap());
+                    let _ = w.watch(&full_path);
+                }
+
                 // Watch if someone changes the plugin
 
                 let mut callback_data = CallbackData {
                     handler: transmute(self),
                     lib: lib.clone(),
-                    path: path,
-                    shadow_dir: shadow_dir,
+                    loaded_path: path,
+                    original_path: original_path,
                 };
-
-                if let (Some(w), Some(s)) = (self.watcher, shadow_dir) {
-                    println!("Added watch on {}", shadow_dir.to_str().unwrap());
-                    let _ = self.watcher.as_mut().unwrap().watch(&s);
-                }
 
                 init_fun(register_plugin_callback, &mut callback_data);
 
@@ -255,9 +273,63 @@ impl<'a> PluginHandler<'a> {
         }
     }
 
-    pub fn create_view_instance(&mut self, plugin_type: &'static str) {
+    fn should_reload(reload_path: &PathBuf, plugin: &Plugin) -> bool {
+        if let Some(p) = plugin.original_path.as_ref() {
+            println!("{} - {}", reload_path.to_str().unwrap(), p.to_str().unwrap());
+            if reload_path.to_str().unwrap().contains(p.to_str().unwrap()) {
+                return true;
+            }
+        }
+
+        false
+    }
+
+
+    fn should_reload_instance(reload_data: &mut Vec<ReloadData>, reload_path: &PathBuf, plugin: &Plugin) -> bool {
+        if Self::should_reload(reload_path, plugin) {
+            reload_data.push(ReloadData { name: plugin.name.clone() });
+            return true;
+        }
+
+        false
+    }
+
+    pub fn reload_plugin(&mut self, reload_path: &PathBuf) {
+        // TODO: Switch to SmallVec (https://github.com/arcnmx/stack-rs)
+        let mut reload_data = Vec::new();
+
+        //TODO: Implement save/reload for the removed plugins, layout, etc
+
+        for i in (0..self.view_instances.len()).rev() {
+            if Self::should_reload_instance(&mut reload_data, reload_path, &self.view_instances[i].plugin_type) {
+                self.view_instances.swap_remove(i);
+            }
+        }
+
+        // Unload the plugins
+
+        for i in (0..self.view_plugins.len()).rev() {
+            if Self::should_reload(reload_path, &self.view_plugins[i]) { 
+                self.view_plugins.swap_remove(i);
+            }
+        }
+
+        // Load plugin again
+
+        for i in reload_data {
+            unsafe { 
+                Self::load_plugin(self, reload_path);
+            }
+
+            Self::create_view_instance(self, &i.name);
+        }
+
+        //println!("Number of instacnes to reload {}", reload_data.len());
+    }
+
+    pub fn create_view_instance(&mut self, plugin_type: &String) {
         for t in self.view_plugins.iter() {
-            if t.name != plugin_type {
+            if t.name != *plugin_type {
                 continue;
             }
 
@@ -294,7 +366,7 @@ impl<'a> PluginHandler<'a> {
         let name = Self::format_name(clean_name);
 
         if let Some(plugin_path) = Self::fine_file(self, &name) {
-            unsafe { Self::load_plugin(self, &name, plugin_path) }
+            unsafe { Self::load_plugin(self, &plugin_path) }
         } else {
             println!("Unable to find plugin {}", clean_name);
             false
