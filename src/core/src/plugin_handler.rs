@@ -13,6 +13,7 @@ use std::ptr;
 use self::libloading::{Library, Symbol};
 use self::libloading::Result as LibRes; 
 use self::tempdir::TempDir;
+use std::str;
 
 #[repr(C)]
 pub struct CBasePlugin {
@@ -45,6 +46,7 @@ pub struct ViewInstance {
 pub struct PluginHandler<'a> {
     pub view_plugins: Vec<Rc<Plugin>>,
     pub backend_plugins: Vec<Rc<Plugin>>,
+    pub custom_plugins: Vec<Rc<Plugin>>,
     pub view_instances: Vec<ViewInstance>,
     pub search_paths: Vec<&'a str>,
     pub watcher: Option<RecommendedWatcher>,
@@ -169,6 +171,7 @@ impl<'a> PluginHandler<'a> {
 
         PluginHandler {
             backend_plugins: Vec::new(),
+            custom_plugins: Vec::new(),
             view_plugins: Vec::new(),
             view_instances: Vec::new(),
             search_paths: search_paths,
@@ -391,6 +394,59 @@ impl<'a> PluginHandler<'a> {
         } else {
             println!("Unable to find plugin {}", clean_name);
             false
+        }
+    }
+
+    unsafe fn load_custom_plugin(&mut self, full_path: &PathBuf, symbol: &[u8]) -> Option<Rc<Plugin>> {
+        let plugin_data = match Self::init_plugin(self, full_path) {
+            Some(p) => p,
+            _ => { 
+                return None;
+            }
+        };
+
+        let data: LibRes<Symbol<*mut c_void>> = plugin_data.lib.get(symbol);
+
+        match data {
+            Ok(d) => {
+                let p = Rc::new(Plugin {
+                    name: "custom_plugin".to_string(), 
+                    path: plugin_data.path.clone(),
+                    original_path: plugin_data.original_path.clone(),
+                    lib: plugin_data.lib.clone(),
+                    plugin_funcs: transmute(d),
+                });
+
+                let t = p.clone();
+                self.custom_plugins.push(p);
+                Some(t)
+            },
+            Err(e) => {
+                println!("Unable to find {} in {} error: {}",
+                         str::from_utf8(symbol).unwrap(),
+                         plugin_data.path.to_str().unwrap(),
+                         e);
+                None
+            }
+        }
+    }
+
+
+    /// Tries to add a custom plugin to the plugin manager.
+    /// 
+    /// The code will search the search paths and tries to find the file
+    /// in the search_paths given to the PluginHandler::new call
+    ///
+    /// Returns true if everything went ok, otherwise fals
+    /// 
+    pub fn add_custom_plugin(&mut self, clean_name: &str, symbol: &[u8]) -> Option<Rc<Plugin>> {
+        let name = Self::format_name(clean_name);
+
+        if let Some(plugin_path) = Self::fine_file(self, &name) {
+            unsafe { Self::load_custom_plugin(self, &plugin_path, symbol) } 
+        } else {
+            println!("Unable to find plugin {}", clean_name);
+            None
         }
     }
 
