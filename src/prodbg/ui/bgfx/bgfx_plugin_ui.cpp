@@ -22,7 +22,7 @@
 #include "core/input_state.h"
 #include "ui/bgfx/cursor.h"
 #include <foundation/string.h>
-#include "i3wm_docking.h"
+//#include "i3wm_docking.h"
 #include "ui_render.h"
 #include <jansson.h>
 
@@ -1959,6 +1959,8 @@ void updateWindowSize(void* user_data, int x, int y, int width, int height) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
+
 static void setCursorStyle(DockSysCursor cursor) {
     switch (cursor) {
         case DockSysCursor_SizeHorizontal:
@@ -1969,6 +1971,8 @@ static void setCursorStyle(DockSysCursor cursor) {
             Cunsor_setType(CursorType_Default); break;
     }
 }
+
+*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TODO: Move this code?
@@ -2007,6 +2011,8 @@ static void saveUserData(struct json_t* item, void* user_data) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
 
 static void* loadUserData(struct json_t* item) {
     ViewPluginInstance* view = 0;
@@ -2052,8 +2058,11 @@ static void* loadUserData(struct json_t* item) {
     return view;
 }
 
+*/
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
 static DockSysCallbacks s_dockSysCallbacks =
 {
     updateWindowSize,
@@ -2061,6 +2070,7 @@ static DockSysCallbacks s_dockSysCallbacks =
     saveUserData,
     loadUserData,
 };
+*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2301,7 +2311,7 @@ void BgfxPluginUI::postUpdate() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BgfxPluginUI::create(void* windowHandle, int width, int height) {
-    docksys_set_callbacks(&s_dockSysCallbacks);
+    //docksys_set_callbacks(&s_dockSysCallbacks);
 
 #ifdef PRODBG_WIN
     bgfx::winSetHwnd((HWND)windowHandle);

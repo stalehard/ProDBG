@@ -64,7 +64,7 @@ void docksys_set_mouse(void *user_data, int x, int y, bool leftDown)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void docksys_update()
+void docksys_update(void* instance)
 {
 	tree_render();
 }
@@ -107,7 +107,7 @@ void docksys_vertical_split(Con *con, void *user_data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void docksys_close_con(void* user_data)
+void docksys_close_con(void* instance, void* user_data)
 {
 	con_focus(con_by_user_data(user_data));
 	tree_close_con(DONT_KILL_WINDOW);
@@ -115,7 +115,7 @@ void docksys_close_con(void* user_data)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void docksys_update_size(int width, int height)
+void docksys_update_size(void* instance, int width, int height)
 {
 	// TODO: Hardcoded for fake-0
 	Output* output = get_output_by_name("fake-0");

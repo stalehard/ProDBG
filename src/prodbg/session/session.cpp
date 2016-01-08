@@ -17,7 +17,7 @@
 #include "ui/bgfx/ui_host.h"
 #include "ui/bgfx/ui_dock_private.h" // TODO: Fix me
 #include "ui/plugin.h"
-#include "i3wm_docking.h"
+//#include "i3wm_docking.h"
 
 
 #include <stdlib.h>
