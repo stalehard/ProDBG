@@ -61,12 +61,19 @@ struct ReloadData {
     pub name: String,
 }
 
+struct InitPluginData {
+    pub original_path: Option<PathBuf>,
+    pub path: PathBuf, 
+    pub lib: Rc<Library>,
+}
+
 pub struct CallbackData<'a> {
     handler: &'a mut PluginHandler<'a>,
     lib: Rc<Library>,
     loaded_path: PathBuf,
     original_path: Option<PathBuf>,
 }
+
 
 
 #[repr(C)]
@@ -201,6 +208,39 @@ impl<'a> PluginHandler<'a> {
     }
 
     ///
+    /// Sets up InitPluginData which contains the loaded plugin and which paths the plugin has been
+    /// loaded at. It also take care of copy the plugin to the shadow directory if exists
+    ///
+    
+    fn init_plugin(&self, full_path: &PathBuf) -> Option<InitPluginData> {
+        let path;
+        let original_path;
+
+        if let Some(sd) = self.shadow_dir.as_ref() {
+            path = sd.path().join(full_path.file_name().unwrap());
+            let _ = fs::copy(&full_path, &path);
+            println!("Copy from {} {}", full_path.to_str().unwrap(), path.to_str().unwrap());
+            original_path = Some(full_path.clone());
+        } else {
+            original_path = None;
+            path = full_path.clone();
+        }
+
+        match Library::new(&path) {
+            Ok(l) => Some(InitPluginData { 
+                original_path: 
+                original_path, 
+                path: path, 
+                lib: Rc::new(l)
+            }),
+            Err(e) => {
+                println!("Unable to load {} error: {}", path.to_str().unwrap(), e);
+                None
+            }
+        }
+    }
+
+    ///
     /// Loads a plugin for ProDBG. A plugin (currently) is a shared object file (dll/so/dylib)
     /// and looks for a "InitPlugin" entry point. The entry point looks like this
     /// 
@@ -216,32 +256,13 @@ impl<'a> PluginHandler<'a> {
     /// Returns true if we managed to load the plugin and everything went ok
     ///
     unsafe fn load_plugin(&mut self, full_path: &PathBuf) -> bool {
-        let path;
-        let loaded_lib;
-        let original_path;
-
-        if let Some(sd) = self.shadow_dir.as_mut() {
-            path = sd.path().join(full_path.file_name().unwrap());
-            let _ = fs::copy(&full_path, &path);
-            println!("Copy from {} {}", full_path.to_str().unwrap(), path.to_str().unwrap());
-            original_path = Some(full_path.clone());
-        } else {
-            original_path = None;
-            path = full_path.clone();
-        }
-
-        match Library::new(&path) {
-            Ok(l) => loaded_lib = l,
-            Err(e) => {
-                println!("Unable to load {} error: {}", path.to_str().unwrap(), e);
-                return false;
-            }
-        }
-
-        let lib = Rc::new(loaded_lib);
+        let plugin_data = match Self::init_plugin(self, full_path) {
+            Some(p) => p,
+            None => return false,
+        };
 
         let init_plugin: LibRes<Symbol<extern "C" fn(RegisterPlugin, *mut CallbackData)>> 
-            = lib.get(b"InitPlugin");
+            = plugin_data.lib.get(b"InitPlugin");
 
         match init_plugin {
             Ok(init_fun) => {
@@ -255,9 +276,9 @@ impl<'a> PluginHandler<'a> {
 
                 let mut callback_data = CallbackData {
                     handler: transmute(self),
-                    lib: lib.clone(),
-                    loaded_path: path,
-                    original_path: original_path,
+                    lib: plugin_data.lib.clone(),
+                    loaded_path: plugin_data.path,
+                    original_path: plugin_data.original_path,
                 };
 
                 init_fun(register_plugin_callback, &mut callback_data);
@@ -266,7 +287,7 @@ impl<'a> PluginHandler<'a> {
             }
             Err(e) => {
                 println!("Unable to find InitPlugin in {} error: {}",
-                            path.to_str().unwrap(),
+                            plugin_data.path.to_str().unwrap(),
                             e);
                 false
             }
