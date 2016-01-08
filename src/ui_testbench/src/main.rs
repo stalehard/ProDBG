@@ -22,7 +22,7 @@ fn main() {
     });
 
     context.plugin_handler.add_plugin("bitmap_memory");
-    context.plugin_handler.create_view_instance("Bitmap View");
+    context.plugin_handler.create_view_instance(&"Bitmap View".to_string());
 
     unsafe {
         // this is kinda ugly but we have no good way to pass this around
