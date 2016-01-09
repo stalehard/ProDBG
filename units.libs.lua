@@ -75,34 +75,8 @@ StaticLibrary {
 
     Sources = { 
         Glob {
+            Dir = "src/native/external/tinyxml2",
             Extensions = { ".cpp", ".h" },
-        },
-    },
-
-	IdeGenerationHints = { Msvc = { SolutionFolder = "External" } },
-}
-
------------------------------------------------------------------------------------------------------------------------
-
-StaticLibrary {
-    Name = "i3wm_docking",
-
-    Env = { 
-        CPPPATH = { 
-			"src/external/jansson/include",
-            "src/external/i3wm_docking/include",
-        },
-        CCOPTS = {
-        	{ "-Wno-everything", "-std=c99"; Config = { "macosx-*-*", "macosx_test-*" } },
-        	{ "-std=c99"; Config = "linux-*-*" },
-        	{ "/wd4267", "/wd4706", "/wd4244", "/wd4701", "/wd4334", "/wd4127"; Config = "win64-*-*" },
-        },
-    },
-
-    Sources = { 
-        Glob {
-            Dir = "src/external/i3wm_docking/src",
-            Extensions = { ".c", ".h" },
         },
     },
 

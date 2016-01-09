@@ -1,5 +1,5 @@
-#include "pd_docking.h"
-#include "pd_common.h"
+//#include "api/pd_docking.h"
+//#include "pd_common.h"
 #include "i3wm_docking.h"
 #include <stdlib.h>
 
@@ -30,6 +30,7 @@ typedef struct PDDocking {
 } PDDocking;
 */
 
+/*
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static void* create_instance(int x, int y, int width, int height) {
@@ -58,5 +59,7 @@ PD_EXPORT PDDocking docking_system = {
 	docksys_update_size,
 
 };
+
+*/
 
 

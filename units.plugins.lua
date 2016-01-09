@@ -322,13 +322,14 @@ SharedLibrary {
 
 -----------------------------------------------------------------------------------------------------------------------
 
+--[[
 SharedLibrary {
     Name = "i3wm_docking",
 
     Env = { 
         CPPPATH = { 
-			"src/external/jansson/include",
-            "src/external/i3wm_docking/include",
+			"src/native/external/jansson/include",
+            "src/plugins/i3wm_docking/include",
         },
         CCOPTS = {
         	{ "-Wno-everything", "-std=c99"; Config = { "macosx-*-*", "macosx_test-*" } },
@@ -346,6 +347,7 @@ SharedLibrary {
 
     IdeGenerationHints = { Msvc = { SolutionFolder = "Plugins" } },
 }
+--]]
 
 -----------------------------------------------------------------------------------------------------------------------
 
