@@ -10,4 +10,4 @@ crate-type = ["dylib"]
 
 # Depends
 [dependencies]
-prodbg = { path = "../../../../api/rust/prodbg" }
+prodbg = { path = "../../../api/rust/prodbg" }

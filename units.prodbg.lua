@@ -60,7 +60,7 @@ Program {
 
     Sources = { 
         FGlob {
-            Dir = "src/prodbg/main",
+            Dir = "src/native/dummy_main",
             Extensions = { ".c", ".cpp", ".m", ".mm", ".h" },
             Filters = {
                 { Pattern = "mac"; Config = { "macosx-*-*", "macosx_test-*-*" } },
