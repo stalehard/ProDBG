@@ -3,6 +3,7 @@
 #include "pd_host.h"
 #include <stdlib.h>
 #include <stdio.h>
+//#include <foundation/apple.h>
 #include <foundation/foundation.h>
 #include <foundation/string.h>
 #include <assert.h>

@@ -72,7 +72,7 @@ Program {
         },
     },
 
-    Depends = { "main_lib", "core", "ui", "api", "session", "jansson", "lua", "remote_api", "stb", 
+    Depends = { "main_lib", "ui", "lua", "remote_api", "stb", 
     			"bgfx", "uv", "imgui", "remotery", "foundation_lib", "scintilla", 
     			"tinyxml2", "i3wm_docking", "capstone" },
 

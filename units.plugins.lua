@@ -78,7 +78,7 @@ SharedLibrary {
     Env = {
         CPPPATH = { 
         	"api/include", 
-        	"src/external", 
+        	"src/native/external", 
         },
     	CXXOPTS = { { "-fPIC"; Config = "linux-gcc"; }, },
     },
@@ -216,7 +216,7 @@ SharedLibrary {
     
     Env = {
         CPPPATH = { 
-			"src/external/foundation_lib",
+			"src/native/external/foundation_lib",
         	"api/include", 
         },
         CXXOPTS = { { "-fPIC"; Config = "linux-gcc"; }, },
@@ -244,8 +244,8 @@ SharedLibrary {
     
     Env = {
         CPPPATH = { 
-			"src/external/jansson/include",
-			"src/external/libuv/include",
+			"src/native/external/jansson/include",
+			"src/native/external/libuv/include",
 			"api/include", 
 		},
 		
