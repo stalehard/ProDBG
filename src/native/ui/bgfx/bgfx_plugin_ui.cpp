@@ -2525,6 +2525,12 @@ extern "C" float bgfx_get_screen_height() {
 	return (float)s_context.height;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+extern "C" void* bgfx_get_native_context() {
+	return bgfx::nativeContext();
+}
+
 
 
 

@@ -8,14 +8,14 @@ fn main() {
     let tundra;
 
     if target.contains("darwin") {
-        tundra = "../../bin/macosx/tundra/tundra2";
+        tundra = "../../../bin/macosx/tundra/tundra2";
         if debug == "true" {
             command = "macosx-clang-debug";
         } else {
             command = "macosx-clang-release";
         }
     } else if target.contains("windows") {
-        tundra = "bin/win32/tundra2";
+        tundra = "../../bin/win32/tundra2";
         if debug == "true" {
             command = "win64-msvc-debug";
         } else {
@@ -30,13 +30,11 @@ fn main() {
         }
     }
 
-    /*
     let _ = Command::new(tundra)
                 .arg("-v")
                 .arg(command)
                 .output()
                 .unwrap_or_else(|e| panic!("Unable to execute tundra: {}", e));
-    */
 
     // Lib path
     println!("cargo:rustc-link-search=native=t2-output/{}-default",

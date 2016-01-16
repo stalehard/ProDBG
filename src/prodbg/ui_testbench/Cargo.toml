@@ -9,4 +9,5 @@ build = "build.rs"
 libc = "0.2.0"
 lazy_static = "0.1.*"
 core = { path = "../core" }
+ui = { path = "../../ui" }
 

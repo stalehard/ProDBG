@@ -1,10 +1,9 @@
 extern crate core;
 extern crate libc;
+extern crate ui;
 
-#[macro_use]
-extern crate lazy_static;
-
-use libc::{c_void, c_int, c_char, c_float};
+use libc::{c_void, c_int};
+/*
 use core::plugin_handler::*;
 use std::ptr;
 use std::mem::transmute;
@@ -13,8 +12,37 @@ use std::mem::transmute;
 struct Context<'a> {
     plugin_handler: PluginHandler<'a>,
 }
+*/
+
+
+const WIDTH: usize = 640;
+const HEIGHT: usize = 360;
 
 fn main() {
+    let mut window = match ui::Window::new("Test - ESC to exit", WIDTH, HEIGHT, ui::Scale::X1) {
+        Ok(win) => win,
+        Err(err) => {
+            println!("Unable to create window {}", err);
+            return;
+        }
+    };
+
+    unsafe {
+        bgfx_create();
+        bgfx_create_window(window.get_native_handle(), WIDTH as i32, HEIGHT as i32);  
+    }
+
+    while window.is_open() && !window.is_key_down(ui::Key::Escape) {
+        
+        unsafe {
+            bgfx_pre_update();
+            bgfx_post_update();
+        }
+
+        window.update();
+    }
+
+    /*
     let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
 
     let mut context = Box::new(Context {
@@ -29,6 +57,7 @@ fn main() {
         bgfx_set_context(transmute(&mut *context));
         prodbg_main(0, ptr::null())
     }
+    */
 }
 
 ///
@@ -37,14 +66,15 @@ fn main() {
 ///
 
 extern {
-    fn prodbg_main(argc: c_int, argv: *const c_char);
+    //fn prodbg_main(argc: c_int, argv: *const c_char);
 
-    fn bgfx_create();
-    fn bgfx_destroy();
-
-    fn bgfx_create_window(window: *const c_void, width: c_int, height: c_int);
     fn bgfx_pre_update();
     fn bgfx_post_update();
+    fn bgfx_create();
+    fn bgfx_create_window(window: *const c_void, width: c_int, height: c_int);
+    /*
+    fn bgfx_destroy();
+
 
     fn bgfx_get_ui_funcs() -> *const c_void;
 
@@ -59,6 +89,7 @@ extern {
 
     fn bgfx_set_context(context: *mut c_void); 
     fn bgfx_get_context() -> *mut c_void;
+    */
 }
 
 ///
@@ -66,15 +97,18 @@ extern {
 ///
 
 #[no_mangle]
-pub extern fn prodbg_create(window: *const c_void, width: c_int, height: c_int) {
+pub extern fn prodbg_create(_: *const c_void, _: c_int, _: c_int) {
+/*
     unsafe { 
         bgfx_create(); 
         bgfx_create_window(window, width, height);
     }
+*/
 }
 
 #[no_mangle]
 pub unsafe extern fn prodbg_timed_update() {
+/*
     let context = bgfx_get_context() as *mut Context;
     let t = &mut (*context);
 
@@ -103,6 +137,7 @@ pub unsafe extern fn prodbg_timed_update() {
     }
 
     bgfx_post_update();
+*/
 }
 
 #[no_mangle]
@@ -116,6 +151,7 @@ pub extern fn prodbg_event(event_id: c_int) {
 
 #[no_mangle]
 pub extern fn prodbg_destroy() {
+/*
     unsafe {
         bgfx_destroy();
 
@@ -125,6 +161,7 @@ pub extern fn prodbg_destroy() {
 
         drop(t);
     }
+*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

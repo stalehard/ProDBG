@@ -481,10 +481,16 @@ static NSMenu* s_popupMenu;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)rightMouseDown:(NSEvent*)event {
+	buildPopupMenu(0, 0);
+
     if (!s_popupMenu)
         return;
 
+    printf("right mouse down...\n");
+
     [NSMenu popUpContextMenu:s_popupMenu withEvent:event forView:self];
+
+    printf("end menu...\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -555,6 +561,7 @@ PDMenuItem* buildPluginsMenu(PluginData** plugins, int count) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
 static void buildPopupSubmenu(NSMenu* popupMenu, const char* inName, PDMenuItem* pluginsMenu, int count, uint32_t startId, uint32_t idMask) {
     NSString* name = [NSString stringWithUTF8String: inName];
 
@@ -579,22 +586,36 @@ static void buildPopupSubmenu(NSMenu* popupMenu, const char* inName, PDMenuItem*
 
     [name release];
 }
+*/
+
+
+// thoeu
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void buildPopupMenu(PDMenuItem* pluginsMenu, int count) {
     // TODO: Support rebuild of this menu
 
+	(void)pluginsMenu;
+	(void)count;
+
     if (s_popupMenu)
         return;
 
     s_popupMenu = [[NSMenu alloc] initWithTitle:@"Contextual Menu"];
+
+    [s_popupMenu insertItemWithTitle:@"Beep" action:@selector(onMenuPress:) keyEquivalent:@"" atIndex:0];
+    [s_popupMenu insertItemWithTitle:@"Honk" action:@selector(onMenuPress:) keyEquivalent:@"" atIndex:1];
+
+/*
 
     buildPopupSubmenu(s_popupMenu, "Split Horizontally", pluginsMenu, count,
                       PRODBG_MENU_POPUP_SPLIT_HORZ, PRODBG_MENU_POPUP_SPLIT_HORZ_SHIFT);
 
     buildPopupSubmenu(s_popupMenu, "Split Vertically", pluginsMenu, count,
                       PRODBG_MENU_POPUP_SPLIT_VERT, PRODBG_MENU_POPUP_SPLIT_VERT_SHIFT);
+*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
