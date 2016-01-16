@@ -42,7 +42,7 @@ fn main() {
         unsafe { 
             bgfx_pre_update();
 
-            for instance in plugin_handler.view_instances.iter() {
+            for instance in &plugin_handler.view_instances {
                 bgfx_imgui_set_window_pos(0.0, 0.0);
                 bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
 
