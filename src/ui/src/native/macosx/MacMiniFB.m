@@ -1,4 +1,3 @@
-
 #include "OSXWindow.h"
 #include <Cocoa/Cocoa.h>
 #include <unistd.h>
@@ -20,8 +19,7 @@ void* mfb_open(const char* name, int width, int height, int scale)
 		
 		s_init = true;
 	}
-		
-	unsigned int styles = NSClosableWindowMask | NSTitledWindowMask;
+	unsigned int styles = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
 	NSRect rectangle = NSMakeRect(0, 0, width * scale, (height * scale));
 		
 	OSXWindow* window = [[OSXWindow alloc] initWithContentRect:rectangle styleMask:styles backing:NSBackingStoreBuffered defer:NO];
@@ -39,6 +37,8 @@ void* mfb_open(const char* name, int width, int height, int scale)
 	[window setTitle:[NSString stringWithUTF8String:name]];
 	[window setReleasedWhenClosed:NO];
 	[window performSelectorOnMainThread:@selector(makeKeyAndOrderFront:) withObject:nil waitUntilDone:YES];
+    [window setRestorable:NO];
+	[window setDelegate:[[WindowDelegate alloc] initWithWindow:window]];
 
 	[window center];
 

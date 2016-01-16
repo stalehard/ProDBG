@@ -12,3 +12,12 @@
 }
 
 @end
+
+@interface WindowDelegate : NSObject
+{
+    OSXWindow* window;
+}
+
+- (id)initWithwWindow:(OSXWindow*)initWindow;
+
+@end

@@ -1,6 +1,29 @@
 #import "OSXWindow.h"
 #import "OSXWindowFrameView.h"
 
+@implementation WindowDelegate
+
+- (void)windowDidResize:(NSNotification *)notification
+{
+    const NSRect contentRect = [[window contentView] frame];
+
+    printf("diidResize\n");
+
+    prodbg_set_window_size((int)contentRect.size.width, (int)contentRect.size.height);
+}
+
+- (id)initWithWindow:(OSXWindow*)initWindow
+{
+    self = [super init];
+    if (self != nil)
+        window = initWindow;
+
+    return self;
+}
+
+@end
+
+
 @implementation OSXWindow
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,6 +188,7 @@
 
 - (void)updateSize 
 {
+
 	/*
 	OSXWindowFrameView* frameView = [super contentView];
 	if (frameView)

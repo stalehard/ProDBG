@@ -15,8 +15,8 @@ struct Context<'a> {
 */
 
 
-const WIDTH: usize = 640;
-const HEIGHT: usize = 360;
+const WIDTH: usize = 1280;
+const HEIGHT: usize = 1024;
 
 fn main() {
     let mut window = match ui::Window::new("Test - ESC to exit", WIDTH, HEIGHT, ui::Scale::X1) {
@@ -41,6 +41,11 @@ fn main() {
 
         window.update();
     }
+
+    unsafe {
+        bgfx_destroy();
+    }
+
 
     /*
     let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
@@ -72,8 +77,8 @@ extern {
     fn bgfx_post_update();
     fn bgfx_create();
     fn bgfx_create_window(window: *const c_void, width: c_int, height: c_int);
-    /*
     fn bgfx_destroy();
+    /*
 
 
     fn bgfx_get_ui_funcs() -> *const c_void;

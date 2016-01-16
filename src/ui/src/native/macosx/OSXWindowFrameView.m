@@ -38,6 +38,5 @@
     //[[self window] setTitle:PRODBG_VERSION];
 }
 
-
 @end
 
