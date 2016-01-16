@@ -41,9 +41,8 @@ fn main() {
              command);
 
     // Ugly but hey!
-    let libs_to_link = ["ui", "jansson", "lua", "remote_api", "stb", "bgfx",
-                        "uv", "imgui", "remotery",
-                        "scintilla", "tinyxml2", "capstone"];
+    let libs_to_link = ["ui", "lua", "remote_api", "stb", "bgfx",
+                        "imgui", "scintilla", "tinyxml2", "capstone"];
 
     for lib in libs_to_link.iter() {
         println!("cargo:rustc-link-lib=static={}", *lib);
