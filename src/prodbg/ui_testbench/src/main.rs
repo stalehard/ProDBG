@@ -2,17 +2,16 @@ extern crate core;
 extern crate libc;
 extern crate ui;
 
-use libc::{c_void, c_int};
-/*
+use libc::{c_void, c_int, c_float};
+
 use core::plugin_handler::*;
 use std::ptr;
-use std::mem::transmute;
+//use std::mem::transmute;
 
 #[repr(C)]
 struct Context<'a> {
     plugin_handler: PluginHandler<'a>,
 }
-*/
 
 
 const WIDTH: usize = 1280;
@@ -27,6 +26,15 @@ fn main() {
         }
     };
 
+    let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
+
+    let mut context = Box::new(Context {
+        plugin_handler: PluginHandler::new(search_paths, Some("t2-output")),
+    });
+
+    context.plugin_handler.add_plugin("bitmap_memory");
+    context.plugin_handler.create_view_instance(&"Bitmap View".to_string());
+
     unsafe {
         bgfx_create();
         bgfx_create_window(window.get_native_handle(), WIDTH as i32, HEIGHT as i32);  
@@ -34,8 +42,29 @@ fn main() {
 
     while window.is_open() && !window.is_key_down(ui::Key::Escape) {
         
-        unsafe {
+        match context.plugin_handler.watch_recv.try_recv() {
+            Ok(file) => {
+                context.plugin_handler.reload_plugin(file.path.as_ref().unwrap());
+                println!("Poked file! {}", file.path.unwrap().to_str().unwrap());
+            }
+            _ => (),
+        }
+
+        unsafe { 
             bgfx_pre_update();
+
+            for instance in context.plugin_handler.view_instances.iter() {
+                bgfx_imgui_set_window_pos(0.0, 0.0);
+                bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
+
+                bgfx_imgui_begin(1);
+
+                let plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewPlugin; 
+                ((*plugin_funcs).update)(instance.user_data, bgfx_get_ui_funcs(), ptr::null(), ptr::null());
+
+                bgfx_imgui_end();
+            }
+
             bgfx_post_update();
         }
 
@@ -47,22 +76,6 @@ fn main() {
     }
 
 
-    /*
-    let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
-
-    let mut context = Box::new(Context {
-        plugin_handler: PluginHandler::new(search_paths, Some("t2-output")),
-    });
-
-    context.plugin_handler.add_plugin("bitmap_memory");
-    context.plugin_handler.create_view_instance(&"Bitmap View".to_string());
-
-    unsafe {
-        // this is kinda ugly but we have no good way to pass this around
-        bgfx_set_context(transmute(&mut *context));
-        prodbg_main(0, ptr::null())
-    }
-    */
 }
 
 ///
@@ -78,8 +91,6 @@ extern {
     fn bgfx_create();
     fn bgfx_create_window(window: *const c_void, width: c_int, height: c_int);
     fn bgfx_destroy();
-    /*
-
 
     fn bgfx_get_ui_funcs() -> *const c_void;
 
@@ -92,9 +103,8 @@ extern {
     fn bgfx_get_screen_width() -> f32;
     fn bgfx_get_screen_height() -> f32;
 
-    fn bgfx_set_context(context: *mut c_void); 
-    fn bgfx_get_context() -> *mut c_void;
-    */
+    //fn bgfx_set_context(context: *mut c_void); 
+    //fn bgfx_get_context() -> *mut c_void;
 }
 
 ///

@@ -12,10 +12,13 @@ void* mfb_open(const char* name, int width, int height, int scale)
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
 	if (!s_init) {
-		NSArray *tl;
 		NSApplication* application = [NSApplication sharedApplication];
 		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-  		[[NSBundle mainBundle] loadNibNamed:@"Main Menu" owner:application topLevelObjects:&tl];
+		NSBundle* bundle = [NSBundle mainBundle];
+
+		//printf("%p\n", bundle);
+
+  		[NSBundle loadNibNamed:@"MainMenu" owner:NSApp];
 		
 		s_init = true;
 	}
@@ -85,7 +88,7 @@ int mfb_update(void* window)
 
 	//g_updateBuffer = buffer;
 	int state = update_events();
-	[[win contentView] setNeedsDisplay:YES];
+	//[[win contentView] setNeedsDisplay:YES];
 	return state;
 }
 
