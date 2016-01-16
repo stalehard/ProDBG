@@ -6,13 +6,6 @@ use libc::{c_void, c_int, c_float};
 
 use core::plugin_handler::*;
 use std::ptr;
-//use std::mem::transmute;
-
-#[repr(C)]
-struct Context<'a> {
-    plugin_handler: PluginHandler<'a>,
-}
-
 
 const WIDTH: usize = 1280;
 const HEIGHT: usize = 1024;
@@ -28,12 +21,10 @@ fn main() {
 
     let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
 
-    let mut context = Box::new(Context {
-        plugin_handler: PluginHandler::new(search_paths, Some("t2-output")),
-    });
+    let mut plugin_handler = PluginHandler::new(search_paths, Some("t2-output"));
 
-    context.plugin_handler.add_plugin("bitmap_memory");
-    context.plugin_handler.create_view_instance(&"Bitmap View".to_string());
+    plugin_handler.add_plugin("bitmap_memory");
+    plugin_handler.create_view_instance(&"Bitmap View".to_string());
 
     unsafe {
         bgfx_create();
@@ -41,9 +32,9 @@ fn main() {
     }
 
     while window.is_open() && !window.is_key_down(ui::Key::Escape) {
-        match context.plugin_handler.watch_recv.try_recv() {
+        match plugin_handler.watch_recv.try_recv() {
             Ok(file) => {
-                context.plugin_handler.reload_plugin(file.path.as_ref().unwrap());
+                plugin_handler.reload_plugin(file.path.as_ref().unwrap());
             }
             _ => (),
         }
@@ -51,7 +42,7 @@ fn main() {
         unsafe { 
             bgfx_pre_update();
 
-            for instance in context.plugin_handler.view_instances.iter() {
+            for instance in plugin_handler.view_instances.iter() {
                 bgfx_imgui_set_window_pos(0.0, 0.0);
                 bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
 
@@ -80,8 +71,6 @@ fn main() {
 ///
 
 extern {
-    //fn prodbg_main(argc: c_int, argv: *const c_char);
-
     fn bgfx_pre_update();
     fn bgfx_post_update();
     fn bgfx_create();
@@ -98,93 +87,5 @@ extern {
 
     fn bgfx_get_screen_width() -> f32;
     fn bgfx_get_screen_height() -> f32;
-
-    //fn bgfx_set_context(context: *mut c_void); 
-    //fn bgfx_get_context() -> *mut c_void;
 }
-
-///
-/// These are calls coming from the C/C++ Code
-///
-
-#[no_mangle]
-pub extern fn prodbg_create(_: *const c_void, _: c_int, _: c_int) {
-/*
-    unsafe { 
-        bgfx_create(); 
-        bgfx_create_window(window, width, height);
-    }
-*/
-}
-
-#[no_mangle]
-pub unsafe extern fn prodbg_timed_update() {
-/*
-    let context = bgfx_get_context() as *mut Context;
-    let t = &mut (*context);
-
-    // check if someone has poked our file!
-
-    match t.plugin_handler.watch_recv.try_recv() {
-        Ok(file) => {
-            t.plugin_handler.reload_plugin(file.path.as_ref().unwrap());
-            println!("Poked file! {}", file.path.unwrap().to_str().unwrap());
-        }
-        _ => (),
-    }
-
-    bgfx_pre_update();
-
-    for instance in t.plugin_handler.view_instances.iter() {
-        bgfx_imgui_set_window_pos(0.0, 0.0);
-        bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
-
-        bgfx_imgui_begin(1);
-
-        let plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewPlugin; 
-        ((*plugin_funcs).update)(instance.user_data, bgfx_get_ui_funcs(), ptr::null(), ptr::null());
-
-        bgfx_imgui_end();
-    }
-
-    bgfx_post_update();
-*/
-}
-
-#[no_mangle]
-pub extern fn prodbg_application_launched() {
-}
-
-#[no_mangle]
-pub extern fn prodbg_event(event_id: c_int) {
-    println!("event {}", event_id);
-}
-
-#[no_mangle]
-pub extern fn prodbg_destroy() {
-/*
-    unsafe {
-        bgfx_destroy();
-
-        // This is kinda ugly. Hopefully this can be sorted later
-        let context = bgfx_get_context() as *mut Context;
-        let t = &mut (*context);
-
-        drop(t);
-    }
-*/
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#[no_mangle]
-pub extern fn main_run() { }
-
-#[no_mangle]
-pub extern fn main_shutdown() { }
-
-
-
-
-
 
