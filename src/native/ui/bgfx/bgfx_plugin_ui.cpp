@@ -16,12 +16,12 @@
 #include <assert.h>
 
 //#include <session/session.h>
-#include <foundation/apple.h>
-#include <foundation/string.h>
+//#include <foundation/apple.h>
+//#include <foundation/string.h>
 #include <bgfx.h>
 //#include "core/input_state.h"
 //#include "ui/bgfx/cursor.h"
-#include <foundation/string.h>
+//#include <foundation/string.h>
 //#include "i3wm_docking.h"
 #include "ui_render.h"
 #include <jansson.h>
@@ -105,7 +105,7 @@ static void set_title(void* private_data, const char* title) {
 
     (void)data;
 
-    if (string_equal(data->title, title))
+    if (!strcmp(data->title, title))
         return;
 
     if (data->title)
@@ -2147,7 +2147,7 @@ static void renderStatusBar(const char* text, float statusSize) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void BgfxPluginUI::setStatusTextNoFormat(const char* text) {
-    string_copy(m_statusText, text, sizeof(m_statusText));
+    strcpy(m_statusText, text);
 }
 
 /*

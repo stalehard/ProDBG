@@ -41,9 +41,8 @@ fn main() {
              command);
 
     // Ugly but hey!
-    let libs_to_link = ["main_lib", "ui",
-                        "jansson", "lua", "remote_api", "stb", "bgfx",
-                        "uv", "imgui", "remotery", "foundation_lib",
+    let libs_to_link = ["ui", "jansson", "lua", "remote_api", "stb", "bgfx",
+                        "uv", "imgui", "remotery",
                         "scintilla", "tinyxml2", "capstone"];
 
     for lib in libs_to_link.iter() {

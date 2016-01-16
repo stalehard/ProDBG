@@ -41,11 +41,9 @@ fn main() {
     }
 
     while window.is_open() && !window.is_key_down(ui::Key::Escape) {
-        
         match context.plugin_handler.watch_recv.try_recv() {
             Ok(file) => {
                 context.plugin_handler.reload_plugin(file.path.as_ref().unwrap());
-                println!("Poked file! {}", file.path.unwrap().to_str().unwrap());
             }
             _ => (),
         }
@@ -74,8 +72,6 @@ fn main() {
     unsafe {
         bgfx_destroy();
     }
-
-
 }
 
 ///
