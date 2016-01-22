@@ -1,5 +1,6 @@
 require "tundra.syntax.glob"
 require "tundra.syntax.osx-bundle"
+require "tundra.syntax.rust-cargo"
 require "tundra.path"
 require "tundra.util"
 
@@ -88,6 +89,19 @@ Program {
 
 -----------------------------------------------------------------------------------------------------------------------
 
+RustProgram {
+	Name = "ui_testbench",
+	CargoConfig = "src/prodbg/ui_testbench/Cargo.toml",
+	Sources = { 
+		"src/prodbg/ui_testbench/src/main.rs",
+		"src/prodbg/ui_testbench/build.rs",
+	},
+
+    Depends = { "ui", "lua", "remote_api", "stb", "bgfx", "imgui", "scintilla", "tinyxml2", "capstone" },
+}
+
+-----------------------------------------------------------------------------------------------------------------------
+
 local prodbgBundle = OsxBundle 
 {
 	Depends = { "prodbg" },
@@ -108,4 +122,5 @@ else
 	Default "prodbg"
 end
 
+Default "ui_testbench"
 
