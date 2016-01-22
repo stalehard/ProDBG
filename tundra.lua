@@ -33,7 +33,7 @@ local macosx = {
         CCOPTS =  {
 			mac_opts,
 		},
-        
+
         CXXOPTS = {
 			mac_opts,
 			"-std=c++11",
@@ -71,7 +71,7 @@ local macosx_test = {
 			"-Wno-everything",
 			"-coverage",
 		},
-        
+
         CXXOPTS = {
 			mac_opts,
 			"-Wno-everything",
