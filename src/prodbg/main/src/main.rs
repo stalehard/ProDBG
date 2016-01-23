@@ -89,4 +89,3 @@ extern {
     fn bgfx_get_screen_height() -> f32;
 }
 
-

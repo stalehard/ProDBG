@@ -136,5 +136,7 @@ Program {
 	IdeGenerationHints = { Msvc = { SolutionFolder = "Tools" } },
 }
 
+-----------------------------------------------------------------------------------------------------------------------
+
 Default "bgfx_shaderc"
 

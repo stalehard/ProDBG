@@ -1,0 +1,12 @@
+[package]
+name = "prodbg"
+version = "0.1.0"
+authors = ["Daniel Collin <daniel@collin.com>"]
+build = "build.rs"
+
+[dependencies]
+libc = "0.2.0"
+lazy_static = "0.1.*"
+core = { path = "../core" }
+ui = { path = "../../ui" }
+
