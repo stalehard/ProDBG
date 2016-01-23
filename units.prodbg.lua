@@ -44,7 +44,6 @@ RustProgram {
     Depends = { "ui", "lua", "remote_api", "stb", "bgfx", "imgui", "scintilla", "tinyxml2", "capstone" },
 }
 
-
 -----------------------------------------------------------------------------------------------------------------------
 
 local prodbgBundle = RustOsxBundle 
@@ -61,13 +60,25 @@ local prodbgBundle = RustOsxBundle
 
 -----------------------------------------------------------------------------------------------------------------------
 
+local uiBundle = RustOsxBundle 
+{
+	Depends = { "ui_testbench" },
+	Target = "$(OBJECTDIR)/UITestbench.app",
+	InfoPList = "Data/Mac/Info.plist",
+	Executable = "ui_testbench",
+	Resources = {
+		CompileNib { Source = "data/mac/appnib.xib", Target = "appnib2.nib" },
+		"data/mac/icon.icns",
+	},
+}
+
+-----------------------------------------------------------------------------------------------------------------------
+
 if native.host_platform == "macosx" then
 	Default(prodbgBundle)
+	Default(uiBundle)
 else
 	Default "prodbg"
+	Default "ui_testbench"
 end
-
-
-Default "ui_testbench"
--- Default "prodbg"
 
