@@ -1,20 +1,16 @@
 use std::env;
+extern crate gcc;
 
 fn main() {
-    let tundra_dir = env::var("TUNDRA_OBJECTDIR").unwrap_or("".to_string());
-    let libs = env::var("TUNDRA_STATIC_LIBS").unwrap_or("".to_string());
-
-    let native_libs = libs.split(" ");
-
-    println!("cargo:rustc-link-search=native={}", tundra_dir);
-
-    for lib in native_libs {
-        println!("cargo:rustc-link-lib=static={}", lib);
-        println!("cargo:rerun-if-changed={}", lib);
+    let env = env::var("TARGET").unwrap();
+    if env.contains("darwin") {
+        gcc::compile_library("libminifb_native.a",
+                             &["src/native/macosx/MacMiniFB.m",
+                               "src/native/macosx/OSXWindow.m",
+                               "src/native/macosx/OSXWindowFrameView.m"]);   // MacOS
+    } else if env.contains("linux") {
+        gcc::compile_library("libminifb_native.a", &["src/native/x11/X11MiniFB.c"]);   // Unix
     }
-
-    println!("cargo:rustc-flags=-l dylib=stdc++");
-    println!("cargo:rustc-flags=-l framework=Cocoa");
 }
 
 
