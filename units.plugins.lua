@@ -1,8 +1,20 @@
 require "tundra.syntax.glob"
 require "tundra.path"
 require "tundra.util"
+require "tundra.syntax.rust-cargo"
 
 local native = require('tundra.native')
+
+-----------------------------------------------------------------------------------------------------------------------
+
+local function get_rs_src(dir)
+	return Glob {
+		Dir = dir,
+		Extensions = { ".rs" },
+		Recursive = true,
+	}
+end
+
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -322,6 +334,17 @@ SharedLibrary {
 
 -----------------------------------------------------------------------------------------------------------------------
 
+RustSharedLibrary {
+	Name = "bitmap_memory",
+	CargoConfig = "src/plugins/bitmap_memory/Cargo.toml",
+	Sources = { 
+		get_rs_src("src/plugins/bitmap_memory"),
+		get_rs_src("api/rust/prodbg"),
+	}
+}
+
+-----------------------------------------------------------------------------------------------------------------------
+
 --[[
 SharedLibrary {
     Name = "i3wm_docking",
@@ -371,4 +394,5 @@ Default "workspace_plugin"
 Default "console_plugin"
 Default "c64_vice_plugin"
 Default "amiga_uae_plugin"
+Default "bitmap_memory"
 

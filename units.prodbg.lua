@@ -4,7 +4,7 @@ require "tundra.syntax.rust-cargo"
 require "tundra.path"
 require "tundra.util"
 
-local native = require "tundra.native"
+local native = require('tundra.native')
 
 -----------------------------------------------------------------------------------------------------------------------
 
