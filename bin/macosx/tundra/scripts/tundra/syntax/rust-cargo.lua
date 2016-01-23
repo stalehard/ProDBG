@@ -46,7 +46,7 @@ function build_rust_action_cmd_line(env, data, program)
 	-- We also set the tundra cmd line as env so we can use that inside the build.rs
 	-- to link with the libs in the correct path
 
-	local target = path.join("$(OBJECTDIR)", data.Name);
+	local target = path.join("$(OBJECTDIR)", data.Name)
 
 	local target_dir = "" 
 	local tundra_dir = "$(OBJECTDIR)";
