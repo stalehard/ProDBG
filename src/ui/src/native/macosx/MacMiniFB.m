@@ -7,7 +7,7 @@ static bool s_init = false;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void* mfb_open(const char* name, int width, int height, int scale)
+void* mfb_open(const char* name, int width, int height)
 {
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
@@ -23,7 +23,7 @@ void* mfb_open(const char* name, int width, int height, int scale)
 		s_init = true;
 	}
 	unsigned int styles = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
-	NSRect rectangle = NSMakeRect(0, 0, width * scale, (height * scale));
+	NSRect rectangle = NSMakeRect(0, 0, width, height);
 		
 	OSXWindow* window = [[OSXWindow alloc] initWithContentRect:rectangle styleMask:styles backing:NSBackingStoreBuffered defer:NO];
 
@@ -32,7 +32,6 @@ void* mfb_open(const char* name, int width, int height, int scale)
 
 	window->width = width;
 	window->height = height;
-	window->scale = scale;
 	window->key_callback = 0;
 
 	//[window updateSize];

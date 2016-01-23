@@ -11,7 +11,7 @@ const WIDTH: usize = 1280;
 const HEIGHT: usize = 1024;
 
 fn main() {
-    let mut window = match ui::Window::new("Test - ESC to exit", WIDTH, HEIGHT, ui::Scale::X1) {
+    let mut window = match ui::Window::new("Test - ESC to exit", WIDTH, HEIGHT) {
         Ok(win) => win,
         Err(err) => {
             println!("Unable to create window {}", err);
