@@ -1,9 +1,10 @@
 require "tundra.syntax.glob"
-require "tundra.syntax.osx-bundle"
+require "tundra.syntax.rust-osx-bundle"
 require "tundra.syntax.rust-cargo"
 require "tundra.path"
 require "tundra.util"
-require "tundra.native"
+
+local native = require "tundra.native"
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -43,16 +44,15 @@ RustProgram {
     Depends = { "ui", "lua", "remote_api", "stb", "bgfx", "imgui", "scintilla", "tinyxml2", "capstone" },
 }
 
---[[
 
 -----------------------------------------------------------------------------------------------------------------------
 
-local prodbgBundle = OsxBundle 
+local prodbgBundle = RustOsxBundle 
 {
 	Depends = { "prodbg" },
 	Target = "$(OBJECTDIR)/ProDBG.app",
 	InfoPList = "Data/Mac/Info.plist",
-	Executable = "$(OBJECTDIR)/prodbg",
+	Executable = "prodbg",
 	Resources = {
 		CompileNib { Source = "data/mac/appnib.xib", Target = "appnib.nib" },
 		"data/mac/icon.icns",
@@ -67,8 +67,7 @@ else
 	Default "prodbg"
 end
 
---]]
 
 Default "ui_testbench"
-Default "prodbg"
+-- Default "prodbg"
 
