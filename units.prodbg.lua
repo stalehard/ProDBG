@@ -1,5 +1,4 @@
 require "tundra.syntax.glob"
-require "tundra.syntax.rust-osx-bundle"
 require "tundra.syntax.rust-cargo"
 require "tundra.path"
 require "tundra.util"
