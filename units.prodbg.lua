@@ -46,12 +46,12 @@ RustProgram {
 
 -----------------------------------------------------------------------------------------------------------------------
 
-local prodbgBundle = RustOsxBundle 
+local prodbgBundle = OsxBundle 
 {
 	Depends = { "prodbg" },
 	Target = "$(OBJECTDIR)/ProDBG.app",
 	InfoPList = "Data/Mac/Info.plist",
-	Executable = "prodbg",
+	Executable = "$(OBJECTDIR)/prodbg",
 	Resources = {
 		CompileNib { Source = "data/mac/appnib.xib", Target = "appnib.nib" },
 		"data/mac/icon.icns",
@@ -60,12 +60,12 @@ local prodbgBundle = RustOsxBundle
 
 -----------------------------------------------------------------------------------------------------------------------
 
-local uiBundle = RustOsxBundle 
+local uiBundle = OsxBundle 
 {
 	Depends = { "ui_testbench" },
 	Target = "$(OBJECTDIR)/UITestbench.app",
 	InfoPList = "Data/Mac/Info.plist",
-	Executable = "ui_testbench",
+	Executable = "$(OBJECTDIR)/ui_testbench",
 	Resources = {
 		CompileNib { Source = "data/mac/appnib.xib", Target = "appnib2.nib" },
 		"data/mac/icon.icns",
