@@ -46,7 +46,7 @@ function build_rust_action_cmd_line(env, data, program)
 	-- We also set the tundra cmd line as env so we can use that inside the build.rs
 	-- to link with the libs in the correct path
 
-	local target = path.join("$(OBJECTDIR)", data.Name)
+	local target = path.join("$(OBJECTDIR)", "__" .. data.Name)
 
 	local target_dir = "" 
 	local tundra_dir = "$(OBJECTDIR)";
@@ -99,7 +99,7 @@ function _rust_cargo_program_mt:create_dag(env, data, deps)
 	local action_cmd_line, output_target = build_rust_action_cmd_line(env, data, true)
 	local extra_deps = get_extra_deps(data, env)
 
-	return depgraph.make_node {
+	local build_node = depgraph.make_node {
 		Env          = env,
 		Pass         = data.Pass,
 		InputFiles   = util.merge_arrays({ data.CargoConfig }, data.Sources),
@@ -108,7 +108,13 @@ function _rust_cargo_program_mt:create_dag(env, data, deps)
 		Action       = action_cmd_line,
 		OutputFiles  = { output_target }, 
 		Dependencies = util.merge_arrays(deps, extra_deps),
-  }
+	}
+
+	local dst ="$(OBJECTDIR)" .. "$(SEP)" .. path.get_filename(env:interpolate(output_target))
+	local src = output_target
+
+	-- Copy the output file to the regular $(OBJECTDIR) 
+	return files.copy_file(env, src, dst, data.Pass, { build_node })
 end
 
 function _rust_cargo_shared_lib_mt:create_dag(env, data, deps)
@@ -116,7 +122,7 @@ function _rust_cargo_shared_lib_mt:create_dag(env, data, deps)
 	local action_cmd_line, output_target = build_rust_action_cmd_line(env, data, false)
 	local extra_deps = get_extra_deps(data, env)
 
-	return depgraph.make_node {
+	local build_node = depgraph.make_node {
 		Env          = env,
 		Pass         = data.Pass,
 		InputFiles   = util.merge_arrays({ data.CargoConfig }, data.Sources),
@@ -125,7 +131,13 @@ function _rust_cargo_shared_lib_mt:create_dag(env, data, deps)
 		Action       = action_cmd_line,
 		OutputFiles  = { output_target }, 
 		Dependencies = util.merge_arrays(deps, extra_deps),
-  }
+	}
+
+	local dst ="$(OBJECTDIR)" .. "$(SEP)" .. path.get_filename(env:interpolate(output_target))
+	local src = output_target
+
+	-- Copy the output file to the regular $(OBJECTDIR) 
+	return files.copy_file(env, src, dst, data.Pass, { build_node })
 end
 
 local rust_blueprint = {
