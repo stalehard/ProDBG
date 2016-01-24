@@ -158,7 +158,7 @@ pub struct MouseData {
     pub pos_y: f32,
     pub scroll_x: f32,
     pub scroll_y: f32,
-    pub mouse_states: [u8; 5],
+    pub state: [u8; 5],
 }
 
 // This needs to match C version in OSXWIndow
@@ -230,6 +230,11 @@ impl Window {
     #[inline]
     pub fn get_mouse_pos(&self) -> (f32, f32) {
         (self.shared_data.mouse_data.pos_x, self.shared_data.mouse_data.pos_y)
+    }
+
+    #[inline]
+    pub fn get_mouse_state(&self, index: usize) -> u8 {
+        self.shared_data.mouse_data.state[index]
     }
 
     #[inline]

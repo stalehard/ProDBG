@@ -3,6 +3,7 @@
 
 local mac_opts = {
 	"-Wall",
+	"-Wno-switch-enum",
 	"-I.", "-DPRODBG_MAC", 
 	"-Weverything", "-Werror", 
 	"-Wno-unknown-warning-option",

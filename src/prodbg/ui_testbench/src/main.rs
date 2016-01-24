@@ -33,6 +33,8 @@ fn main() {
         bgfx_create_window(window.get_native_handle(), WIDTH as i32, HEIGHT as i32);  
     }
 
+
+
     while window.is_open() && !window.is_key_down(ui::Key::Escape) {
         match plugin_handler.watch_recv.try_recv() {
             Ok(file) => {
@@ -57,7 +59,13 @@ fn main() {
             }
 
             bgfx_post_update();
+
+            let (mouse_x, mouse_y) = window.get_mouse_pos();
+
+            prodbg_set_mouse_pos(mouse_x, mouse_y);
+            prodbg_set_mouse_state(0, window.get_mouse_state(0) as c_int);
         }
+
 
         window.update();
     }
@@ -78,6 +86,9 @@ extern {
     fn bgfx_create();
     fn bgfx_create_window(window: *const c_void, width: c_int, height: c_int);
     fn bgfx_destroy();
+
+    fn prodbg_set_mouse_pos(x: f32, y: f32);
+    fn prodbg_set_mouse_state(mouse: c_int, state: c_int);
 
     fn bgfx_get_ui_funcs() -> *const c_void;
 

@@ -2354,22 +2354,12 @@ void BgfxPluginUI::destroy() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" void prodbg_set_mouse_pos(float x, float y) {
-	/*
-    InputState* state = InputState_getState();
-
-    state->mousePos.x = x;
-    state->mousePos.y = y;
-    */
-
     IMGUI_setMousePos(x, y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern "C" void prodbg_set_mouse_state(int button, int state) {
-    //InputState* inputState = InputState_getState();
-    //inputState->mouseDown[0] = !!state;
-
     IMGUI_setMouseState(state);
 }
 

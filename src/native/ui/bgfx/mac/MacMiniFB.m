@@ -39,7 +39,6 @@ void* mfb_open(const char* name, int width, int height)
 	[window setReleasedWhenClosed:NO];
 	[window performSelectorOnMainThread:@selector(makeKeyAndOrderFront:) withObject:nil waitUntilDone:YES];
     [window setRestorable:NO];
-    [window setAcceptsMouseMovedEvents:YES];
 	//[window setDelegate:[[WindowDelegate alloc] initWithWindow:window]];
 
 	[window center];
@@ -67,11 +66,29 @@ void mfb_close(void* win)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static int update_events()
+static int update_events(OSXWindow* win)
 {
 	int state = 0;
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 	NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
+
+	switch ([event type]) {
+		case NSLeftMouseDown:
+		{
+			win->rust_window->mouse_data.state[0] = 1;
+			break;
+		}
+
+		case NSLeftMouseUp:
+		{
+			win->rust_window->mouse_data.state[0] = 0;
+			break;
+		}
+
+		default:
+			break;
+	}
+
 	[NSApp sendEvent:event];
 	[pool release];
 
@@ -82,9 +99,8 @@ static int update_events()
 
 int mfb_update(void* window)
 {
-	(void)window;
-	//OSXWindow* win = (OSXWindow*)window;
-	int state = update_events();
+	OSXWindow* win = (OSXWindow*)window;
+	int state = update_events(win);
 	return state;
 }
 

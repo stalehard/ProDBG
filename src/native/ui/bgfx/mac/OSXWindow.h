@@ -6,7 +6,7 @@
 typedef struct MouseData {
 	float x, y;
 	float sx, sy;
-	uint8_t mouse_state[5];
+	uint8_t state[5];
 } MouseData;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ typedef struct RustWindow {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-@interface OSXWindow : NSWindow
+@interface OSXWindow : NSWindow <NSWindowDelegate>
 {
 	NSView* childContentView;
 	@public void (*key_callback)(void* user_data, int key, int state);

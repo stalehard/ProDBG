@@ -275,13 +275,17 @@ impl Window {
         self.0.set_position(x, y)
     }
     
-
     ///
     /// Get the mouse position 
     ///
     #[inline]
     pub fn get_mouse_pos(&self) -> (f32, f32) {
         self.0.get_mouse_pos()
+    }
+
+    #[inline]
+    pub fn get_mouse_state(&self, index: usize) -> u8 {
+        self.0.get_mouse_state(index)
     }
 
     ///

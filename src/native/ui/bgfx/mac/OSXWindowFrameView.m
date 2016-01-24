@@ -9,6 +9,33 @@
     return YES;
 }
 
+- (BOOL)acceptFirstMouse:(NSEvent*)event {
+	(void)event;
+	return YES;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+- (void)mouseUp:(NSEvent*)event {
+    (void)event;
+    printf("mouse up\n");
+}
+
+- (void)mouseDown:(NSEvent*)event {
+    (void)event;
+    printf("mouse down\n");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+-(void) viewWillMoveToWindow:(NSWindow*)newWindow {
+	printf("viewWillMoveToWindow\n");
+    NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self frame]
+                                    options: (NSTrackingAreaOptions)(NSTrackingInVisibleRect | NSTrackingMouseMoved | NSTrackingActiveAlways) owner:self userInfo:nil];
+    [self addTrackingArea:trackingArea];
+    (void)newWindow;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*

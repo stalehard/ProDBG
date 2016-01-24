@@ -13,7 +13,7 @@ impl View for BitmapView {
     }
 
     fn update(&mut self, ui: &Ui, _: &mut Reader, _: &mut Writer) {
-        if ui.button("test4 ", None) {
+        if ui.button("hoestuhtseoh", None) {
             println!("yah");
         }
 

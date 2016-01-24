@@ -171,8 +171,6 @@ extern void prodbg_set_window_size(int width, int height);
     NSPoint location = [self mouseLocationOutsideOfEventStream];
     NSRect adjustFrame = [NSWindow contentRectForFrameRect: originalFrame styleMask: NSTitledWindowMask];
 
-    printf("mouse moved...\n");
-
     rust_window->mouse_data.x = (float)location.x;
     rust_window->mouse_data.y = (float)(adjustFrame.size.height - location.y);
 }
