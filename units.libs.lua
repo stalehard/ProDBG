@@ -629,6 +629,8 @@ StaticLibrary {
 
 -----------------------------------------------------------------------------------------------------------------------
 
+--[[
+
 StaticLibrary {
     Name = "main_lib",
 
@@ -696,6 +698,8 @@ StaticLibrary {
 
 	IdeGenerationHints = { Msvc = { SolutionFolder = "Libs" } },
 }
+
+--]]
 
 
 
