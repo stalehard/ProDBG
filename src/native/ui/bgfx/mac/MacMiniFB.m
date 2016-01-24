@@ -11,7 +11,8 @@ void* mfb_open(const char* name, int width, int height)
 	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
 	if (!s_init) {
-		NSApplication* application = [NSApplication sharedApplication];
+		//NSApplication* application = [NSApplication sharedApplication];
+		[NSApplication sharedApplication];
 		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 		//NSBundle* bundle = [NSBundle mainBundle];
 
@@ -81,7 +82,8 @@ static int update_events()
 
 int mfb_update(void* window)
 {
-	OSXWindow* win = (OSXWindow*)window;
+	(void)window;
+	//OSXWindow* win = (OSXWindow*)window;
 	int state = update_events();
 	return state;
 }
@@ -90,7 +92,7 @@ int mfb_update(void* window)
 
 static float transformY(float y)
 {
-	float b = CGDisplayBounds(CGMainDisplayID()).size.height; 
+	float b = (float)CGDisplayBounds(CGMainDisplayID()).size.height; 
 	float t = b - y;
 	return t;
 }
@@ -101,7 +103,7 @@ void mfb_set_position(void* window, int x, int y)
 {
 	OSXWindow* win = (OSXWindow*)window;
 	const NSRect contentRect = [[win contentView] frame];
-    const NSRect dummyRect = NSMakeRect(x, transformY(y + contentRect.size.height), 0, 0);
+    const NSRect dummyRect = NSMakeRect(x, transformY(y + (float)contentRect.size.height), 0, 0);
     const NSRect frameRect = [win frameRectForContentRect:dummyRect];
     [win setFrameOrigin:frameRect.origin];
 }

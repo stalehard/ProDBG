@@ -573,9 +573,16 @@ StaticLibrary {
     Name = "ui",
 
     Env = { 
+    	CCOPTS = {
+			{ "-Wno-objc-interface-ivars",
+			  "-Wno-direct-ivar-access",
+			  "-Wno-nullable-to-nonnull-conversion",
+			  "-Wno-format-nonliteral"; Config = "macosx-*-*" },
+		},
 
         CXXOPTS = {
-        	{ "-D__WXOSX_COCOA__",
+        	{ 
+
         	  "-Wno-gnu-anonymous-struct",
 			  "-Wno-global-constructors",
 			  "-Wno-switch-enum",
@@ -594,7 +601,7 @@ StaticLibrary {
             "src/native/external/bgfx/include",
         	"api/include",
         	"src/native/external/i3wm_docking",
-			"src/native/external/foundation_lib",
+			-- "src/native/external/foundation_lib",
 			"src/native/external/libuv/include",
             "src/native/external/stb",
             "src/native/external/jansson/include",

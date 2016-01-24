@@ -72,11 +72,11 @@ extern void prodbg_set_window_size(int width, int height);
 	if (childContentView)
 		[childContentView removeFromSuperview];
 
-	NSRect t = [self contentRectForFrameRect:bounds];
+	//NSRect t = [self contentRectForFrameRect:bounds];
 
 	childContentView = aView;
 	[childContentView setFrame:[self contentRectForFrameRect:bounds]];
-	[childContentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+	//[childContentView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
 	[frameView addSubview:childContentView];
 }
 
@@ -153,10 +153,12 @@ extern void prodbg_set_window_size(int width, int height);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 -(void) viewWillMoveToWindow:(NSWindow*)newWindow {
+	/*
 	printf("viewWillMoveToWindow\n");
     NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self frame]
                                     options: (NSTrackingInVisibleRect | NSTrackingMouseMoved | NSTrackingActiveAlways) owner:self userInfo:nil];
     [self addTrackingArea:trackingArea];
+    */
     (void)newWindow;
 }
 
@@ -171,24 +173,27 @@ extern void prodbg_set_window_size(int width, int height);
 
     printf("mouse moved...\n");
 
-    rust_window->mouse_data.x = location.x;
-    rust_window->mouse_data.y = adjustFrame.size.height - location.y;
+    rust_window->mouse_data.x = (float)location.x;
+    rust_window->mouse_data.y = (float)(adjustFrame.size.height - location.y);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)mainWindowChanged:(NSNotification *)aNotification {
+	(void)aNotification;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (void)windowWillClose:(NSNotification *)notification {
+	(void)notification;
 	should_close = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 - (BOOL)windowShouldClose:(id)sender {
+	(void)sender;
 	should_close = true;
 	return TRUE;
 }

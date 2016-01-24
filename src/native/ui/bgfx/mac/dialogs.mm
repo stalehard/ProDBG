@@ -1,5 +1,5 @@
 #include "../dialogs.h"
-#include <foundation/apple.h>
+//#include <foundation/apple.h>
 #import <Cocoa/Cocoa.h>
 #import <AppKit/AppKit.h>
 
