@@ -17,6 +17,16 @@ end
 
 -----------------------------------------------------------------------------------------------------------------------
 
+local function get_rs_native_src(dir)
+	return Glob {
+		Dir = dir,
+		Extensions = { ".rs", ".c", ".m", ".mm" },
+		Recursive = true,
+	}
+end
+
+-----------------------------------------------------------------------------------------------------------------------
+
 RustProgram {
 	Name = "ui_testbench",
 	CargoConfig = "src/prodbg/ui_testbench/Cargo.toml",

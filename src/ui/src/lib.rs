@@ -274,6 +274,15 @@ impl Window {
     pub fn set_position(&mut self, x: isize, y: isize) {
         self.0.set_position(x, y)
     }
+    
+
+    ///
+    /// Get the mouse position 
+    ///
+    #[inline]
+    pub fn get_mouse_pos(&self) -> (f32, f32) {
+        self.0.get_mouse_pos()
+    }
 
     ///
     /// Get the current keys that are down. 
@@ -389,3 +398,5 @@ impl Window {
         self.0.get_native_handle()
     }
 }
+
+

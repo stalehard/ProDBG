@@ -228,6 +228,11 @@ impl Window {
     }
 
     #[inline]
+    pub fn get_mouse_pos(&self) -> (f32, f32) {
+        (self.shared_data.mouse_data.pos_x, self.shared_data.mouse_data.pos_y)
+    }
+
+    #[inline]
     pub fn set_position(&mut self, x: isize, y: isize) {
         unsafe { mfb_set_position(self.shared_data.window_handle, x as i32, y as i32) }
     }

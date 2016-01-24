@@ -38,6 +38,7 @@ void* mfb_open(const char* name, int width, int height)
 	[window setReleasedWhenClosed:NO];
 	[window performSelectorOnMainThread:@selector(makeKeyAndOrderFront:) withObject:nil waitUntilDone:YES];
     [window setRestorable:NO];
+    [window setAcceptsMouseMovedEvents:YES];
 	//[window setDelegate:[[WindowDelegate alloc] initWithWindow:window]];
 
 	[window center];

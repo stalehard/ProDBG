@@ -130,8 +130,7 @@ extern void prodbg_set_window_size(int width, int height);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)keyDown:(NSEvent *)event
-{
+- (void)keyDown:(NSEvent *)event {
 	// Cmd+Q always closes app
     if ([event.characters.uppercaseString isEqualToString:@"Q"] && ([event modifierFlags] & NSCommandKeyMask)) {
         [self performClose:self];
@@ -145,8 +144,7 @@ extern void prodbg_set_window_size(int width, int height);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)keyUp:(NSEvent *)event
-{
+- (void)keyUp:(NSEvent *)event {
 	if (key_callback) {
 		key_callback(rust_window, [event keyCode], 0);
 	}
@@ -154,50 +152,63 @@ extern void prodbg_set_window_size(int width, int height);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)mainWindowChanged:(NSNotification *)aNotification
-{
+-(void) viewWillMoveToWindow:(NSWindow*)newWindow {
+	printf("viewWillMoveToWindow\n");
+    NSTrackingArea* trackingArea = [[NSTrackingArea alloc] initWithRect:[self frame]
+                                    options: (NSTrackingInVisibleRect | NSTrackingMouseMoved | NSTrackingActiveAlways) owner:self userInfo:nil];
+    [self addTrackingArea:trackingArea];
+    (void)newWindow;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (void)windowWillClose:(NSNotification *)notification 
-{
+- (void)mouseMoved:(NSEvent*)event {
+    (void)event;
+
+    NSRect originalFrame = [self frame];
+    NSPoint location = [self mouseLocationOutsideOfEventStream];
+    NSRect adjustFrame = [NSWindow contentRectForFrameRect: originalFrame styleMask: NSTitledWindowMask];
+
+    printf("mouse moved...\n");
+
+    rust_window->mouse_data.x = location.x;
+    rust_window->mouse_data.y = adjustFrame.size.height - location.y;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)mainWindowChanged:(NSNotification *)aNotification {
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+- (void)windowWillClose:(NSNotification *)notification {
 	should_close = true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)windowShouldClose:(id)sender
-{
+- (BOOL)windowShouldClose:(id)sender {
 	should_close = true;
 	return TRUE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (NSView *)contentView
-{
+- (NSView *)contentView {
 	return childContentView;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)canBecomeKeyWindow
-{
+- (BOOL)canBecomeKeyWindow {
+	printf("canBecomeKeyWindow\n");
 	return YES;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-- (BOOL)canBecomeMainWindow
-{
-	return YES;
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-- (NSRect)contentRectForFrameRect:(NSRect)windowFrame
-{
+- (NSRect)contentRectForFrameRect:(NSRect)windowFrame {
 	windowFrame.origin = NSZeroPoint;
 	return NSInsetRect(windowFrame, 0, 0);
 }
