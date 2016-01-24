@@ -218,6 +218,13 @@ impl Window {
     }
 
     ///
+    /// Does some extra setup after the window has been created 
+    ///
+    pub fn init(&mut self) {
+        self.0.init()
+    }
+
+    ///
     /// Updates the window with a 32-bit pixel buffer. Notice that the buffer needs to be at least 
     /// the size of the created window
     ///

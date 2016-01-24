@@ -147,13 +147,30 @@ extern {
     fn mfb_close(window: *mut c_void);
     fn mfb_update(window: *mut c_void);
     fn mfb_set_position(window: *mut c_void, x: i32, y: i32);
-    fn mfb_set_key_callback(window: *mut c_void, target: *mut c_void, cb: unsafe extern fn(*mut c_void, i32, i32));
+    fn mfb_set_data_key_callback(window: *mut c_void, target: *mut c_void, cb: unsafe extern fn(*mut c_void, i32, i32));
     fn mfb_should_close(window: *mut c_void) -> i32;
-    //fn mfb_get_screen_size() -> u32;
 }
 
-pub struct Window {
+// This needs to match C version in OSXWIndow
+#[derive(Default)]
+pub struct MouseData {
+    pub pos_x: f32,
+    pub pos_y: f32,
+    pub scroll_x: f32,
+    pub scroll_y: f32,
+    pub mouse_states: [u8; 5],
+}
+
+// This needs to match C version in OSXWIndow
+#[repr(C)]
+struct SharedData {
     window_handle: *mut c_void,
+    mouse_data: MouseData,
+}
+
+// This needs to match C version in OSXWIndow
+pub struct Window {
+    shared_data: SharedData, 
     key_handler: KeyHandler,
 }
 
@@ -187,9 +204,18 @@ impl Window {
             }
 
             Ok(Window { 
-                window_handle: handle,
+                shared_data: SharedData { 
+                    window_handle: handle,
+                    mouse_data: MouseData::default(),
+                },
                 key_handler: KeyHandler::new(),
             })
+        }
+    }
+
+    pub fn init(&mut self) {
+        unsafe {
+            mfb_set_data_key_callback(self.shared_data.window_handle, mem::transmute(&mut self.shared_data), key_callback);
         }
     }
 
@@ -197,15 +223,13 @@ impl Window {
         self.key_handler.update();
 
         unsafe {
-            mfb_update(self.window_handle);
-            // TODO: Move to init function
-            mfb_set_key_callback(self.window_handle, mem::transmute(self), key_callback);
+            mfb_update(self.shared_data.window_handle);
         }
     }
 
     #[inline]
     pub fn set_position(&mut self, x: isize, y: isize) {
-        unsafe { mfb_set_position(self.window_handle, x as i32, y as i32) }
+        unsafe { mfb_set_position(self.shared_data.window_handle, x as i32, y as i32) }
     }
 
     #[inline]
@@ -240,19 +264,19 @@ impl Window {
 
     #[inline]
     pub fn is_open(&self) -> bool {
-        unsafe { mfb_should_close(self.window_handle) == 0 }
+        unsafe { mfb_should_close(self.shared_data.window_handle) == 0 }
     }
 
     #[inline]
     pub fn get_native_handle(&self) -> *mut c_void {
-        self.window_handle
+        self.shared_data.window_handle
     }
 }
 
 impl Drop for Window {
     fn drop(&mut self) {
         unsafe {
-            mfb_close(self.window_handle);
+            mfb_close(self.shared_data.window_handle);
         }
     }
 }

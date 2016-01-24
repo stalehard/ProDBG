@@ -4,7 +4,6 @@
 
 static bool s_init = false;
 
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void* mfb_open(const char* name, int width, int height)
@@ -14,11 +13,11 @@ void* mfb_open(const char* name, int width, int height)
 	if (!s_init) {
 		NSApplication* application = [NSApplication sharedApplication];
 		[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-		NSBundle* bundle = [NSBundle mainBundle];
+		//NSBundle* bundle = [NSBundle mainBundle];
 
 		//printf("%p\n", bundle);
 
-  		[NSBundle loadNibNamed:@"MainMenu" owner:NSApp];
+  		//[NSBundle loadNibNamed:@"MainMenu" owner:NSApp];
 		
 		s_init = true;
 	}
@@ -30,9 +29,8 @@ void* mfb_open(const char* name, int width, int height)
 	if (!window)
 		return 0;
 
-	window->width = width;
-	window->height = height;
 	window->key_callback = 0;
+	window->rust_window = 0;
 
 	//[window updateSize];
 
@@ -40,7 +38,7 @@ void* mfb_open(const char* name, int width, int height)
 	[window setReleasedWhenClosed:NO];
 	[window performSelectorOnMainThread:@selector(makeKeyAndOrderFront:) withObject:nil waitUntilDone:YES];
     [window setRestorable:NO];
-	[window setDelegate:[[WindowDelegate alloc] initWithWindow:window]];
+	//[window setDelegate:[[WindowDelegate alloc] initWithWindow:window]];
 
 	[window center];
 
@@ -83,11 +81,7 @@ static int update_events()
 int mfb_update(void* window)
 {
 	OSXWindow* win = (OSXWindow*)window;
-	//memcpy(win->draw_buffer, buffer, win->width * win->height * 4);
-
-	//g_updateBuffer = buffer;
 	int state = update_events();
-	//[[win contentView] setNeedsDisplay:YES];
 	return state;
 }
 
@@ -131,10 +125,11 @@ uint32_t mfb_get_screen_size()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void mfb_set_key_callback(void* window, void* rust_data, void (*key_callback)(void* user_data, int key, int state))
+void mfb_set_data_key_callback(void* window, void* rust_window, void (*key_callback)(void* user_data, int key, int state))
 {
 	OSXWindow* win = (OSXWindow*)window;
 	win->key_callback = key_callback;
-	win->rust_data = rust_data;
+	win->rust_window = (RustWindow*)rust_window;
 }
+
 

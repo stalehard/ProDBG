@@ -19,6 +19,8 @@ fn main() {
         }
     };
 
+    window.init();
+
     let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
 
     let mut plugin_handler = PluginHandler::new(search_paths, Some("t2-output"));

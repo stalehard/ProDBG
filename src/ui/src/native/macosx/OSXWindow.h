@@ -1,23 +1,30 @@
 #import <Cocoa/Cocoa.h>
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// This needs to match Rust version in macos/mod.rs
+typedef struct MouseData {
+	float x, y;
+	float sx, sy;
+	uint8_t mouse_state[5];
+} MouseData;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// This needs to match Rust version in macos/mod.rs
+typedef struct RustWindow {
+	void* window_handle;
+	MouseData mouse_data;
+} RustWindow;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 @interface OSXWindow : NSWindow
 {
 	NSView* childContentView;
 	@public void (*key_callback)(void* user_data, int key, int state);
-	@public int width;
-	@public int height;
-	@public int scale;
-	@public void* rust_data;
+	@public RustWindow* rust_window;
 	@public bool should_close;
 }
-
 @end
 
-@interface WindowDelegate : NSObject
-{
-    OSXWindow* window;
-}
-
-- (id)initWithwWindow:(OSXWindow*)initWindow;
-
-@end
