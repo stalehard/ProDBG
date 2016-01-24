@@ -14,6 +14,8 @@ use self::libloading::{Library, Symbol};
 use self::libloading::Result as LibRes; 
 use self::tempdir::TempDir;
 use std::str;
+use std::time::Duration;
+use std::thread;
 
 #[repr(C)]
 pub struct CBasePlugin {
@@ -210,6 +212,28 @@ impl<'a> PluginHandler<'a> {
         None
     }
 
+    fn try_copy(src: &Path, dest: &Path) -> bool {
+        for _ in 0..10 {
+            match fs::metadata(src) {
+                Ok(file) => {
+                    let len = file.len(); 
+                    if len > 0 {
+                        fs::copy(&src, &dest).unwrap();
+                        println!("Copy from {} {}", src.to_str().unwrap(), dest.to_str().unwrap());
+                        return true;
+                    }
+                }
+
+                _ => (),
+            }
+
+            println!("Waiting to copy file...");
+            thread::sleep(Duration::from_millis(100));
+        }
+
+        false
+    }
+
     ///
     /// Sets up InitPluginData which contains the loaded plugin and which paths the plugin has been
     /// loaded at. It also take care of copy the plugin to the shadow directory if exists
@@ -221,8 +245,7 @@ impl<'a> PluginHandler<'a> {
 
         if let Some(sd) = self.shadow_dir.as_ref() {
             path = sd.path().join(full_path.file_name().unwrap());
-            let _ = fs::copy(&full_path, &path);
-            println!("Copy from {} {}", full_path.to_str().unwrap(), path.to_str().unwrap());
+            Self::try_copy(&full_path, &path);
             original_path = Some(full_path.clone());
         } else {
             original_path = None;
