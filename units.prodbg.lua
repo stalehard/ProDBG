@@ -33,7 +33,6 @@ RustProgram {
 	Sources = { 
 		get_rs_src("src/prodbg/ui_testbench"),
 		get_rs_src("src/prodbg/core"),
-		get_rs_src("src/ui"),
 	},
 
     Depends = { "ui", "lua", "remote_api", "stb", "bgfx", "imgui", "scintilla", "tinyxml2", "capstone" },

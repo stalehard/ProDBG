@@ -320,6 +320,12 @@ static int translateKey(unsigned int key) {
     NSPoint location = [window mouseLocationOutsideOfEventStream];
     NSRect adjustFrame = [NSWindow contentRectForFrameRect: originalFrame styleMask: NSTitledWindowMask];
 
+    prinf("%f %f - %f %f\n", 
+   		adjustFrame.origin.x, 
+   		adjustFrame.origin.y, 
+   		adjustFrame.size.width, 
+   		adjustFrame.size.height);
+
     prodbg_set_mouse_pos(location.x, adjustFrame.size.height - location.y);
 
     (void)event;

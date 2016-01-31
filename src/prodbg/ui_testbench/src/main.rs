@@ -1,7 +1,8 @@
 extern crate core;
 extern crate libc;
-extern crate ui;
+extern crate minifb;
 
+use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
 use libc::{c_void, c_int, c_float};
 
 use core::plugin_handler::*;
@@ -11,15 +12,18 @@ const WIDTH: usize = 1280;
 const HEIGHT: usize = 1024;
 
 fn main() {
-    let mut window = match ui::Window::new("Test - ESC to exit", WIDTH, HEIGHT) {
+    let mut window = match Window::new("Noise Test - Press ESC to exit", WIDTH, HEIGHT, 
+                                       WindowOptions { 
+                                           resize: true,
+                                           scale: Scale::X1,
+                                           ..WindowOptions::default()
+                                       }) {
         Ok(win) => win,
         Err(err) => {
             println!("Unable to create window {}", err);
             return;
         }
     };
-
-    window.init();
 
     let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
 
@@ -30,12 +34,10 @@ fn main() {
 
     unsafe {
         bgfx_create();
-        bgfx_create_window(window.get_native_handle(), WIDTH as i32, HEIGHT as i32);  
+        bgfx_create_window(window.get_window_handle() as *mut c_void, WIDTH as i32, HEIGHT as i32);  
     }
 
-
-
-    while window.is_open() && !window.is_key_down(ui::Key::Escape) {
+    while window.is_open() && !window.is_key_down(Key::Escape) {
         match plugin_handler.watch_recv.try_recv() {
             Ok(file) => {
                 plugin_handler.reload_plugin(file.path.as_ref().unwrap());
@@ -60,10 +62,10 @@ fn main() {
 
             bgfx_post_update();
 
-            let (mouse_x, mouse_y) = window.get_mouse_pos();
-
-            prodbg_set_mouse_pos(mouse_x, mouse_y);
-            prodbg_set_mouse_state(0, window.get_mouse_state(0) as c_int);
+            window.get_mouse_pos(MouseMode::Clamp).map(|mouse| {
+                prodbg_set_mouse_pos(mouse.0, mouse.1);
+                prodbg_set_mouse_state(0, window.get_mouse_down(MouseButton::Left) as c_int);
+            });
         }
 
 
