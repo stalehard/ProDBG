@@ -52,7 +52,9 @@ LexerLibrary::LexerLibrary(const char *ModuleName) {
 	last = NULL;
 
 	// Load the DLL
-	lib = DynamicLibrary::Load(ModuleName);
+	//[PRODBG] - Disabled because this function can't be found on Linux (but we don't need it anyway)
+	lib = 0; //DynamicLibrary::Load(ModuleName);
+	//[PRODBG]
 	if (lib->IsValid()) {
 		m_sModuleName = ModuleName;
 		//Cannot use reinterpret_cast because: ANSI C++ forbids casting between pointers to functions and objects
