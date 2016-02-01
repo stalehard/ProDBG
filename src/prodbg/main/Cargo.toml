@@ -3,7 +3,7 @@ name = "prodbg"
 version = "0.1.0"
 authors = ["Daniel Collin <daniel@collin.com>"]
 
-build = "build.rs"
+build = "../build.rs"
 
 [dependencies]
 libc = "0.2.0"

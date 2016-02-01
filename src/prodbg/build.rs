@@ -1,6 +1,7 @@
 use std::env;
 
 fn main() {
+	let target = env::var("TARGET").unwrap_or("".to_string());
     let tundra_dir = env::var("TUNDRA_OBJECTDIR").unwrap_or("".to_string());
     let libs = env::var("TUNDRA_STATIC_LIBS").unwrap_or("".to_string());
 
@@ -14,7 +15,15 @@ fn main() {
     }
 
     println!("cargo:rustc-flags=-l dylib=stdc++");
-    println!("cargo:rustc-flags=-l framework=Cocoa");
+
+	if target == "darwin" {
+    	println!("cargo:rustc-flags=-l framework=Cocoa");
+    } else if target == "windows" {
+    } else {
+    	println!("cargo:rustc-flags=-l dylib=X11");
+    	println!("cargo:rustc-flags=-l dylib=GL");
+    	println!("cargo:rustc-flags=-l dylib=dl");
+    }
 }
 
 
