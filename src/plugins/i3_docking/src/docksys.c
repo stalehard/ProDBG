@@ -25,8 +25,9 @@ int handle_button_press(int x, int y, int mxd, int myd, bool lmb_down);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void docksys_set_callbacks(PDDockingCallbacks* callbacks)
+void docksys_set_callbacks(void* instance, PDDockingCallbacks* callbacks)
 {
+	(void)instance;
 	g_callbacks = callbacks;
 }
 
@@ -52,12 +53,12 @@ void docksys_create(int x, int y, int width, int height)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void docksys_set_mouse(void *user_data, int x, int y, bool leftDown)
+void docksys_set_mouse(void* instance, void *user_data, int x, int y, uint8_t left_down)
 {
 	int mxd = x - prev_mouse_x;
 	int myd = y - prev_mouse_y;
 
-	handle_button_press(x, y, mxd, myd, leftDown);
+	handle_button_press(x, y, mxd, myd, !!left_down);
 
 	prev_mouse_x = x;
 	prev_mouse_y = y;

@@ -1,6 +1,8 @@
 #ifndef _PD_DOCKING_H_
 #define _PD_DOCKING_H_ 
 
+#include <stdint.h>
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This is the API used for docking of views within ProDBG. It's possible to use this API to replace the
 // existing one
@@ -15,6 +17,13 @@ typedef enum PDDockingCursor
     PDDockingCursor_SizeHorizontal,
     PDDockingCursor_SizeVertical,
 } PDDockingCursor;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+typedef enum PDDockingSplitDir {
+	PDDockingSplitDir_Horizontal,
+	PDDockingSplitDir_Vertical,
+} PDDockingSplitDir;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,19 +44,15 @@ typedef struct PDDocking {
 
 	void (*set_callbacks)(void* instance, PDDockingCallbacks* callbacks);
 
-	void (*horz_split)(void* instance, void* user_data, PDDockHandle handle);
-	void (*vert_split)(void* instance, void* user_data, PDDockHandle handle);
+	void (*split)(void* instance, void* user_data, PDDockingSplitDir dir, PDDockHandle handle);
 
 	void (*close_dock)(void* instance, PDDockHandle handle);
 
 	void (*update_size)(void* instance, void* user_data, int width, int height);
-	void (*set_mouse)(void* instance, void* user_data, float x, float y, bool left_down);
-	bool (*is_hovering_border)(void* instance, void* user_data);
-
-	PDDockHandle (*get_handle_at)(void* instance, float x, float y);
+	void (*set_mouse)(void* instance, void* user_data, int x, int y, uint8_t left_down);
 
 	void (*save_state)(void* instance, const char* filename);
-	void (*load_state)(void* instance, void* user_data, const char* filename);
+	void (*load_state)(void* instance, const char* filename);
 
 	void (*update)(void* instance);
 

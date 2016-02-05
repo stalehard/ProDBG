@@ -1,7 +1,9 @@
-//#include "api/pd_docking.h"
-//#include "pd_common.h"
+#include "include/docksys.h"
 #include "i3_docking.h"
 #include <stdlib.h>
+#include <stdbool.h>
+#include <pd_common.h>
+#include <pd_docking.h>
 
 struct DummyData {
 	int data;
@@ -9,33 +11,9 @@ struct DummyData {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
-typedef struct PDDocking {
-	void (*set_callbacks)(void* user_data, PDDockingCallbacks* callbacks);
-
-	void (*horz_split)(void* user_data, PDDockHandle handle);
-	void (*vert_split)(void* user_data, PDDockHandle handle);
-
-	void (*update_size)(void* user_data, int width, int height);
-	void (*set_mouse)(void* user_data, float x, float y, bool left_down);
-	bool (*is_hovering_border)(void* user_data);
-
-	PDDockHandle (*get_handle_at)(void* user_data, float x, float y);
-
-	void (*save_state)(void* user_data, const char* filename);
-	void (*load_state)(void* user_data, const char* filename);
-
-	void (*update)(void* user_data);
-
-} PDDocking;
-*/
-
-/*
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 static void* create_instance(int x, int y, int width, int height) {
 	docksys_create(x, y, width, height);
-	return malloc(sizeof(DummyData));
+	return malloc(sizeof(struct DummyData));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,20 +24,72 @@ static void destroy_instance(void* data) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT PDDocking docking_system = {
+static void set_callbacks(void* instance, PDDockingCallbacks* callbacks) {
+	(void)instance;
+	(void)callbacks;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void save_state(void* instance, const char* filename) {
+	(void)instance;
+	(void)filename;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void load_state(void* instance, const char* filename) {
+	(void)instance;
+	(void)filename;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void update(void* instance) {
+	(void)instance;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void set_mouse(void* instance, void* user_data, float x, float y, bool left_down) {
+	(void)instance;
+	(void)user_data;
+	(void)x;
+	(void)y;
+	(void)left_down;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void split(void* instance, void* user_data, PDDockingSplitDir dir, PDDockHandle handle) {
+	(void)instance;
+	(void)user_data;
+	(void)dir;
+	(void)handle;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+PD_EXPORT PDDocking pd_docking_system = {
+	"i3_docking_system",
+
 	create_instance,
 	destroy_instance,
 
 	docksys_set_callbacks,
+	split,
 
-	docksys_horizontal_split,
-	docksys_vertical_split,
+	//docksys_horizontal_split,
+	//docksys_vertical_split,
 
 	docksys_close_con,
 	docksys_update_size,
+	docksys_set_mouse,
 
+	save_state,
+	load_state,
+
+	update,
 };
-
-*/
 
 
