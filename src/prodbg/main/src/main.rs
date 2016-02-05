@@ -1,6 +1,9 @@
 extern crate core;
 extern crate libc;
 extern crate minifb;
+extern crate libloading;
+
+pub mod docking;
 
 use minifb::{Window, Key, Scale, WindowOptions};
 use libc::{c_void, c_int, c_float};
