@@ -345,14 +345,14 @@ RustSharedLibrary {
 
 -----------------------------------------------------------------------------------------------------------------------
 
---[[
 SharedLibrary {
-    Name = "i3wm_docking",
+    Name = "i3_docking",
 
     Env = { 
         CPPPATH = { 
 			"src/native/external/jansson/include",
-            "src/plugins/i3wm_docking/include",
+            "src/plugins/i3_docking/include",
+        	"api/include",
         },
         CCOPTS = {
         	{ "-Wno-everything", "-std=c99"; Config = { "macosx-*-*", "macosx_test-*" } },
@@ -363,14 +363,13 @@ SharedLibrary {
 
     Sources = { 
 		Glob {
-			Dir = "src/plugins/i3wm_docking",
+			Dir = "src/plugins/i3_docking",
 			Extensions = { ".c", ".h" },
 		},
 	},
 
     IdeGenerationHints = { Msvc = { SolutionFolder = "Plugins" } },
 }
---]]
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -395,4 +394,5 @@ Default "console_plugin"
 Default "c64_vice_plugin"
 Default "amiga_uae_plugin"
 Default "bitmap_memory"
+Default "i3_docking"
 

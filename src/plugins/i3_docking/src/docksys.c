@@ -10,12 +10,13 @@
 #include <stddef.h>
 #include <string.h>
 #include <assert.h>
+#include <pd_docking.h>
 
 #if defined(DOCKSYS_SUPPORTS_LOAD_SAVE)
 #include <jansson.h>
 #endif
 
-DockSysCallbacks* g_callbacks = 0;
+PDDockingCallbacks* g_callbacks = 0;
 
 static int prev_mouse_x;
 static int prev_mouse_y;
@@ -24,7 +25,7 @@ int handle_button_press(int x, int y, int mxd, int myd, bool lmb_down);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void docksys_set_callbacks(DockSysCallbacks* callbacks)
+void docksys_set_callbacks(PDDockingCallbacks* callbacks)
 {
 	g_callbacks = callbacks;
 }

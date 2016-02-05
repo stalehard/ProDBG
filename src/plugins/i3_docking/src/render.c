@@ -27,7 +27,9 @@
 #include <malloc.h>
 #endif
 
-extern DockSysCallbacks* g_callbacks;
+#include <pd_docking.h>
+
+extern PDDockingCallbacks* g_callbacks;
 
 /* change this to 'true' if you want to have additional borders around every
  * container (for debugging purposes) */

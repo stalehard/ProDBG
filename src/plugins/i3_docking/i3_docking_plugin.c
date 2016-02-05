@@ -1,6 +1,6 @@
 //#include "api/pd_docking.h"
 //#include "pd_common.h"
-#include "i3wm_docking.h"
+#include "i3_docking.h"
 #include <stdlib.h>
 
 struct DummyData {

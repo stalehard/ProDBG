@@ -21,6 +21,7 @@
 #include "docksys.h"
 #include <math.h>
 #include <assert.h>
+#include <pd_docking.h>
 
 typedef struct MouseEvent
 {
@@ -33,7 +34,7 @@ typedef struct MouseEvent
 
 } MouseEvent;
 
-extern DockSysCallbacks* g_callbacks;
+extern PDDockingCallbacks* g_callbacks;
 
 typedef enum { CLICK_BORDER = 0,
                CLICK_DECORATION = 1,
@@ -617,11 +618,11 @@ static State s_state = State_None;
 static int s_borderSize = 4;    // TODO: Use settings for border area
 static Con* s_hoverCon = 0;
 static border_t s_border;
-static DockSysCursor s_oldCursor = DockSysCursor_Default;
+static PDDockingCursor s_oldCursor = PDDockingCursor_Default;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void setCursorStyle(DockSysCursor cursor)
+static void setCursorStyle(PDDockingCursor cursor)
 {
     if (!g_callbacks)
         return;
@@ -632,7 +633,7 @@ static void setCursorStyle(DockSysCursor cursor)
     if (s_oldCursor == cursor)
         return;
 
-    g_callbacks->set_cursor_style(cursor);
+    g_callbacks->set_cursor_style(0, cursor);
 
     s_oldCursor = cursor;
 }
@@ -655,7 +656,7 @@ static bool isHoveringBorder(Con* con, int mx, int my)
 
         if ((mx >= x && mx < w) && (my >= y && my < h))
         {
-            setCursorStyle(DockSysCursor_SizeVertical);
+            setCursorStyle(PDDockingCursor_SizeVertical);
 
             s_border = BORDER_RIGHT;
             s_hoverCon = con;
@@ -671,7 +672,7 @@ static bool isHoveringBorder(Con* con, int mx, int my)
 
         if ((mx >= x && mx < w) && (my >= y && my < h))
         {
-            setCursorStyle(DockSysCursor_SizeHorizontal);
+            setCursorStyle(PDDockingCursor_SizeHorizontal);
 
             s_border = BORDER_BOTTOM;
             s_hoverCon = con;
@@ -700,7 +701,7 @@ static void updateHoverBorder(const MouseEvent* event)
     }
     else if (!s_hoverCon)
     {
-        setCursorStyle(DockSysCursor_Default);
+        setCursorStyle(PDDockingCursor_Default);
         s_state = State_None;
     }
 }
@@ -711,7 +712,7 @@ static void updateDragBorder(const MouseEvent* event)
 {
     if (!event->lmbDown)
     {
-        setCursorStyle(DockSysCursor_Default);
+        setCursorStyle(PDDockingCursor_Default);
         s_state = State_None;
         return;
     }

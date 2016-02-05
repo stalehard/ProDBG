@@ -23,11 +23,12 @@ typedef struct PDDockingCallbacks {
 	void (*set_cursor_style)(void* user_data, PDDockingCursor cursor);
 	void (*save_user_data)(void* item, void* user_data);
 	void* (*load_user_data)(void* item);
-} DockSysCallbacks;
+} PDDockingCallbacks;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct PDDocking {
+	const char* name;
 
 	void* (*create_instance)(int x, int y, int width, int height);
 	void (*destroy_instance)(void* instance);
