@@ -6,6 +6,7 @@ extern crate notify;
 
 pub mod plugin_handler;
 pub mod session;
+pub mod plugins;
 
 /// Formats dll name on Windows ("test_foo" -> "test_foo.dll")
 #[cfg(target_os="windows")]

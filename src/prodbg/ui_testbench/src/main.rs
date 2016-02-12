@@ -1,11 +1,14 @@
 extern crate core;
 extern crate libc;
 extern crate minifb;
+extern crate dynamic_reload;
 
+use self::dynamic_reload::{DynamicReload, Search};
 use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
 use libc::{c_void, c_int, c_float};
 
-use core::plugin_handler::*;
+//use core::plugin_handler::*;
+use core::plugins::*;
 use std::ptr;
 
 const WIDTH: usize = 1280;
@@ -25,12 +28,13 @@ fn main() {
         }
     };
 
-    let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
+    //let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
 
-    let mut plugin_handler = PluginHandler::new(search_paths, Some("t2-output"));
+    let mut lib_handler = DynamicReload::new(None, Some("t2-output"), Search::Backwards);
+    let mut plugins = Plugins::new();
 
-    plugin_handler.add_plugin("bitmap_memory");
-    plugin_handler.create_view_instance(&"Bitmap View".to_string());
+    plugins.add_plugin(&mut lib_handler, "bitmap_memory");
+    plugins.create_view_instance(&"Bitmap View".to_string());
 
     unsafe {
         bgfx_create();
@@ -38,17 +42,20 @@ fn main() {
     }
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
+        plugins.update(&mut lib_handler);
+        /*
         match plugin_handler.watch_recv.try_recv() {
             Ok(file) => {
                 plugin_handler.reload_plugin(file.path.as_ref().unwrap());
             }
             _ => (),
         }
+        */
 
         unsafe { 
             bgfx_pre_update();
 
-            for instance in &plugin_handler.view_instances {
+            for instance in &plugins.view_instances {
                 bgfx_imgui_set_window_pos(0.0, 0.0);
                 bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
 
