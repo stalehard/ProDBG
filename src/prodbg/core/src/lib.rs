@@ -3,6 +3,7 @@ use std::fs;
 
 extern crate libc;
 extern crate notify;
+extern crate dynamic_reload;
 
 pub mod plugin_handler;
 pub mod session;
