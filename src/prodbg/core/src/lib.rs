@@ -1,6 +1,3 @@
-//use std::path::{Path, PathBuf};
-//use std::fs;
-
 extern crate libc;
 extern crate notify;
 extern crate dynamic_reload;
