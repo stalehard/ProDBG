@@ -2,10 +2,12 @@ extern crate core;
 extern crate libc;
 extern crate minifb;
 extern crate dynamic_reload;
+extern crate prodbg_api;
 
 use self::dynamic_reload::{DynamicReload, Search};
 use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
 use libc::{c_void, c_int, c_float};
+use prodbg_api::view::CViewCallbacks;
 
 //use core::plugin_handler::*;
 use core::plugins::*;
@@ -34,7 +36,7 @@ fn main() {
     let mut plugins = Plugins::new();
 
     plugins.add_plugin(&mut lib_handler, "bitmap_memory");
-    plugins.create_view_instance(&"Bitmap View".to_string());
+    plugins.view_plugins.create_instance(&"Bitmap View".to_owned());
 
     unsafe {
         bgfx_create();
@@ -55,14 +57,14 @@ fn main() {
         unsafe { 
             bgfx_pre_update();
 
-            for instance in &plugins.view_instances {
+            for instance in &plugins.view_plugins.instances {
                 bgfx_imgui_set_window_pos(0.0, 0.0);
                 bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
 
                 bgfx_imgui_begin(1);
 
-                let plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewPlugin; 
-                ((*plugin_funcs).update)(instance.user_data, bgfx_get_ui_funcs(), ptr::null(), ptr::null());
+                let plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewCallbacks; 
+                ((*plugin_funcs).update.unwrap())(instance.user_data, bgfx_get_ui_funcs(), ptr::null_mut(), ptr::null_mut());
 
                 bgfx_imgui_end();
             }
@@ -99,7 +101,7 @@ extern {
     fn prodbg_set_mouse_pos(x: f32, y: f32);
     fn prodbg_set_mouse_state(mouse: c_int, state: c_int);
 
-    fn bgfx_get_ui_funcs() -> *const c_void;
+    fn bgfx_get_ui_funcs() -> *mut c_void;
 
     fn bgfx_imgui_begin(show: c_int);
     fn bgfx_imgui_end();

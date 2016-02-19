@@ -2,7 +2,7 @@
 name = "bitmap_memory"
 version = "0.1.0"
 dependencies = [
- "prodbg 0.1.0",
+ "prodbg_api 0.1.0",
 ]
 
 [[package]]
@@ -30,16 +30,16 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.1.12"
+version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "prodbg"
+name = "prodbg_api"
 version = "0.1.0"
 dependencies = [
  "bitflags 0.3.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "gcc 0.3.21 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.1.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

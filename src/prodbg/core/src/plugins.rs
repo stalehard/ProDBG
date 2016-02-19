@@ -3,74 +3,22 @@ extern crate dynamic_reload;
 extern crate libc;
 
 use self::dynamic_reload::{DynamicReload, Lib, PlatformName, UpdateState};
-use self::libloading::Result as LibRes; 
+use self::libloading::Result as LibRes;
 use self::libloading::Symbol;
 use std::rc::Rc;
-use std::ffi::CStr;
-use self::libc::{c_char, c_void, c_uchar};
+use self::libc::{c_char, c_void};
 use std::mem::transmute;
-use std::ptr;
-
-pub struct Plugin {
-    pub lib: Rc<Lib>,
-    pub name: String,
-    pub plugin_funcs: *mut CBasePlugin,
-}
-
-#[repr(C)]
-pub struct CBasePlugin {
-    name: *const c_char,
-}
-
-pub struct ViewInstance {
-    pub user_data: *mut c_void,
-    pub x: f32,
-    pub y: f32,
-    pub width: f32,
-    pub height: f32,
-    pub plugin_type: Rc<Plugin>,
-}
+use standard_plugin::StandardPlugin;
+use view_plugins::ViewPlugins;
 
 pub struct Plugins {
-    pub plugins: Vec<Rc<Plugin>>, 
-    pub view_instances: Vec<ViewInstance>,
+    pub plugin_types: Vec<Rc<Lib>>,
+    pub view_plugins: ViewPlugins,
 }
 
 struct CallbackData<'a> {
     handler: &'a mut Plugins,
     lib: &'a Rc<Lib>,
-}
-
-// move
-#[repr(C)]
-pub struct CViewPlugin {
-    pub name: *const c_uchar,
-    pub create_instance: Option<fn(ui_api: *const c_void, service: *const c_void) -> *mut c_void>,
-    pub destroy_instance: Option<fn(*mut c_void)>,
-    pub update: fn(ptr: *mut c_void,
-                   ui: *const c_void,
-                   reader: *const c_void,
-                   writer: *const c_void),
-    pub save_state: Option<fn(*mut c_void)>,
-    pub load_state: Option<fn(*mut c_void)>,
-}
-
-type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, data: *mut CallbackData);
-
-unsafe fn register_plugin_callback(_plugin_type: *const c_char,
-                                   plugin: *mut c_void,
-                                   ph: *mut CallbackData) {
-    let t = &mut (*ph);
-
-    let plugin_funcs: *mut CBasePlugin = transmute(plugin);
-
-    let plugin = Plugin {
-        lib: t.lib.clone(),
-        name: CStr::from_ptr((*plugin_funcs).name).to_string_lossy().into_owned(),
-        plugin_funcs: plugin_funcs,
-    };
-
-    t.handler.plugins.push(Rc::new(plugin));
 }
 
 pub struct ReloadHandler<'a> {
@@ -79,70 +27,59 @@ pub struct ReloadHandler<'a> {
     pub name: String,
 }
 
+type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, data: *mut CallbackData);
+
+unsafe fn register_plugin_callback(plugin_type: *const c_char,
+                                   plugin: *mut c_void,
+                                   ph: *mut CallbackData) {
+    let t = &mut (*ph);
+
+    t.handler.plugin_types.push(t.lib.clone());
+
+    let standard_plugin = StandardPlugin::new(t.lib, plugin_type, plugin);
+
+    if ViewPlugins::is_view_plugin(&standard_plugin) {
+        t.handler.view_plugins.add_plugin(&Rc::new(standard_plugin));
+    }
+}
+
 impl<'a> ReloadHandler<'a> {
     fn new(plugins: &'a mut Plugins) -> ReloadHandler {
         ReloadHandler {
             plugins: plugins,
-            instance_count: 0, 
+            instance_count: 0,
             name: "".to_string(),
         }
     }
 
-    fn check_equal_view(&self, index: usize, lib: &Rc<Lib>) -> bool {
-        self.plugins.view_instances[index].plugin_type.lib.original_path == lib.original_path
-    }
-
     fn check_equal_plugins(&self, index: usize, lib: &Rc<Lib>) -> bool {
-        self.plugins.plugins[index].lib.original_path == lib.original_path
+        self.plugins.plugin_types[index].original_path == lib.original_path
     }
 
     fn unload_plugins(&mut self, lib: &Rc<Lib>) {
+        self.plugins.view_plugins.unload_plugin(lib);
 
-        for i in (0..self.plugins.view_instances.len()).rev() {
-            if Self::check_equal_view(self, i, lib) {
-                self.plugins.view_instances.swap_remove(i);
-                self.instance_count += 1;
-            }
-        }
-
-        // Unload the plugins
-
-        for i in (0..self.plugins.plugins.len()).rev() {
-            if Self::check_equal_plugins(self, i, lib) { 
-                self.name = self.plugins.plugins[i].name.clone();
-                self.plugins.plugins.swap_remove(i);
+        for i in (0..self.plugins.plugin_types.len()).rev() {
+            if Self::check_equal_plugins(self, i, lib) {
+                self.plugins.plugin_types.swap_remove(i);
             }
         }
     }
 
     fn reload_plugins(&mut self, lib: &Rc<Lib>) {
-        println!("About to reload plugins... {:?}", lib.original_path);
+        unsafe { self.plugins.add_p(lib) }
+        self.plugins.view_plugins.reload_plugin()
+    }
 
-        unsafe {
-            self.plugins.add_p(lib) 
-        }
-
-        for _ in 0..self.instance_count {
-            self.plugins.create_view_instance(&self.name);
-        }
-
-        self.instance_count = 0;
+    fn reload_failed(&mut self) {
+        self.plugins.view_plugins.reload_failed();
     }
 
     fn callback(&mut self, state: UpdateState, lib: Option<&Rc<Lib>>) {
         match state {
-            UpdateState::Before => {
-                Self::unload_plugins(self, lib.unwrap())
-            }
-
-            UpdateState::After => {
-                Self::reload_plugins(self, lib.unwrap())
-            }
-
-            UpdateState::ReloadFalied => {
-                println!("Failed to reload {}", self.name);
-                self.instance_count = 0;
-            }
+            UpdateState::Before => Self::unload_plugins(self, lib.unwrap()),
+            UpdateState::After => Self::reload_plugins(self, lib.unwrap()),
+            UpdateState::ReloadFalied => Self::reload_failed(self),
         }
     }
 }
@@ -150,8 +87,8 @@ impl<'a> ReloadHandler<'a> {
 impl Plugins {
     pub fn new() -> Plugins {
         Plugins {
-            plugins: Vec::new(),
-            view_instances: Vec::new(),
+            plugin_types: Vec::new(),
+            view_plugins: ViewPlugins::new(),
         }
     }
 
@@ -172,12 +109,11 @@ impl Plugins {
     }
 
     unsafe fn add_p(&mut self, library: &Rc<Lib>) {
-        let init_plugin: LibRes<Symbol<extern "C" fn(RegisterPlugin, *mut CallbackData)>> = 
-                library.lib.get(b"InitPlugin"); 
+        let init_plugin: LibRes<Symbol<extern "C" fn(RegisterPlugin, *mut CallbackData)>> =
+            library.lib.get(b"InitPlugin");
 
         match init_plugin {
             Ok(init_fun) => {
-                // Watch if someone changes the plugin
                 let mut callback_data = CallbackData {
                     handler: transmute(self),
                     lib: library,
@@ -187,32 +123,6 @@ impl Plugins {
             }
 
             _ => (),
-        }
-    }
-
-    pub fn create_view_instance(&mut self, plugin_type: &String) {
-        for t in self.plugins.iter() {
-            if t.name != *plugin_type {
-                continue;
-            }
-
-            let user_data = unsafe {
-                let callbacks = t.plugin_funcs as *mut CViewPlugin;
-                (*callbacks).create_instance.unwrap()(ptr::null(), ptr::null())
-            };
-
-            let instance = ViewInstance {
-                user_data: user_data,
-                x: 0.0,
-                y: 0.0,
-                width: 0.0,
-                height: 0.0,
-                plugin_type: t.clone(),
-            };
-
-            self.view_instances.push(instance);
-
-            return;
         }
     }
 }

@@ -23,6 +23,15 @@ pub struct ViewPlugins {
 }
 
 impl ViewPlugins {
+    pub fn new() -> ViewPlugins {
+        ViewPlugins {
+            instances: Vec::new(),
+            plugin_types: Vec::new(),
+            reload_name: "".to_owned(),
+            reload_count: 0,
+        }
+    }
+
     pub fn unload_plugin(&mut self, lib: &Rc<Lib>) {
         self.reload_count = 0;
         for i in (0..self.instances.len()).rev() {
@@ -50,10 +59,7 @@ impl ViewPlugins {
         self.plugin_types[index].lib.original_path == lib.original_path
     }
     
-    pub fn reload_plugin(&mut self, lib: &Rc<StandardPlugin>) {
-
-        self.plugin_types.push(lib.clone());
-
+    pub fn reload_plugin(&mut self) {
         let name = self.reload_name.clone();
         for _ in 0..self.reload_count {
             Self::create_instance(self, &name);

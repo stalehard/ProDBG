@@ -1,7 +1,7 @@
 #[macro_use]
-extern crate prodbg;
+extern crate prodbg_api;
 
-use prodbg::*;
+use prodbg_api::*;
 
 struct BitmapView {
     dummy: i32,
@@ -13,7 +13,7 @@ impl View for BitmapView {
     }
 
     fn update(&mut self, ui: &Ui, _: &mut Reader, _: &mut Writer) {
-        if ui.button("hteeoh", None) {
+        if ui.button("stoheuhteeoh", None) {
             println!("yah");
         }
 

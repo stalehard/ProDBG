@@ -11,4 +11,5 @@ minifb = "0.4.*"
 lazy_static = "0.1.*"
 core = { path = "../core" }
 dynamic_reload = "0.1.0" 
+prodbg_api = { path = "../../../api/rust/prodbg" }
 
