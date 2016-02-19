@@ -3,14 +3,18 @@
 ///! which follows the same structure in the shared libs
 ///!
 
-use self::dynamic_reload::{DynamicReload, Lib, PlatformName, UpdateState};
+use dynamic_reload::Lib;
+use libc::{c_char, c_void};
+use std::rc::Rc;
+use std::mem::transmute;
+use std::ffi::CStr;
 
 #[repr(C)]
 pub struct CBasePlugin {
     pub name: *const c_char,
 }
 
-struct StandardPlugin {
+pub struct StandardPlugin {
     pub lib: Rc<Lib>,
     pub name: String,
     pub type_name: String,
@@ -18,14 +22,16 @@ struct StandardPlugin {
 }
 
 impl StandardPlugin {
-    pub fn new(plugin_type: *const c_char, plugin: *mut c_void) -> StandardPlugin {
-        let plugin_funcs: *mut CBasePlugin = transmute(plugin);
+    pub fn new(lib: &Rc<Lib>, plugin_type: *const c_char, plugin: *mut c_void) -> StandardPlugin {
+        unsafe {
+            let plugin_funcs: *mut CBasePlugin = transmute(plugin);
 
-        StandardPlugin {
-            lib: t.lib.clone(),
-            type_name: CStr::from_ptr(plugin_type).to_string_lossy().into_owned(),
-            name: CStr::from_ptr((*plugin_funcs).name).to_string_lossy().into_owned(),
-            plugin_funcs: plugin_funcs,
+            StandardPlugin {
+                lib: lib.clone(),
+                type_name: CStr::from_ptr(plugin_type).to_string_lossy().into_owned(),
+                name: CStr::from_ptr((*plugin_funcs).name).to_string_lossy().into_owned(),
+                plugin_funcs: plugin_funcs,
+            }
         }
     }
 }

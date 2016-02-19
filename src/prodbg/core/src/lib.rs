@@ -4,10 +4,13 @@ use std::fs;
 extern crate libc;
 extern crate notify;
 extern crate dynamic_reload;
+extern crate prodbg_api;
 
 pub mod plugin_handler;
 pub mod session;
 pub mod plugins;
+pub mod standard_plugin;
+pub mod view_plugins;
 
 /// Formats dll name on Windows ("test_foo" -> "test_foo.dll")
 #[cfg(target_os="windows")]
