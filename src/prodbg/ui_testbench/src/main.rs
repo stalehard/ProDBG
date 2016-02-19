@@ -1,10 +1,9 @@
 extern crate core;
 extern crate libc;
 extern crate minifb;
-extern crate dynamic_reload;
 extern crate prodbg_api;
 
-use self::dynamic_reload::{DynamicReload, Search};
+use core::{DynamicReload, Search};
 use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
 use libc::{c_void, c_int, c_float};
 use prodbg_api::view::CViewCallbacks;

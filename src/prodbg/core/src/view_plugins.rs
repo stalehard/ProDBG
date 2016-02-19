@@ -35,7 +35,7 @@ impl ViewPlugins {
     pub fn unload_plugin(&mut self, lib: &Rc<Lib>) {
         self.reload_count = 0;
         for i in (0..self.instances.len()).rev() {
-            if Self::check_equal_view(self, i, lib) {
+            if &self.instances[i].plugin_type.lib == lib {
                 self.instances.swap_remove(i);
                 self.reload_count += 1;
             }
@@ -44,21 +44,13 @@ impl ViewPlugins {
         // Unload the plugins
 
         for i in (0..self.plugin_types.len()).rev() {
-            if Self::check_equal_plugins(self, i, lib) { 
+            if &self.plugin_types[i].lib == lib {
                 self.reload_name = self.plugin_types[i].name.clone();
                 self.plugin_types.swap_remove(i);
             }
         }
     }
 
-    fn check_equal_view(&self, index: usize, lib: &Rc<Lib>) -> bool {
-        self.instances[index].plugin_type.lib.original_path == lib.original_path
-    }
-
-    fn check_equal_plugins(&self, index: usize, lib: &Rc<Lib>) -> bool {
-        self.plugin_types[index].lib.original_path == lib.original_path
-    }
-    
     pub fn reload_plugin(&mut self) {
         let name = self.reload_name.clone();
         for _ in 0..self.reload_count {

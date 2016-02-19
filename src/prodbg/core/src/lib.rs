@@ -12,6 +12,8 @@ pub mod plugins;
 pub mod standard_plugin;
 pub mod view_plugins;
 
+pub use dynamic_reload::*;
+
 /// Formats dll name on Windows ("test_foo" -> "test_foo.dll")
 #[cfg(target_os="windows")]
 pub fn get_dynamiclib_name(name: &str) -> String {
