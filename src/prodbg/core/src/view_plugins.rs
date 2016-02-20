@@ -55,11 +55,11 @@ impl PluginHandler for ViewPlugins {
             Self::create_instance(self, &name);
         }
 
-        ViewPlugins::reset_reload(self)
+        Self::reset_reload(self)
     }
 
     fn reload_failed(&mut self) {
-        ViewPlugins::reset_reload(self)
+        Self::reset_reload(self)
     }
 }
 
