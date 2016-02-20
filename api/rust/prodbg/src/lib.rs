@@ -14,6 +14,7 @@ pub mod ui_ffi;
 pub mod ui;
 pub mod view;
 pub mod cfixed_string;
+pub mod docking;
 
 pub use backend::*;
 pub use read_write::*;
