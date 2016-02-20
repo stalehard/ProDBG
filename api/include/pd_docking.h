@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define PD_DOCKING_API_VERSION "ProDBG Docking 1"
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // This is the API used for docking of views within ProDBG. It's possible to use this API to replace the
 // existing one

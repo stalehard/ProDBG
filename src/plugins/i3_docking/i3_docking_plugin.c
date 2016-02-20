@@ -70,7 +70,7 @@ void split(void* instance, void* user_data, PDDockingSplitDir dir, PDDockHandle 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PD_EXPORT PDDocking pd_docking_system = {
+static PD_EXPORT PDDocking plugin = {
 	"i3_docking_system",
 
 	create_instance,
@@ -92,4 +92,9 @@ PD_EXPORT PDDocking pd_docking_system = {
 	update,
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+PD_EXPORT void InitPlugin(RegisterPlugin* registerPlugin, void* private_data) {
+    registerPlugin(PD_DOCKING_API_VERSION, &plugin, private_data);
+}
 
