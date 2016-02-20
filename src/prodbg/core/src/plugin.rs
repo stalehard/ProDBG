@@ -14,19 +14,19 @@ pub struct CBasePlugin {
     pub name: *const c_char,
 }
 
-pub struct StandardPlugin {
+pub struct Plugin {
     pub lib: Rc<Lib>,
     pub name: String,
     pub type_name: String,
     pub plugin_funcs: *mut CBasePlugin,
 }
 
-impl StandardPlugin {
-    pub fn new(lib: &Rc<Lib>, plugin_type: *const c_char, plugin: *mut c_void) -> StandardPlugin {
+impl Plugin {
+    pub fn new(lib: &Rc<Lib>, plugin_type: *const c_char, plugin: *mut c_void) -> Plugin {
         unsafe {
             let plugin_funcs: *mut CBasePlugin = transmute(plugin);
 
-            StandardPlugin {
+            Plugin {
                 lib: lib.clone(),
                 type_name: CStr::from_ptr(plugin_type).to_string_lossy().into_owned(),
                 name: CStr::from_ptr((*plugin_funcs).name).to_string_lossy().into_owned(),

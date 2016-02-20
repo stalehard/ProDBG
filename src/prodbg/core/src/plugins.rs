@@ -8,12 +8,12 @@ use self::libloading::Symbol;
 use std::rc::Rc;
 use self::libc::{c_char, c_void};
 use std::mem::transmute;
-use standard_plugin::StandardPlugin;
-use view_plugins::ViewPlugins;
+use plugin::Plugin;
+use std::cell::RefCell;
 
 pub struct Plugins {
     pub plugin_types: Vec<Rc<Lib>>,
-    pub view_plugins: ViewPlugins,
+    pub plugin_handlers: Vec<Rc<RefCell<PluginHandler>>>,
 }
 
 struct CallbackData<'a> {
@@ -27,19 +27,31 @@ pub struct ReloadHandler<'a> {
     pub name: String,
 }
 
-type RegisterPlugin = unsafe fn(pt: *const c_char, plugin: *mut c_void, data: *mut CallbackData);
+pub trait PluginHandler {
+    fn is_correct_plugin_type(&self, plugin: &Plugin) -> bool;
+    fn add_plugin(&mut self, plugin: &Rc<Plugin>);
+    fn unload_plugin(&mut self, lib: &Rc<Lib>);
+    fn reload_plugin(&mut self);
+    fn reload_failed(&mut self);
+}
+
+type RegisterPlugin = unsafe fn(pt: *const c_char,
+                                plugin: *mut c_void,
+                                data: *mut CallbackData);
 
 unsafe fn register_plugin_callback(plugin_type: *const c_char,
                                    plugin: *mut c_void,
                                    ph: *mut CallbackData) {
     let t = &mut (*ph);
 
+    let p = Plugin::new(t.lib, plugin_type, plugin);
+
     t.handler.plugin_types.push(t.lib.clone());
 
-    let standard_plugin = StandardPlugin::new(t.lib, plugin_type, plugin);
-
-    if ViewPlugins::is_view_plugin(&standard_plugin) {
-        t.handler.view_plugins.add_plugin(&Rc::new(standard_plugin));
+    for handler in t.handler.plugin_handlers.iter_mut() {
+        if handler.borrow().is_correct_plugin_type(&p) {
+            handler.borrow_mut().add_plugin(&Rc::new(Plugin::new(t.lib, plugin_type, plugin)));
+        }
     }
 }
 
@@ -52,15 +64,13 @@ impl<'a> ReloadHandler<'a> {
         }
     }
 
-    fn check_equal_plugins(&self, index: usize, lib: &Rc<Lib>) -> bool {
-        self.plugins.plugin_types[index].original_path == lib.original_path
-    }
-
     fn unload_plugins(&mut self, lib: &Rc<Lib>) {
-        self.plugins.view_plugins.unload_plugin(lib);
+        for handler in self.plugins.plugin_handlers.iter_mut() {
+            handler.borrow_mut().unload_plugin(lib);
+        }
 
         for i in (0..self.plugins.plugin_types.len()).rev() {
-            if Self::check_equal_plugins(self, i, lib) {
+            if &self.plugins.plugin_types[i] == lib {
                 self.plugins.plugin_types.swap_remove(i);
             }
         }
@@ -68,11 +78,16 @@ impl<'a> ReloadHandler<'a> {
 
     fn reload_plugins(&mut self, lib: &Rc<Lib>) {
         unsafe { self.plugins.add_p(lib) }
-        self.plugins.view_plugins.reload_plugin()
+
+        for handler in self.plugins.plugin_handlers.iter_mut() {
+            handler.borrow_mut().reload_plugin();
+        }
     }
 
     fn reload_failed(&mut self) {
-        self.plugins.view_plugins.reload_failed();
+        for handler in self.plugins.plugin_handlers.iter_mut() {
+            handler.borrow_mut().reload_failed();
+        }
     }
 
     fn callback(&mut self, state: UpdateState, lib: Option<&Rc<Lib>>) {
@@ -88,8 +103,12 @@ impl Plugins {
     pub fn new() -> Plugins {
         Plugins {
             plugin_types: Vec::new(),
-            view_plugins: ViewPlugins::new(),
+            plugin_handlers: Vec::new(),
         }
+    }
+
+    pub fn add_handler<T: PluginHandler + 'static>(&mut self, handler: &Rc<RefCell<T>>) {
+        self.plugin_handlers.push(handler.clone());
     }
 
     pub fn add_plugin(&mut self, lib_handler: &mut DynamicReload, name: &str) {
@@ -122,7 +141,7 @@ impl Plugins {
                 init_fun(register_plugin_callback, &mut callback_data);
             }
 
-            _ => (),
+            Err(e) => println!("Unable to load {:?} err {:?}", library.original_path, e),
         }
     }
 }

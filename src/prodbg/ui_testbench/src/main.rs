@@ -7,6 +7,9 @@ use core::{DynamicReload, Search};
 use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
 use libc::{c_void, c_int, c_float};
 use prodbg_api::view::CViewCallbacks;
+use core::view_plugins::ViewPlugins;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 //use core::plugin_handler::*;
 use core::plugins::*;
@@ -34,8 +37,14 @@ fn main() {
     let mut lib_handler = DynamicReload::new(None, Some("t2-output"), Search::Backwards);
     let mut plugins = Plugins::new();
 
+    // Would be nice to nat have it this way
+    let view_plugins = Rc::new(RefCell::new(ViewPlugins::new()));
+
+    plugins.add_handler(&view_plugins);
+
     plugins.add_plugin(&mut lib_handler, "bitmap_memory");
-    plugins.view_plugins.create_instance(&"Bitmap View".to_owned());
+
+    view_plugins.borrow_mut().create_instance(&"Bitmap View".to_owned());
 
     unsafe {
         bgfx_create();
@@ -56,7 +65,7 @@ fn main() {
         unsafe { 
             bgfx_pre_update();
 
-            for instance in &plugins.view_plugins.instances {
+            for instance in &view_plugins.borrow_mut().instances {
                 bgfx_imgui_set_window_pos(0.0, 0.0);
                 bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
 

@@ -6,7 +6,7 @@ extern crate prodbg_api;
 pub mod plugin_handler;
 pub mod session;
 pub mod plugins;
-pub mod standard_plugin;
+pub mod plugin;
 pub mod view_plugins;
 
 pub use dynamic_reload::*;

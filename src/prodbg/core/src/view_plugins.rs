@@ -1,7 +1,8 @@
 use prodbg_api::view::CViewCallbacks;
 use libc::{c_void, c_uchar};
 use std::rc::Rc;
-use standard_plugin::StandardPlugin;
+use plugin::Plugin;
+use plugins::PluginHandler;
 use dynamic_reload::Lib;
 use std::ptr;
 
@@ -11,28 +12,27 @@ pub struct ViewInstance {
     pub y: f32,
     pub width: f32,
     pub height: f32,
-    pub plugin_type: Rc<StandardPlugin>,
+    pub plugin_type: Rc<Plugin>,
 }
 
 pub struct ViewPlugins {
     pub instances: Vec<ViewInstance>,
-    plugin_types: Vec<Rc<StandardPlugin>>,
+    plugin_types: Vec<Rc<Plugin>>,
     // temporary stored for reloading
     reload_name: String,
     reload_count: i32, 
 }
 
-impl ViewPlugins {
-    pub fn new() -> ViewPlugins {
-        ViewPlugins {
-            instances: Vec::new(),
-            plugin_types: Vec::new(),
-            reload_name: "".to_owned(),
-            reload_count: 0,
-        }
+impl PluginHandler for ViewPlugins {
+    fn is_correct_plugin_type(&self, plugin: &Plugin) -> bool {
+        plugin.type_name.contains("View")
     }
 
-    pub fn unload_plugin(&mut self, lib: &Rc<Lib>) {
+    fn add_plugin(&mut self, plugin: &Rc<Plugin>) {
+        self.plugin_types.push(plugin.clone())
+    }
+
+    fn unload_plugin(&mut self, lib: &Rc<Lib>) {
         self.reload_count = 0;
         for i in (0..self.instances.len()).rev() {
             if &self.instances[i].plugin_type.lib == lib {
@@ -40,8 +40,6 @@ impl ViewPlugins {
                 self.reload_count += 1;
             }
         }
-
-        // Unload the plugins
 
         for i in (0..self.plugin_types.len()).rev() {
             if &self.plugin_types[i].lib == lib {
@@ -51,26 +49,29 @@ impl ViewPlugins {
         }
     }
 
-    pub fn reload_plugin(&mut self) {
+    fn reload_plugin(&mut self) {
         let name = self.reload_name.clone();
         for _ in 0..self.reload_count {
             Self::create_instance(self, &name);
         }
 
-        Self::reset_reload(self)
+        ViewPlugins::reset_reload(self)
     }
 
-    pub fn is_view_plugin(plugin: &StandardPlugin) -> bool {
-        // TODO: Handle versions
-        plugin.type_name.contains("View")
+    fn reload_failed(&mut self) {
+        ViewPlugins::reset_reload(self)
     }
+}
 
-    pub fn add_plugin(&mut self, plugin: &Rc<StandardPlugin>) {
-        self.plugin_types.push(plugin.clone())
-    }
 
-    pub fn reload_failed(&mut self) {
-        Self::reset_reload(self);
+impl ViewPlugins {
+    pub fn new() -> ViewPlugins {
+        ViewPlugins {
+            instances: Vec::new(),
+            plugin_types: Vec::new(),
+            reload_name: "".to_owned(),
+            reload_count: 0,
+        }
     }
 
     pub extern "C" fn service_fun(_name: *const c_uchar) -> *mut c_void {
@@ -107,5 +108,4 @@ impl ViewPlugins {
         self.reload_count = 0;
         self.reload_name = "".to_owned();
     }
-
 }
