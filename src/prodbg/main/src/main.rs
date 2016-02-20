@@ -3,6 +3,8 @@ extern crate libc;
 extern crate minifb;
 extern crate prodbg_api;
 
+mod docking;
+
 use core::{DynamicReload, Search};
 use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
 use libc::{c_void, c_int, c_float};
