@@ -11,7 +11,7 @@ use core::view_plugins::ViewPlugins;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-//use core::plugin_handler::*;
+// use core::plugin_handler::*;
 use core::plugins::*;
 use std::ptr;
 
@@ -19,20 +19,15 @@ const WIDTH: usize = 1280;
 const HEIGHT: usize = 1024;
 
 fn main() {
-    let mut window = match Window::new("Noise Test - Press ESC to exit", WIDTH, HEIGHT, 
-                                       WindowOptions { 
-                                           resize: true,
-                                           scale: Scale::X1,
-                                           ..WindowOptions::default()
-                                       }) {
-        Ok(win) => win,
-        Err(err) => {
-            println!("Unable to create window {}", err);
-            return;
-        }
-    };
-
-    //let search_paths = vec!["../../..", "t2-output/macosx-clang-debug-default", "target/debug"];
+    let mut window = Window::new("Noise Test - Press ESC to exit",
+                                 WIDTH,
+                                 HEIGHT,
+                                 WindowOptions {
+                                     resize: true,
+                                     scale: Scale::X1,
+                                     ..WindowOptions::default()
+                                 })
+                         .expect("Unable to create window");
 
     let mut lib_handler = DynamicReload::new(None, Some("t2-output"), Search::Backwards);
     let mut plugins = Plugins::new();
@@ -41,28 +36,21 @@ fn main() {
     let view_plugins = Rc::new(RefCell::new(ViewPlugins::new()));
 
     plugins.add_handler(&view_plugins);
-
     plugins.add_plugin(&mut lib_handler, "bitmap_memory");
 
     view_plugins.borrow_mut().create_instance(&"Bitmap View".to_owned());
 
     unsafe {
         bgfx_create();
-        bgfx_create_window(window.get_window_handle() as *mut c_void, WIDTH as i32, HEIGHT as i32);  
+        bgfx_create_window(window.get_window_handle() as *mut c_void,
+                           WIDTH as i32,
+                           HEIGHT as i32);
     }
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
         plugins.update(&mut lib_handler);
-        /*
-        match plugin_handler.watch_recv.try_recv() {
-            Ok(file) => {
-                plugin_handler.reload_plugin(file.path.as_ref().unwrap());
-            }
-            _ => (),
-        }
-        */
 
-        unsafe { 
+        unsafe {
             bgfx_pre_update();
 
             for instance in &view_plugins.borrow_mut().instances {
@@ -71,9 +59,11 @@ fn main() {
 
                 bgfx_imgui_begin(1);
 
-                let plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewCallbacks; 
-                ((*plugin_funcs).update.unwrap())(instance.user_data, bgfx_get_ui_funcs(), ptr::null_mut(), ptr::null_mut());
-
+                let plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewCallbacks;
+                ((*plugin_funcs).update.unwrap())(instance.user_data,
+                                                  bgfx_get_ui_funcs(),
+                                                  ptr::null_mut(),
+                                                  ptr::null_mut());
                 bgfx_imgui_end();
             }
 
@@ -99,7 +89,7 @@ fn main() {
 ///
 ///
 
-extern {
+extern "C" {
     fn bgfx_pre_update();
     fn bgfx_post_update();
     fn bgfx_create();
@@ -120,4 +110,3 @@ extern {
     fn bgfx_get_screen_width() -> f32;
     fn bgfx_get_screen_height() -> f32;
 }
-
