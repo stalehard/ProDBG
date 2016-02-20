@@ -5,7 +5,7 @@ use core::plugins::PluginHandler;
 use core::Lib;
 //use std::ptr;
 
-struct DockingPlugin {
+pub struct DockingPlugin {
     plugin: Option<Rc<Plugin>>,
     reload: bool,
 }
@@ -16,6 +16,7 @@ impl PluginHandler for DockingPlugin {
     }
 
     fn add_plugin(&mut self, plugin: &Rc<Plugin>) {
+        println!("Added docking plugin");
         self.plugin = Some(plugin.clone())
     }
 
@@ -45,6 +46,12 @@ impl PluginHandler for DockingPlugin {
 }
 
 impl DockingPlugin {
+    pub fn new() -> DockingPlugin {
+        DockingPlugin {
+            plugin: None,
+            reload: false,
+        }
+    }
 
     fn unload(&mut self) {
         // TODO: Save state here

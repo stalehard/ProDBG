@@ -5,6 +5,8 @@ extern crate prodbg_api;
 
 mod docking;
 
+use docking::DockingPlugin;
+
 use core::{DynamicReload, Search};
 use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
 use libc::{c_void, c_int, c_float};
@@ -13,7 +15,6 @@ use core::view_plugins::ViewPlugins;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-// use core::plugin_handler::*;
 use core::plugins::*;
 use std::ptr;
 
@@ -21,9 +22,7 @@ const WIDTH: usize = 1280;
 const HEIGHT: usize = 1024;
 
 fn main() {
-    let mut window = Window::new("Noise Test - Press ESC to exit",
-                                 WIDTH,
-                                 HEIGHT,
+    let mut window = Window::new("Noise Test - Press ESC to exit", WIDTH, HEIGHT,
                                  WindowOptions {
                                      resize: true,
                                      scale: Scale::X1,
@@ -36,9 +35,13 @@ fn main() {
 
     // Would be nice to nat have it this way
     let view_plugins = Rc::new(RefCell::new(ViewPlugins::new()));
+    let docking_plugin = Rc::new(RefCell::new(DockingPlugin::new()));
 
     plugins.add_handler(&view_plugins);
+    plugins.add_handler(&docking_plugin);
+
     plugins.add_plugin(&mut lib_handler, "bitmap_memory");
+    plugins.add_plugin(&mut lib_handler, "i3_docking");
 
     view_plugins.borrow_mut().create_instance(&"Bitmap View".to_owned());
 
