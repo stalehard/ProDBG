@@ -94,7 +94,7 @@ impl<'a> ReloadHandler<'a> {
         match state {
             UpdateState::Before => Self::unload_plugins(self, lib.unwrap()),
             UpdateState::After => Self::reload_plugins(self, lib.unwrap()),
-            UpdateState::ReloadFalied => Self::reload_failed(self),
+            UpdateState::ReloadFalied(_) => Self::reload_failed(self),
         }
     }
 }
