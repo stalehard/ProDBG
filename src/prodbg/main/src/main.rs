@@ -4,6 +4,7 @@ extern crate minifb;
 extern crate prodbg_api;
 
 mod docking;
+mod backend_plugin;
 
 use docking::DockingPlugin;
 
