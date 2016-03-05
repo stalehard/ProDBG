@@ -41,10 +41,10 @@ fn main() {
     plugins.add_handler(&view_plugins);
     plugins.add_handler(&docking_plugin);
 
-    plugins.add_plugin(&mut lib_handler, "bitmap_memory");
+    plugins.add_plugin(&mut lib_handler, "registers_plugin");
     plugins.add_plugin(&mut lib_handler, "i3_docking");
 
-    view_plugins.borrow_mut().create_instance(&"Bitmap View".to_owned());
+    view_plugins.borrow_mut().create_instance(&"Registers View".to_owned());
 
     unsafe {
         bgfx_create();
