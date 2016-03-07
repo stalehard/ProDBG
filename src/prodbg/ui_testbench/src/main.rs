@@ -38,7 +38,7 @@ fn main() {
     plugins.add_handler(&view_plugins);
     plugins.add_plugin(&mut lib_handler, "bitmap_memory");
 
-    view_plugins.borrow_mut().create_instance(&"Bitmap View".to_owned());
+    view_plugins.borrow_mut().create_instance(&"Bitmap View".to_owned(), 0, 0);
 
     unsafe {
         bgfx_create();
@@ -85,7 +85,7 @@ fn main() {
 }
 
 ///
-/// 
+///
 ///
 ///
 

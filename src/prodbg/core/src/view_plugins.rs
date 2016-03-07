@@ -8,6 +8,8 @@ use std::ptr;
 
 pub struct ViewInstance {
     pub user_data: *mut c_void,
+    pub session_id: usize,
+    pub window_id: usize,
     pub x: f32,
     pub y: f32,
     pub width: f32,
@@ -15,12 +17,17 @@ pub struct ViewInstance {
     pub plugin_type: Rc<Plugin>,
 }
 
+#[derive(Clone)]
+struct ReloadState {
+    name: String,
+    session_id: usize,
+    window_id: usize,
+}
+
 pub struct ViewPlugins {
     pub instances: Vec<ViewInstance>,
     plugin_types: Vec<Rc<Plugin>>,
-    // temporary stored for reloading
-    reload_name: String,
-    reload_count: i32, 
+    reload_state: Vec<ReloadState>,
 }
 
 impl PluginHandler for ViewPlugins {
@@ -33,34 +40,38 @@ impl PluginHandler for ViewPlugins {
     }
 
     fn unload_plugin(&mut self, lib: &Rc<Lib>) {
-        self.reload_count = 0;
+        self.reload_state.clear();
         for i in (0..self.instances.len()).rev() {
             if &self.instances[i].plugin_type.lib == lib {
+                let state = ReloadState {
+                    name: self.instances[i].plugin_type.name.clone(),
+                    session_id: self.instances[i].session_id,
+                    window_id: self.instances[i].window_id,
+                };
+
+                self.reload_state.push(state);
                 self.instances.swap_remove(i);
-                self.reload_count += 1;
             }
         }
 
         for i in (0..self.plugin_types.len()).rev() {
             if &self.plugin_types[i].lib == lib {
-                self.reload_name = self.plugin_types[i].name.clone();
                 self.plugin_types.swap_remove(i);
             }
         }
     }
 
     fn reload_plugin(&mut self) {
-        let name = self.reload_name.clone();
-        for _ in 0..self.reload_count {
-            Self::create_instance(self, &name);
+        let t = self.reload_state.clone();
+        for reload_plugin in &t {
+            Self::create_instance(self,
+                                  &reload_plugin.name,
+                                  reload_plugin.session_id,
+                                  reload_plugin.window_id);
         }
-
-        Self::reset_reload(self)
     }
 
-    fn reload_failed(&mut self) {
-        Self::reset_reload(self)
-    }
+    fn reload_failed(&mut self) {}
 }
 
 
@@ -69,8 +80,7 @@ impl ViewPlugins {
         ViewPlugins {
             instances: Vec::new(),
             plugin_types: Vec::new(),
-            reload_name: "".to_owned(),
-            reload_count: 0,
+            reload_state: Vec::new(),
         }
     }
 
@@ -78,7 +88,7 @@ impl ViewPlugins {
         ptr::null_mut()
     }
 
-    pub fn create_instance(&mut self, plugin_type: &String) {
+    pub fn create_instance(&mut self, plugin_type: &String, session_id: usize, window_id: usize) {
         for t in self.plugin_types.iter() {
             if t.name != *plugin_type {
                 continue;
@@ -91,6 +101,8 @@ impl ViewPlugins {
 
             let instance = ViewInstance {
                 user_data: user_data,
+                session_id: session_id,
+                window_id: window_id,
                 x: 0.0,
                 y: 0.0,
                 width: 0.0,
@@ -102,10 +114,5 @@ impl ViewPlugins {
 
             return;
         }
-    }
-
-    fn reset_reload(&mut self) {
-        self.reload_count = 0;
-        self.reload_name = "".to_owned();
     }
 }

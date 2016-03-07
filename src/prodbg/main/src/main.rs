@@ -4,6 +4,7 @@ extern crate minifb;
 extern crate prodbg_api;
 
 mod docking;
+pub mod session;
 mod backend_plugin;
 
 use docking::DockingPlugin;
@@ -45,7 +46,7 @@ fn main() {
     plugins.add_plugin(&mut lib_handler, "registers_plugin");
     plugins.add_plugin(&mut lib_handler, "i3_docking");
 
-    view_plugins.borrow_mut().create_instance(&"Registers View".to_owned());
+    view_plugins.borrow_mut().create_instance(&"Registers View".to_owned(), 0, 0);
 
     unsafe {
         bgfx_create();

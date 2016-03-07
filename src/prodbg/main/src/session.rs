@@ -1,6 +1,7 @@
-use core::view_plugins::ViewPlugins;
+//use core::view_plugins::ViewPlugins;
+use core::plugins::PluginHandler;
+use core::plugin::Plugin;
 use std::rc::Rc;
-use std::cell::RefCell;
 
 ///! Session is a major part of ProDBG. There can be several sessions active at the same time
 ///! and each session has exactly one backend. There are only communication internally in a session
@@ -15,28 +16,29 @@ use std::cell::RefCell;
 ///! 2. Views and backends makes no assumetions on the inner workings of the others.
 ///! 3. Backends and views can post messages which anyone can decide to (optionally) act on.
 ///!
-struct Session {
-    local: bool,
+pub struct Session {
+    /// Current backend (can be None if no backend is active)
+    pub backend: Option<Rc<Plugin>>,
 
-    /// Handler for the view plugins
-    view_plugins: Rc<RefCell<PluginHandler>>,
+    /// Instacens of view plugins beloning to this backend
+    pub view_instaces: Vec<Rc<Plugin>>,
+}
 
-    /// Handler for the view plugins
-    backend_plugins: Rc<RefCell<PluginHandler>>,
-
-    backend: Option<Rc<Plugin>>,
+///! Connection options for Remote connections. Currently just one Ip adderss
+///!
+pub struct ConnectionSettings<'a> {
+    pub address: &'a str,
 }
 
 impl Session {
-    fn new() -> Session {
+    pub fn new() -> Session {
         Session {
-            local: false,
-            view_plugins: Vec::new(),
             backend: None,
+            view_instaces: Vec::new(),
         }
     }
 
-    pub fn start_local(_: &str,  _: Option<&str>) {
+    pub fn start_remote(_plugin_handler: &PluginHandler, _settings: &ConnectionSettings) {
 
     }
 
