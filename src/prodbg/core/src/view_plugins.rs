@@ -6,10 +6,16 @@ use plugins::PluginHandler;
 use dynamic_reload::Lib;
 use std::ptr;
 
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+pub struct SessionId(pub usize);
+
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+pub struct WindowId(pub usize);
+
 pub struct ViewInstance {
     pub user_data: *mut c_void,
-    pub session_id: usize,
-    pub window_id: usize,
+    pub session_id: SessionId,
+    pub window_id: WindowId,
     pub x: f32,
     pub y: f32,
     pub width: f32,
@@ -20,8 +26,8 @@ pub struct ViewInstance {
 #[derive(Clone)]
 struct ReloadState {
     name: String,
-    session_id: usize,
-    window_id: usize,
+    session_id: SessionId,
+    window_id: WindowId,
 }
 
 pub struct ViewPlugins {
@@ -88,7 +94,7 @@ impl ViewPlugins {
         ptr::null_mut()
     }
 
-    pub fn create_instance(&mut self, plugin_type: &String, session_id: usize, window_id: usize) {
+    pub fn create_instance(&mut self, plugin_type: &String, session_id: SessionId, window_id: WindowId) {
         for t in self.plugin_types.iter() {
             if t.name != *plugin_type {
                 continue;
