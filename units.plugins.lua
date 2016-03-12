@@ -373,6 +373,25 @@ SharedLibrary {
 
 -----------------------------------------------------------------------------------------------------------------------
 
+SharedLibrary {
+    Name = "dummy_backend_plugin",
+    
+    Env = {
+        CPPPATH = { 
+        	"api/include", 
+        	"src/native/external", 
+        },
+    	CXXOPTS = { { "-fPIC"; Config = "linux-gcc"; }, },
+    },
+
+    Sources = { "src/plugins/dummy_backend/dummy_backend.c" },
+
+	IdeGenerationHints = { Msvc = { SolutionFolder = "Plugins" } },
+}
+
+
+-----------------------------------------------------------------------------------------------------------------------
+
 if native.host_platform == "macosx" then
    Default "lldb_plugin"
 end
