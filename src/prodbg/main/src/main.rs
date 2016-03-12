@@ -3,93 +3,100 @@ extern crate libc;
 extern crate minifb;
 extern crate prodbg_api;
 
+pub mod windows;
 mod docking;
 pub mod session;
 mod backend_plugin;
 
 use docking::DockingPlugin;
 
+use session::Sessions;
+use windows::Windows;
 use core::{DynamicReload, Search};
-use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
-use libc::{c_void, c_int, c_float};
-use prodbg_api::view::CViewCallbacks;
-use core::view_plugins::{ViewPlugins, SessionId, WindowId};
+//use minifb::{Scale, WindowOptions, MouseMode, MouseButton, Menu};
+//use libc::{c_void, c_int, c_float};
+//use prodbg_api::view::CViewCallbacks;
+use core::view_plugins::{ViewPlugins};
 use std::rc::Rc;
 use std::cell::RefCell;
 
-
 use core::plugins::*;
-use std::ptr;
+//use std::ptr;
 
-const WIDTH: usize = 1280;
-const HEIGHT: usize = 1024;
+//const WIDTH: usize = 1280;
+//const HEIGHT: usize = 1024;
+
+//const MENU_CREATE_VIEW_0: usize = 2;
+//const MENU_CREATE_VIEW_1: usize = 3;
+//const MENU_CREATE_VIEW_2: usize = 4;
+
+/*
+fn add_view(index: usize, sessions: &mut Sessions, windows: &mut Windows, view_plugins: &ViewPlugins) {
+    // TODO: Mask out index for plugin
+    view.create_instance_from_index(0).map(|handle| {
+        window.add_view(handle);
+        session.add_view(handle);
+    });
+}
+*/
+
+/*
+fn menu_press(id: usize, sessions: &mut Sessions, windows: &mut Windows, view_plugins: &ViewPlugins) {
+    match id {
+        MENU_CREATE_VIEW_0 => {
+            //add_view(0, sessions, windows, view_plugins);
+        }
+        _ => (),
+    }
+}
+
+fn create_menus() -> Vec<MenuInfo> {
+
+}
+*/
 
 fn main() {
-    let mut window = Window::new("Noise Test - Press ESC to exit", WIDTH, HEIGHT,
-                                 WindowOptions {
-                                     resize: true,
-                                     scale: Scale::X1,
-                                     ..WindowOptions::default()
-                                 })
-                         .expect("Unable to create window");
-
+    let mut sessions = Sessions::new();
+    let mut windows = Windows::new();
+    
     let mut lib_handler = DynamicReload::new(None, Some("t2-output"), Search::Backwards);
     let mut plugins = Plugins::new();
+
+    //let menus = create_menus();
 
     // Would be nice to nat have it this way
     let view_plugins = Rc::new(RefCell::new(ViewPlugins::new()));
     let docking_plugin = Rc::new(RefCell::new(DockingPlugin::new()));
+    //let backend_plugins = Rc::new(RefCell::new(BackendPlugins::new()));
+
+    //windows.create_default();
+    //sessions.create_default();
 
     plugins.add_handler(&view_plugins);
     plugins.add_handler(&docking_plugin);
+    //plugins.add_handler(&backend_plugins);
 
     plugins.add_plugin(&mut lib_handler, "registers_plugin");
     plugins.add_plugin(&mut lib_handler, "i3_docking");
+    //plugins.add_plugin(&mut lib_handler, "dummy_backend");
 
-    view_plugins.borrow_mut().create_instance(&"Registers View".to_owned(), SessionId(0), WindowId(0));
+    //add_view(0, sessions, windows, view_plugins);
 
-    unsafe {
-        bgfx_create();
-        bgfx_create_window(window.get_window_handle() as *mut c_void,
-                           WIDTH as i32,
-                           HEIGHT as i32);
-    }
+    // TODO: Wrap away this code.
 
-    while window.is_open() && !window.is_key_down(Key::Escape) {
+    unsafe { bgfx_create(); }
+
+    loop {
         plugins.update(&mut lib_handler);
+        sessions.update(&mut view_plugins.borrow_mut());
+        windows.update();
 
-        unsafe {
-            bgfx_pre_update();
-
-            for instance in &view_plugins.borrow_mut().instances {
-                bgfx_imgui_set_window_pos(0.0, 0.0);
-                bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
-
-                bgfx_imgui_begin(1);
-
-                let plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewCallbacks;
-                ((*plugin_funcs).update.unwrap())(instance.user_data,
-                                                  bgfx_get_ui_funcs(),
-                                                  ptr::null_mut(),
-                                                  ptr::null_mut());
-                bgfx_imgui_end();
-            }
-
-            bgfx_post_update();
-
-            window.get_mouse_pos(MouseMode::Clamp).map(|mouse| {
-                prodbg_set_mouse_pos(mouse.0, mouse.1);
-                prodbg_set_mouse_state(0, window.get_mouse_down(MouseButton::Left) as c_int);
-            });
+        if windows.should_exit() {
+            break;
         }
-
-
-        window.update();
     }
 
-    unsafe {
-        bgfx_destroy();
-    }
+    unsafe { bgfx_destroy(); }
 }
 
 ///
@@ -98,24 +105,7 @@ fn main() {
 ///
 
 extern "C" {
-    fn bgfx_pre_update();
-    fn bgfx_post_update();
     fn bgfx_create();
-    fn bgfx_create_window(window: *const c_void, width: c_int, height: c_int);
     fn bgfx_destroy();
-
-    fn prodbg_set_mouse_pos(x: f32, y: f32);
-    fn prodbg_set_mouse_state(mouse: c_int, state: c_int);
-
-    fn bgfx_get_ui_funcs() -> *mut c_void;
-
-    fn bgfx_imgui_begin(show: c_int);
-    fn bgfx_imgui_end();
-
-    fn bgfx_imgui_set_window_pos(x: c_float, y: c_float);
-    fn bgfx_imgui_set_window_size(x: c_float, y: c_float);
-
-    fn bgfx_get_screen_width() -> f32;
-    fn bgfx_get_screen_height() -> f32;
 }
 

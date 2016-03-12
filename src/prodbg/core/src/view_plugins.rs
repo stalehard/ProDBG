@@ -7,15 +7,11 @@ use dynamic_reload::Lib;
 use std::ptr;
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
-pub struct SessionId(pub usize);
-
-#[derive(PartialEq, Eq, Clone, Copy, Debug)]
-pub struct WindowId(pub usize);
+pub struct ViewHandle(pub usize);
 
 pub struct ViewInstance {
     pub user_data: *mut c_void,
-    pub session_id: SessionId,
-    pub window_id: WindowId,
+    pub handle: ViewHandle,
     pub x: f32,
     pub y: f32,
     pub width: f32,
@@ -26,14 +22,14 @@ pub struct ViewInstance {
 #[derive(Clone)]
 struct ReloadState {
     name: String,
-    session_id: SessionId,
-    window_id: WindowId,
+    handle: ViewHandle,
 }
 
 pub struct ViewPlugins {
     pub instances: Vec<ViewInstance>,
     plugin_types: Vec<Rc<Plugin>>,
     reload_state: Vec<ReloadState>,
+    handle_counter: ViewHandle,
 }
 
 impl PluginHandler for ViewPlugins {
@@ -51,8 +47,7 @@ impl PluginHandler for ViewPlugins {
             if &self.instances[i].plugin_type.lib == lib {
                 let state = ReloadState {
                     name: self.instances[i].plugin_type.name.clone(),
-                    session_id: self.instances[i].session_id,
-                    window_id: self.instances[i].window_id,
+                    handle: self.instances[i].handle,
                 };
 
                 self.reload_state.push(state);
@@ -70,15 +65,13 @@ impl PluginHandler for ViewPlugins {
     fn reload_plugin(&mut self) {
         let t = self.reload_state.clone();
         for reload_plugin in &t {
-            Self::create_instance(self,
-                                  &reload_plugin.name,
-                                  reload_plugin.session_id,
-                                  reload_plugin.window_id);
+            Self::create_instance(self, &reload_plugin.name);
         }
     }
 
     fn reload_failed(&mut self) {}
 }
+
 
 
 impl ViewPlugins {
@@ -87,6 +80,7 @@ impl ViewPlugins {
             instances: Vec::new(),
             plugin_types: Vec::new(),
             reload_state: Vec::new(),
+            handle_counter: ViewHandle(0),
         }
     }
 
@@ -94,31 +88,49 @@ impl ViewPlugins {
         ptr::null_mut()
     }
 
-    pub fn create_instance(&mut self, plugin_type: &String, session_id: SessionId, window_id: WindowId) {
-        for t in self.plugin_types.iter() {
-            if t.name != *plugin_type {
+    pub fn get_view(&mut self, view_handle: ViewHandle) -> Option<&mut ViewInstance> {
+        for i in 0..self.instances.len() {
+            if self.instances[i].handle == view_handle {
+                return Some(&mut self.instances[i]);
+            }
+        }
+
+        None
+    }
+
+    pub fn create_instance_from_index(&mut self, index: usize) -> Option<ViewHandle> {
+        let user_data = unsafe {
+            let callbacks = self.plugin_types[index].plugin_funcs as *mut CViewCallbacks;
+            (*callbacks).create_instance.unwrap()(ptr::null(), Self::service_fun)
+        };
+
+        let handle = self.handle_counter;
+
+        let instance = ViewInstance {
+            user_data: user_data,
+            handle: handle,
+            x: 0.0,
+            y: 0.0,
+            width: 0.0,
+            height: 0.0,
+            plugin_type: self.plugin_types[index].clone(),
+        };
+
+        self.handle_counter.0 += 1;
+        self.instances.push(instance);
+
+        Some(handle)
+    }
+
+    pub fn create_instance(&mut self, plugin_type: &String) -> Option<ViewHandle> {
+        for i in 0..self.plugin_types.len() {
+            if self.plugin_types[i].name != *plugin_type {
                 continue;
             }
 
-            let user_data = unsafe {
-                let callbacks = t.plugin_funcs as *mut CViewCallbacks;
-                (*callbacks).create_instance.unwrap()(ptr::null(), Self::service_fun)
-            };
-
-            let instance = ViewInstance {
-                user_data: user_data,
-                session_id: session_id,
-                window_id: window_id,
-                x: 0.0,
-                y: 0.0,
-                width: 0.0,
-                height: 0.0,
-                plugin_type: t.clone(),
-            };
-
-            self.instances.push(instance);
-
-            return;
+            return Self::create_instance_from_index(self, i);
         }
+
+        None
     }
 }
