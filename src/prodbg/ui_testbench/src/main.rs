@@ -7,7 +7,7 @@ use core::{DynamicReload, Search};
 use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
 use libc::{c_void, c_int, c_float};
 use prodbg_api::view::CViewCallbacks;
-use core::view_plugins::{ViewPlugins, SessionId, WindowId};
+use core::view_plugins::{ViewPlugins};
 use std::rc::Rc;
 use std::cell::RefCell;
 
@@ -38,7 +38,7 @@ fn main() {
     plugins.add_handler(&view_plugins);
     plugins.add_plugin(&mut lib_handler, "bitmap_memory");
 
-    view_plugins.borrow_mut().create_instance(&"Bitmap View".to_owned(), SessionId(0), WindowId(0));
+    view_plugins.borrow_mut().create_instance(&"Bitmap View".to_owned());
 
     unsafe {
         bgfx_create();

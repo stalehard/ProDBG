@@ -1,5 +1,5 @@
 ///!
-///! Stdandard plugin is of the type of view plugins and backend plugins
+///! Standard plugin is of the type of view plugins and backend plugins
 ///! which follows the same structure in the shared libs
 ///!
 
