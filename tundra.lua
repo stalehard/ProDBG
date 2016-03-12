@@ -31,6 +31,10 @@ local mac_opts = {
 
 local macosx = {
     Env = {
+    	RUST_CARGO_OPTS = { 
+			{ "test"; Config = "*-*-*-test" },
+		},
+
         CCOPTS =  {
 			mac_opts,
 		},
@@ -87,6 +91,10 @@ local gcc_opts = {
 
 local gcc_env = {
     Env = {
+    	RUST_CARGO_OPTS = { 
+			{ "test"; Config = "*-*-*-test" },
+		},
+
         CCOPTS = {
 			gcc_opts,
 		},
@@ -116,6 +124,10 @@ local win64_opts = {
 
 local win64 = {
     Env = {
+    	RUST_CARGO_OPTS = { 
+			{ "test"; Config = "*-*-*-test" },
+		},
+
         GENERATE_PDB = "1",
         CCOPTS = {
 			win64_opts,
@@ -173,5 +185,7 @@ Build {
 		},
             
     },
-    
+	
+	Variants = { "debug", "release" },
+	SubVariants = { "default", "test" },
 }
