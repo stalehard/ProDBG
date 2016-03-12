@@ -11,23 +11,36 @@ local native   = require "tundra.native"
 
 _rust_cargo_program_mt = nodegen.create_eval_subclass { }
 _rust_cargo_shared_lib_mt = nodegen.create_eval_subclass { }
+_rust_cargo_crate_mt = nodegen.create_eval_subclass { }
+
+-- This function will gather up so extra dependencies. In the case when we depend on a Rust crate
+-- We simply return the sources to allow the the unit being built to depend on it. The reason
+-- for this is that Cargo will not actually link with this step but it's only used to make
+-- sure it gets built when a Crate changes
 
 function get_extra_deps(data, env) 
 	local libsuffix = { env:get("LIBSUFFIX") }
   	local sources = data.Sources
-
-	extra_deps = {} 
+  	local source_depts = {}
+	local extra_deps = {} 
 
 	for _, dep in util.nil_ipairs(data.Depends) do
     	if dep.Keyword == "StaticLibrary" then
 			local node = dep:get_dag(env:get_parent())
 			extra_deps[#extra_deps + 1] = node
 			node:insert_output_files(sources, libsuffix)
+		elseif dep.Keyword == "RustCrate" then
+			local node = dep:get_dag(env:get_parent())
+			source_depts[#source_depts + 1] = dep.Decl.Sources
 		end
 	end
 
-	return extra_deps 
+	return extra_deps, source_depts 
 end
+
+local cmd_line_type_prog = 0
+local cmd_line_type_shared_lib = 1
+local cmd_line_type_crate = 2
 
 function build_rust_action_cmd_line(env, data, program)
 	local static_libs = ""
@@ -55,7 +68,7 @@ function build_rust_action_cmd_line(env, data, program)
 
 	if native.host_platform == "windows" then
 		export = "set "
-		merge = " && "
+		merge = "&&"
 	end
 
 	target_dir = export .. "CARGO_TARGET_DIR=" .. target .. merge 
@@ -74,10 +87,12 @@ function build_rust_action_cmd_line(env, data, program)
 
 	-- Make sure output_name gets prefixed/sufixed correctly
 
-	if program == true then
+	if program == cmd_line_type_prog then
 		output_name = data.Name .. "$(HOSTPROGSUFFIX)"
-	else
+	elseif program == cmd_line_type_shared_lib then
 		output_name = "$(SHLIBPREFIX)" .. data.Name .. "$(HOSTSHLIBSUFFIX)"
+	else
+		output_name = "$(SHLIBPREFIX)" .. data.Name .. ".rlib" 
 	end
 
 	-- If variant is debug (default) we assume that we should use debug and not release mode
@@ -89,20 +104,28 @@ function build_rust_action_cmd_line(env, data, program)
 		release = " --release "
 	end
 
-	local action_cmd_line = tundra_dir .. target_dir .. static_libs .. "$(RUST_CARGO) build --manifest-path=" .. data.CargoConfig .. release
-	
+	-- If user hasn't set any specific cargo opts we use build as default
+	-- Setting RUST_CARGO_OPTS = "build" by default doesn't seem to work as if user set
+	-- RUST_CARGO_OPTS = "test" the actual string is "build test" which doesn't work
+	local cargo_opts = env:interpolate("$(RUST_CARGO_OPTS)")
+	if cargo_opts == "" then
+		cargo_opts = "build"
+	end
+
+	local action_cmd_line = tundra_dir .. target_dir .. static_libs .. "$(RUST_CARGO) " .. cargo_opts .. " --manifest-path=" .. data.CargoConfig .. release
+
 	return action_cmd_line, output_target
 end
 
 function _rust_cargo_program_mt:create_dag(env, data, deps)
 
-	local action_cmd_line, output_target = build_rust_action_cmd_line(env, data, true)
-	local extra_deps = get_extra_deps(data, env)
+	local action_cmd_line, output_target = build_rust_action_cmd_line(env, data, cmd_line_type_prog)
+	local extra_deps, dep_sources = get_extra_deps(data, env)
 
 	local build_node = depgraph.make_node {
 		Env          = env,
 		Pass         = data.Pass,
-		InputFiles   = util.merge_arrays({ data.CargoConfig }, data.Sources),
+		InputFiles   = util.merge_arrays({ data.CargoConfig }, data.Sources, util.flatten(dep_sources)),
 		Annotation 	 = path.join("$(OBJECTDIR)", data.Name), 
 		Label        = "Cargo Program $(@)",
 		Action       = action_cmd_line,
@@ -119,13 +142,13 @@ end
 
 function _rust_cargo_shared_lib_mt:create_dag(env, data, deps)
 
-	local action_cmd_line, output_target = build_rust_action_cmd_line(env, data, false)
-	local extra_deps = get_extra_deps(data, env)
+	local action_cmd_line, output_target = build_rust_action_cmd_line(env, data, cmd_line_type_shared_lib)
+	local extra_deps, dep_sources = get_extra_deps(data, env)
 
 	local build_node = depgraph.make_node {
 		Env          = env,
 		Pass         = data.Pass,
-		InputFiles   = util.merge_arrays({ data.CargoConfig }, data.Sources),
+		InputFiles   = util.merge_arrays({ data.CargoConfig }, data.Sources, util.flatten(dep_sources)),
 		Annotation 	 = path.join("$(OBJECTDIR)", data.Name), 
 		Label        = "Cargo SharedLibrary $(@)",
 		Action       = action_cmd_line,
@@ -139,6 +162,26 @@ function _rust_cargo_shared_lib_mt:create_dag(env, data, deps)
 	-- Copy the output file to the regular $(OBJECTDIR) 
 	return files.copy_file(env, src, dst, data.Pass, { build_node })
 end
+
+function _rust_cargo_crate_mt:create_dag(env, data, deps)
+
+	local action_cmd_line, output_target = build_rust_action_cmd_line(env, data, cmd_line_type_crate)
+	local extra_deps, dep_sources = get_extra_deps(data, env)
+
+	local build_node = depgraph.make_node {
+		Env          = env,
+		Pass         = data.Pass,
+		InputFiles   = util.merge_arrays({ data.CargoConfig }, data.Sources, util.flatten(dep_sources)),
+		Annotation 	 = path.join("$(OBJECTDIR)", data.Name), 
+		Label        = "Cargo Crate $(@)",
+		Action       = action_cmd_line,
+		OutputFiles  = { output_target }, 
+		Dependencies = util.merge_arrays(deps, extra_deps),
+	}
+
+	return build_node 
+end
+
 
 local rust_blueprint = {
   Name = { 
@@ -161,4 +204,5 @@ local rust_blueprint = {
 
 nodegen.add_evaluator("RustProgram", _rust_cargo_program_mt, rust_blueprint)
 nodegen.add_evaluator("RustSharedLibrary", _rust_cargo_shared_lib_mt, rust_blueprint)
+nodegen.add_evaluator("RustCrate", _rust_cargo_crate_mt, rust_blueprint)
 
