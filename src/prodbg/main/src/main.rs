@@ -69,7 +69,6 @@ fn main() {
     let docking_plugin = Rc::new(RefCell::new(DockingPlugin::new()));
     //let backend_plugins = Rc::new(RefCell::new(BackendPlugins::new()));
 
-    //windows.create_default();
     //sessions.create_default();
 
     plugins.add_handler(&view_plugins);
@@ -86,7 +85,11 @@ fn main() {
 
     unsafe { bgfx_create(); }
 
+    windows.create_default();
+
     loop {
+        unsafe { bgfx_pre_update(); }
+
         plugins.update(&mut lib_handler);
         sessions.update(&mut view_plugins.borrow_mut());
         windows.update();
@@ -94,6 +97,8 @@ fn main() {
         if windows.should_exit() {
             break;
         }
+
+        unsafe { bgfx_post_update(); }
     }
 
     unsafe { bgfx_destroy(); }
@@ -105,6 +110,9 @@ fn main() {
 ///
 
 extern "C" {
+    fn bgfx_pre_update();
+    fn bgfx_post_update();
+
     fn bgfx_create();
     fn bgfx_destroy();
 }

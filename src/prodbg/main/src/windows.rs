@@ -39,7 +39,7 @@ impl Windows {
     }
 
     /// Create a default window which will only be created if there are no other
-    pub fn create_default_window(&mut self) {
+    pub fn create_default(&mut self) {
         if self.windows.len() > 0 {
             return;
         }
@@ -61,6 +61,8 @@ impl Windows {
         match res {
             Ok(win) => {
                 unsafe {
+                    println!("{:?} {} {}", win.get_window_handle() as *const c_void, 
+                             width, height);
                     bgfx_create_window(win.get_window_handle() as *const c_void,
                                        width as c_int,
                                        height as c_int);
@@ -89,21 +91,22 @@ impl Windows {
     }
 
     pub fn update(&mut self) {
-        // for i in (0..self.instances.len()).rev() {
-        // self.instances[i].update();
-        //
-        // self.instances[i].get_mouse_pos(MouseMode::Clamp).map(|mouse| {
-        // prodbg_set_mouse_pos(mouse.0, mouse.1);
-        // prodbg_set_mouse_state(0, self.instances[i].get_mouse_down(MouseButton::Left) as c_int);
-        // });
-        //
-        // if !self.instances[i].is_open() {
-        // self.instances.swap_remove(i);
-        // }
-        // }
-        //
-    }
+        for i in (0..self.windows.len()).rev() {
+            self.windows[i].update();
 
+            /*
+            self.windows[i].get_mouse_pos(MouseMode::Clamp).map(|mouse| {
+                prodbg_set_mouse_pos(mouse.0, mouse.1);
+                prodbg_set_mouse_state(0, self.instances[i].get_mouse_down(MouseButton::Left) as c_int);
+            });
+            */
+        
+        if !self.windows[i].win.is_open() {
+                self.windows.swap_remove(i);
+            }
+        }  
+    }
+       
     /// Checks if application should exit (all window instances closed)
     pub fn should_exit(&self) -> bool {
         self.windows.len() == 0
