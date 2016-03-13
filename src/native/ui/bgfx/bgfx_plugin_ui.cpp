@@ -2205,7 +2205,7 @@ void BgfxPluginUI::preUpdate() {
     const float deltaTime = 1.0f / 60.f; // TODO: Calc correct dt
 
     bgfx::setViewRect(0, 0, 0, (uint16_t)s_context.width, (uint16_t)s_context.height);
-    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0xf01010ff, 1.0f, 0);
+    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x000f0f0f, 1.0f, 0);
     bgfx::submit(0);
 
     IMGUI_preUpdate(deltaTime);
