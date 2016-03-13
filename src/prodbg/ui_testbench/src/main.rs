@@ -5,7 +5,7 @@ extern crate prodbg_api;
 
 use core::{DynamicReload, Search};
 use minifb::{Window, Key, Scale, WindowOptions, MouseMode, MouseButton};
-use libc::{c_void, c_int, c_float};
+use libc::{c_void, c_int};
 use prodbg_api::view::CViewCallbacks;
 use core::view_plugins::{ViewPlugins};
 use std::rc::Rc;
@@ -104,9 +104,9 @@ extern "C" {
     fn bgfx_imgui_begin(show: c_int);
     fn bgfx_imgui_end();
 
-    fn bgfx_imgui_set_window_pos(x: c_float, y: c_float);
-    fn bgfx_imgui_set_window_size(x: c_float, y: c_float);
+    //fn bgfx_imgui_set_window_pos(x: c_float, y: c_float);
+    //fn bgfx_imgui_set_window_size(x: c_float, y: c_float);
 
-    fn bgfx_get_screen_width() -> f32;
-    fn bgfx_get_screen_height() -> f32;
+    //fn bgfx_get_screen_width() -> f32;
+    //fn bgfx_get_screen_height() -> f32;
 }

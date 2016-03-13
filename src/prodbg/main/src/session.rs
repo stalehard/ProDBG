@@ -7,7 +7,7 @@ use core::plugins::PluginHandler;
 //use core::plugin::Plugin;
 //use std::rc::Rc;
 use std::ptr;
-use libc::{c_void, c_int, c_float};
+use libc::{c_void, c_int};
 
 ///! Session is a major part of ProDBG. There can be several sessions active at the same time
 ///! and each session has exactly one backend. There are only communication internally in a session
@@ -47,9 +47,9 @@ impl Session {
 
     fn update_view_instance(view: &mut ViewInstance) {
         unsafe {
-            bgfx_imgui_set_window_pos(view.x, view.y);
+            //bgfx_imgui_set_window_pos(view.x, view.y);
             //bgfx_imgui_set_window_size(view.width, view.height); 
-            bgfx_imgui_set_window_size(500.0, 500.0); 
+            //bgfx_imgui_set_window_size(500.0, 500.0); 
 
             // TODO: Fix visibility flag
             bgfx_imgui_begin(1);
@@ -143,8 +143,8 @@ extern "C" {
     fn bgfx_imgui_begin(show: c_int);
     fn bgfx_imgui_end();
 
-    fn bgfx_imgui_set_window_pos(x: c_float, y: c_float);
-    fn bgfx_imgui_set_window_size(x: c_float, y: c_float);
+    //fn bgfx_imgui_set_window_pos(x: c_float, y: c_float);
+    //fn bgfx_imgui_set_window_size(x: c_float, y: c_float);
 
     //fn bgfx_get_screen_width() -> f32;
     //fn bgfx_get_screen_height() -> f32;
