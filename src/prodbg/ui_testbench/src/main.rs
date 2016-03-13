@@ -54,8 +54,8 @@ fn main() {
             bgfx_pre_update();
 
             for instance in &view_plugins.borrow_mut().instances {
-                bgfx_imgui_set_window_pos(0.0, 0.0);
-                bgfx_imgui_set_window_size(500.0, 500.0); 
+                //bgfx_imgui_set_window_pos(0.0, 0.0);
+                //bgfx_imgui_set_window_size(500.0, 500.0); 
 
                 bgfx_imgui_begin(1);
 
