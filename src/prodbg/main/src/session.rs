@@ -64,6 +64,10 @@ impl Session {
         }
     }
 
+    pub fn add_view(&mut self, view: ViewHandle) {
+        self.views.push(view);
+    }
+
     /*
     pub fn set_backend(&mut self, backend: Option<BackendHandle>) {
         self.backend = backend 
@@ -74,7 +78,11 @@ impl Session {
 
         // TODO: Reader/Write setup + backend update
 
-        unsafe { bgfx_pre_update(); }
+        /*
+        unsafe { 
+            bgfx_pre_update(); 
+        }
+        */
 
         for view in &self.views {
             if let Some(ref mut v) = view_plugins.get_view(*view) {
@@ -82,7 +90,7 @@ impl Session {
             }
         }
 
-        unsafe { bgfx_post_update(); }
+        //unsafe { bgfx_post_update(); }
     }
 }
 
@@ -92,14 +100,15 @@ impl Session {
 ///
 pub struct Sessions {
     instances: Vec<Session>,
-    //instance_counter: SessionId,
+    current: usize,
+    
 }
 
 impl Sessions {
     pub fn new() -> Sessions {
         Sessions {
             instances: Vec::new(),
-            //instance_counter: SessionId(0),
+            current: 0,
         }
     }
 
@@ -113,6 +122,11 @@ impl Sessions {
             session.update(view_plugins);
         }
     }
+
+    pub fn get_current(&mut self) -> &mut Session {
+        let current = self.current;
+        &mut self.instances[current]
+    }
 }
 
 ///
@@ -121,8 +135,8 @@ impl Sessions {
 ///
 
 extern "C" {
-    fn bgfx_pre_update();
-    fn bgfx_post_update();
+    //fn bgfx_pre_update();
+    //fn bgfx_post_update();
 
     fn bgfx_get_ui_funcs() -> *mut c_void;
 
@@ -135,5 +149,14 @@ extern "C" {
     //fn bgfx_get_screen_width() -> f32;
     //fn bgfx_get_screen_height() -> f32;
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_search_paths_none() {
+        assert_eq!(1, 1);
+    }
+}
+
 
 

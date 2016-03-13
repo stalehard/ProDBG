@@ -1,7 +1,7 @@
 extern crate minifb;
 
 use libc::{c_void, c_int};
-use minifb::{Scale, WindowOptions};
+use minifb::{Scale, WindowOptions, MouseMode, MouseButton};
 use core::view_plugins::ViewHandle;
 
 const WIDTH: usize = 1280;
@@ -31,11 +31,15 @@ pub struct Window {
 pub struct Windows {
     /// All the windows being tracked
     windows: Vec<Window>,
+    current: usize,
 }
 
 impl Windows {
     pub fn new() -> Windows {
-        Windows { windows: Vec::new() }
+        Windows { 
+            windows: Vec::new(),
+            current: 0,
+        }
     }
 
     /// Create a default window which will only be created if there are no other
@@ -90,21 +94,30 @@ impl Windows {
         Ok(window)
     }
 
+    fn update_window(window: &mut Window) {
+        window.update();
+
+        window.win.get_mouse_pos(MouseMode::Clamp).map(|mouse| {
+            unsafe {
+                prodbg_set_mouse_pos(mouse.0, mouse.1);
+                prodbg_set_mouse_state(0, window.win.get_mouse_down(MouseButton::Left) as c_int);
+            }
+        });
+    }
+
     pub fn update(&mut self) {
         for i in (0..self.windows.len()).rev() {
-            self.windows[i].update();
-
-            /*
-            self.windows[i].get_mouse_pos(MouseMode::Clamp).map(|mouse| {
-                prodbg_set_mouse_pos(mouse.0, mouse.1);
-                prodbg_set_mouse_state(0, self.instances[i].get_mouse_down(MouseButton::Left) as c_int);
-            });
-            */
+            Self::update_window(&mut self.windows[i]);
         
-        if !self.windows[i].win.is_open() {
+            if !self.windows[i].win.is_open() {
                 self.windows.swap_remove(i);
             }
         }  
+    }
+
+    pub fn get_current(&mut self) -> &mut Window {
+        let current = self.current;
+        &mut self.windows[current]
     }
        
     /// Checks if application should exit (all window instances closed)
@@ -134,11 +147,15 @@ impl Window {
     pub fn update(&mut self) {
         self.win.update();
     }
+
+    pub fn add_view(&mut self, view: ViewHandle) {
+        self.views.push(view);
+    }
 }
 
 
 extern "C" {
-    // fn prodbg_set_mouse_pos(x: f32, y: f32);
-    // fn prodbg_set_mouse_state(mouse: c_int, state: c_int);
+     fn prodbg_set_mouse_pos(x: f32, y: f32);
+     fn prodbg_set_mouse_state(mouse: c_int, state: c_int);
     fn bgfx_create_window(window: *const c_void, width: c_int, height: c_int);
 }

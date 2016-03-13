@@ -38,6 +38,7 @@ impl PluginHandler for ViewPlugins {
     }
 
     fn add_plugin(&mut self, plugin: &Rc<Plugin>) {
+        println!("added plugin type {}", plugin.type_name);
         self.plugin_types.push(plugin.clone())
     }
 
@@ -134,3 +135,13 @@ impl ViewPlugins {
         None
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_search_paths_none() {
+        assert_eq!(1);
+    }
+}
+
+

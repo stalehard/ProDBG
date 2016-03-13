@@ -30,24 +30,25 @@ use core::plugins::*;
 //const MENU_CREATE_VIEW_1: usize = 3;
 //const MENU_CREATE_VIEW_2: usize = 4;
 
-/*
-fn add_view(index: usize, sessions: &mut Sessions, windows: &mut Windows, view_plugins: &ViewPlugins) {
+fn add_view(index: usize, sessions: &mut Sessions, windows: &mut Windows, view_plugins: &mut ViewPlugins) {
+    let session = sessions.get_current();
+    let window = windows.get_current();
+
     // TODO: Mask out index for plugin
-    view.create_instance_from_index(0).map(|handle| {
+    view_plugins.create_instance_from_index(index).map(|handle| {
         window.add_view(handle);
         session.add_view(handle);
     });
 }
-*/
 
 /*
-fn menu_press(id: usize, sessions: &mut Sessions, windows: &mut Windows, view_plugins: &ViewPlugins) {
-    match id {
-        MENU_CREATE_VIEW_0 => {
-            //add_view(0, sessions, windows, view_plugins);
-        }
-        _ => (),
-    }
+   fn menu_press(id: usize, sessions: &mut Sessions, windows: &mut Windows, view_plugins: &ViewPlugins) {
+   match id {
+   MENU_CREATE_VIEW_0 => {
+//add_view(0, sessions, windows, view_plugins);
+}
+_ => (),
+}
 }
 
 fn create_menus() -> Vec<MenuInfo> {
@@ -58,7 +59,7 @@ fn create_menus() -> Vec<MenuInfo> {
 fn main() {
     let mut sessions = Sessions::new();
     let mut windows = Windows::new();
-    
+
     let mut lib_handler = DynamicReload::new(None, Some("t2-output"), Search::Backwards);
     let mut plugins = Plugins::new();
 
@@ -69,23 +70,24 @@ fn main() {
     let docking_plugin = Rc::new(RefCell::new(DockingPlugin::new()));
     //let backend_plugins = Rc::new(RefCell::new(BackendPlugins::new()));
 
-    //sessions.create_default();
+    sessions.create_instance();
 
     plugins.add_handler(&view_plugins);
     plugins.add_handler(&docking_plugin);
     //plugins.add_handler(&backend_plugins);
 
-    plugins.add_plugin(&mut lib_handler, "registers_plugin");
+    plugins.add_plugin(&mut lib_handler, "bitmap_memory");
     plugins.add_plugin(&mut lib_handler, "i3_docking");
     //plugins.add_plugin(&mut lib_handler, "dummy_backend");
 
-    //add_view(0, sessions, windows, view_plugins);
 
     // TODO: Wrap away this code.
 
     unsafe { bgfx_create(); }
 
     windows.create_default();
+
+    add_view(0, &mut sessions, &mut windows, &mut view_plugins.borrow_mut());
 
     loop {
         unsafe { bgfx_pre_update(); }
