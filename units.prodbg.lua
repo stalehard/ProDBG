@@ -66,6 +66,8 @@ local prodbgBundle = OsxBundle
 		CompileNib { Source = "data/mac/appnib.xib", Target = "appnib.nib" },
 		"data/mac/icon.icns",
 	},
+
+	Config = { "macosx-clang-debug-default" ; "macosx-clang-release-default" },
 }
 
 -----------------------------------------------------------------------------------------------------------------------
@@ -80,6 +82,8 @@ local uiBundle = OsxBundle
 		CompileNib { Source = "data/mac/appnib.xib", Target = "appnib2.nib" },
 		"data/mac/icon.icns",
 	},
+
+	Config = { "macosx-clang-debug-default" ; "macosx-clang-release-default" },
 }
 
 -----------------------------------------------------------------------------------------------------------------------

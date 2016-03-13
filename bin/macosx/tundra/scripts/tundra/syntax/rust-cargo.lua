@@ -133,11 +133,14 @@ function _rust_cargo_program_mt:create_dag(env, data, deps)
 		Dependencies = util.merge_arrays(deps, extra_deps),
 	}
 
-	local dst ="$(OBJECTDIR)" .. "$(SEP)" .. path.get_filename(env:interpolate(output_target))
-	local src = output_target
-
-	-- Copy the output file to the regular $(OBJECTDIR) 
-	return files.copy_file(env, src, dst, data.Pass, { build_node })
+	-- No copy if we are running in test mode (as the executable will be executed directly) 
+	if string.match(env:interpolate("$(RUST_CARGO_OPTS)"), "test") then
+		return build_node 
+	else
+		local dst ="$(OBJECTDIR)" .. "$(SEP)" .. path.get_filename(env:interpolate(output_target))
+		local src = output_target
+		return files.copy_file(env, src, dst, data.Pass, { build_node })
+	end
 end
 
 function _rust_cargo_shared_lib_mt:create_dag(env, data, deps)
@@ -156,11 +159,14 @@ function _rust_cargo_shared_lib_mt:create_dag(env, data, deps)
 		Dependencies = util.merge_arrays(deps, extra_deps),
 	}
 
-	local dst ="$(OBJECTDIR)" .. "$(SEP)" .. path.get_filename(env:interpolate(output_target))
-	local src = output_target
-
-	-- Copy the output file to the regular $(OBJECTDIR) 
-	return files.copy_file(env, src, dst, data.Pass, { build_node })
+	-- No copy if we are running in test mode (as the executable will be executed directly) 
+	if string.match(env:interpolate("$(RUST_CARGO_OPTS)"), "test") then
+		return build_node 
+	else
+		local dst ="$(OBJECTDIR)" .. "$(SEP)" .. path.get_filename(env:interpolate(output_target))
+		local src = output_target
+		return files.copy_file(env, src, dst, data.Pass, { build_node })
+	end
 end
 
 function _rust_cargo_crate_mt:create_dag(env, data, deps)
