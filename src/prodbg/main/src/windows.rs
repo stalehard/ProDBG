@@ -5,7 +5,7 @@ use minifb::{Scale, WindowOptions, MouseMode, MouseButton};
 use core::view_plugins::ViewHandle;
 
 const WIDTH: usize = 1280;
-const HEIGHT: usize = 1024;
+const HEIGHT: usize = 800;
 
 pub struct Window {
     /// minifb window

@@ -15,8 +15,8 @@ use std::cell::RefCell;
 use core::plugins::*;
 use std::ptr;
 
-const WIDTH: usize = 1280;
-const HEIGHT: usize = 1024;
+const WIDTH: usize = 1024;
+const HEIGHT: usize = 800;
 
 fn main() {
     let mut window = Window::new("Noise Test - Press ESC to exit",
@@ -55,7 +55,7 @@ fn main() {
 
             for instance in &view_plugins.borrow_mut().instances {
                 bgfx_imgui_set_window_pos(0.0, 0.0);
-                bgfx_imgui_set_window_size(bgfx_get_screen_width(), bgfx_get_screen_height());
+                bgfx_imgui_set_window_size(500.0, 500.0); 
 
                 bgfx_imgui_begin(1);
 
@@ -64,6 +64,7 @@ fn main() {
                                                   bgfx_get_ui_funcs(),
                                                   ptr::null_mut(),
                                                   ptr::null_mut());
+
                 bgfx_imgui_end();
             }
 
@@ -74,7 +75,6 @@ fn main() {
                 prodbg_set_mouse_state(0, window.get_mouse_down(MouseButton::Left) as c_int);
             });
         }
-
 
         window.update();
     }
