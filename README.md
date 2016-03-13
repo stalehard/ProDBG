@@ -17,7 +17,7 @@ As the rewrite of ProDBG is currently under way no debugging is working currentl
 
 ## How to compile and build
 
-Latest stable version of Rust needs to be present on the system. This can be downloaded from [here](https://www.rust-lang.org/downloads.html)
+Latest stable version of Rust needs to be present on the system and can be downloaded from [here](https://www.rust-lang.org/downloads.html)
 
 ## Mac
 
@@ -29,7 +29,7 @@ After doing that open a terminal and run ```scripts/mac_build_debug.sh``` and yo
 
 On Windows Visual Studio 2013 is required (2012 or earlier will not work as parts of the code uses C99) With VS 2013 installed do this:
 
-Open a cmd window and first run scripts\vcvarsx86_amd64.bat and then scripts\win64_build_debug.cmd and you will have an executable in t2-output\win64-msvc-debug-default\prodbg.exe
+Open a cmd window and first run ```scripts\vcvarsx86_amd64.bat``` and then ```scripts\win64_build_debug.cmd``` and you will have an executable in ```t2-output\win64-msvc-debug-default\prodbg.exe```
 
 ## Linux
 
