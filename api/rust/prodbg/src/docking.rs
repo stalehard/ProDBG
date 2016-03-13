@@ -34,6 +34,7 @@ pub struct CDocking {
                                        height: raw::c_int)
                                        -> *mut raw::c_void,
     pub destroy_instance: extern "C" fn(instance: *mut raw::c_void),
+    pub get_handle_at: extern "C" fn(x: raw::c_int, y: raw::c_int) -> *mut raw::c_void,
     pub set_callbacks: extern "C" fn(instance: *mut raw::c_void, callbacks: *mut CDockingCallbacks),
     pub split: extern "C" fn(instance: *mut raw::c_void,
                              user_data: *mut raw::c_void,

@@ -44,10 +44,11 @@ typedef struct PDDocking {
 	void* (*create_instance)(int x, int y, int width, int height);
 	void (*destroy_instance)(void* instance);
 
+	PDDockHandle (*get_handle_at)(int x, int y);
+
 	void (*set_callbacks)(void* instance, PDDockingCallbacks* callbacks);
 
 	void (*split)(void* instance, void* user_data, PDDockingSplitDir dir, PDDockHandle handle);
-
 	void (*close_dock)(void* instance, PDDockHandle handle);
 
 	void (*update_size)(void* instance, void* user_data, int width, int height);

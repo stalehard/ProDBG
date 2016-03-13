@@ -24,6 +24,12 @@ static void destroy_instance(void* data) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+static void* get_dock_at(int x, int y) {
+	return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 static void set_callbacks(void* instance, PDDockingCallbacks* callbacks) {
 	(void)instance;
 	(void)callbacks;
@@ -76,6 +82,7 @@ static PD_EXPORT PDDocking plugin = {
 	create_instance,
 	destroy_instance,
 
+	get_dock_at,
 	docksys_set_callbacks,
 	split,
 
