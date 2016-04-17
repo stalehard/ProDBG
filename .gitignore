@@ -8,3 +8,4 @@ temp/vice_mem_dump
 target/
 Cargo.lock
 .vscode/
+*.orig
