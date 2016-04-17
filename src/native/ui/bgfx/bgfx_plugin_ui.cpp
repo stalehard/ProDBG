@@ -18,7 +18,7 @@
 //#include <session/session.h>
 //#include <foundation/apple.h>
 //#include <foundation/string.h>
-#include <bgfx.h>
+#include <bgfx/bgfx.h>
 //#include "core/input_state.h"
 //#include "ui/bgfx/cursor.h"
 //#include <foundation/string.h>
@@ -30,7 +30,7 @@
 #include <Windows.h>
 #endif
 
-#include <bgfxplatform.h>
+#include <bgfx/bgfxplatform.h>
 
 struct ImGuiWindow;
 
@@ -331,7 +331,8 @@ void BgfxPluginUI::preUpdate() {
 
     bgfx::setViewRect(0, 0, 0, (uint16_t)s_context.width, (uint16_t)s_context.height);
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x000f0f0f, 1.0f, 0);
-    bgfx::submit(0);
+    // TODO(marco): is 2 the correct index here??
+    bgfx::submit(0, UIRender_getProgramHandle(2));
 
     IMGUI_preUpdate(deltaTime);
     //InputState_update(deltaTime);
