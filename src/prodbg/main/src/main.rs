@@ -6,13 +6,8 @@ extern crate bgfx_rs;
 extern crate imgui_sys;
 
 pub mod windows;
-// mod docking;
 
-//use docking::DockingPlugin;
-//use prodbg_api::ui::Ui;
 use bgfx_rs::Bgfx;
-//use imgui_sys::Imgui;
-
 use core::session::Sessions;
 use windows::Windows;
 use core::{DynamicReload, Search};
@@ -22,20 +17,6 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use core::plugins::*;
-
-/*
-fn add_view(index: usize, sessions: &mut Sessions, windows: &mut Windows, view_plugins: &mut ViewPlugins) {
-    let session = sessions.get_current();
-    let window = windows.get_current();
-    let ui = Imgui::create_ui_instance();
-
-    // TODO: Mask out index for plugin
-    view_plugins.create_instance_from_index(ui, index).map(|handle| {
-        window.add_view(handle);
-        session.add_view(handle);
-    });
-}
-*/
 
 fn main() {
     let bgfx = Bgfx::new();
@@ -59,8 +40,6 @@ fn main() {
     plugins.add_plugin(&mut lib_handler, "hex_memory_plugin");
 
     windows.create_default();
-
-    //add_view(0, &mut sessions, &mut windows, &mut view_plugins.borrow_mut());
 
     loop {
         bgfx.pre_update();
