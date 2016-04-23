@@ -1,8 +1,8 @@
 #include "pd_backend.h"
 #include "pd_host.h"
-#include <stdlib.h> 
-#include <stdio.h> 
-#include <string.h> 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -30,11 +30,11 @@ void destroy_instance(void* user_data) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static PDDebugState update(void* user_data, 
-						   PDAction action, 
-						   PDReader* reader, 
+static PDDebugState update(void* user_data,
+						   PDAction action,
+						   PDReader* reader,
 						   PDWriter* writer) {
-    DummyPlugin* plugin = (DummyPlugin*)user_data;
+	(void)user_data;
     (void)action;
     (void)reader;
     (void)writer;
