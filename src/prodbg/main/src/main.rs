@@ -29,7 +29,7 @@ fn main() {
     let view_plugins = Rc::new(RefCell::new(ViewPlugins::new()));
     let backend_plugins = Rc::new(RefCell::new(BackendPlugins::new()));
 
-    sessions.create_instance();
+    let session = sessions.create_instance();
 
     plugins.add_handler(&view_plugins);
     plugins.add_handler(&backend_plugins);
@@ -40,6 +40,14 @@ fn main() {
     plugins.add_plugin(&mut lib_handler, "hex_memory_plugin");
 
     windows.create_default();
+
+    // test code, we set dummy backend as active
+
+    if let Some(backend) = backend_plugins.borrow_mut().create_instance(&"Dummy Backend".to_owned()) {
+        if let Some(session) = sessions.get_session(session) {
+            session.set_backend(Some(backend));
+        }
+    }
 
     loop {
         bgfx.pre_update();
