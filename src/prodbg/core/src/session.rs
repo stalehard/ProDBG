@@ -100,10 +100,12 @@ impl Sessions {
         }
     }
 
-    pub fn create_instance(&mut self) {
+    pub fn create_instance(&mut self) -> SessionHandle {
         let s = Session::new(self.session_counter);
+        let handle = s.handle;
         self.instances.push(s);
         self.session_counter.0 += 1;
+        handle
     }
 
     pub fn update(&mut self) {
