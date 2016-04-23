@@ -1,6 +1,7 @@
 use prodbg_api::read_write::{Reader, Writer};
 use plugins::PluginHandler;
 use reader_wrapper::{ReaderWrapper, WriterWrapper};
+use backend_plugin::BackendHandle;
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct SessionHandle(pub u64);
@@ -24,6 +25,8 @@ pub struct Session {
 
     current_writer: usize,
     writers: [Writer; 2],
+
+    backend: Option<BackendHandle>,
 }
 
 ///! Connection options for Remote connections. Currently just one Ip adderss
@@ -36,14 +39,13 @@ impl Session {
     pub fn new(handle: SessionHandle) -> Session {
         Session {
             handle: handle,
-            //views: Vec::new(),
             writers: [
                 WriterWrapper::create_writer(),
                 WriterWrapper::create_writer(),
             ],
             reader: ReaderWrapper::create_reader(),
             current_writer: 0,
-            //backend: None,
+            backend: None,
         }
     }
 
@@ -55,11 +57,9 @@ impl Session {
 
     pub fn start_local(_: &str, _: usize) {}
 
-    /*
     pub fn set_backend(&mut self, backend: Option<BackendHandle>) {
         self.backend = backend
     }
-    */
 
     pub fn update(&mut self) {
         // swap the writers
@@ -69,17 +69,15 @@ impl Session {
 
         ReaderWrapper::init_from_writer(&mut self.reader, &self.writers[p_writer]);
 
-        //let mut writer = &mut self.writers[c_writer];
-
-        // TODO: Update backend here
-
         /*
-        for view in &self.views {
-            if let Some(ref mut v) = view_plugins.get_view(*view) {
-                Self::update_view_instance(&self.reader, writer, v);
-            }
+        if let Some(backend) = self.backend {
+            unsafe
         }
         */
+
+        //let mut writer = &mut self.writers[c_writer];
+
+
     }
 }
 

@@ -7,7 +7,6 @@ extern crate imgui_sys;
 
 pub mod windows;
 mod docking;
-mod backend_plugin;
 
 use docking::DockingPlugin;
 //use prodbg_api::ui::Ui;
