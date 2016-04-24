@@ -79,7 +79,7 @@ impl BackendPlugins {
         }
     }
 
-    pub extern "C" fn service_fun(_name: *const c_uchar) -> *mut c_void {
+    extern "C" fn service_fun(_name: *const c_uchar) -> *mut c_void {
         ptr::null_mut()
     }
 
@@ -115,6 +115,18 @@ impl BackendPlugins {
             }
 
             return self.create_instance_from_type(i);
+        }
+
+        None
+    }
+
+    pub fn get_backend(&mut self, backend_handle: Option<BackendHandle>) -> Option<&mut BackendInstance> {
+        if let Some(handle) = backend_handle {
+            for i in 0..self.instances.len() {
+                if self.instances[i].handle == handle {
+                    return Some(&mut self.instances[i]);
+                }
+            }
         }
 
         None

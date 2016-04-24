@@ -53,7 +53,7 @@ fn main() {
         bgfx.pre_update();
 
         plugins.update(&mut lib_handler);
-        sessions.update();
+        sessions.update(&mut backend_plugins.borrow_mut());
         windows.update(&mut sessions, &mut view_plugins.borrow_mut());
 
         if windows.should_exit() {

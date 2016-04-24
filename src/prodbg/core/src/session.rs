@@ -1,7 +1,9 @@
 use prodbg_api::read_write::{Reader, Writer};
+use prodbg_api::backend::{CBackendCallbacks};
 use plugins::PluginHandler;
 use reader_wrapper::{ReaderWrapper, WriterWrapper};
-use backend_plugin::BackendHandle;
+use backend_plugin::{BackendHandle, BackendPlugins};
+use libc::{c_void};
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub struct SessionHandle(pub u64);
@@ -61,7 +63,7 @@ impl Session {
         self.backend = backend
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, backend_plugins: &mut BackendPlugins) {
         // swap the writers
         let p_writer = (self.current_writer + 1) & 1;
         //let c_writer = self.current_writer;
@@ -69,11 +71,15 @@ impl Session {
 
         ReaderWrapper::init_from_writer(&mut self.reader, &self.writers[p_writer]);
 
-        /*
-        if let Some(backend) = self.backend {
-            unsafe
+        if let Some(backend) = backend_plugins.get_backend(self.backend) {
+            unsafe {
+                let plugin_funcs = backend.plugin_type.plugin_funcs as *mut CBackendCallbacks;
+                ((*plugin_funcs).update.unwrap())(backend.plugin_data,
+                                                  0,
+                                                  self.reader.api as *mut c_void,
+                                                  self.writers[p_writer].api as *mut c_void);
+            }
         }
-        */
 
         //let mut writer = &mut self.writers[c_writer];
 
@@ -108,9 +114,9 @@ impl Sessions {
         handle
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, backend_plugins: &mut BackendPlugins) {
         for session in self.instances.iter_mut() {
-            session.update();
+            session.update(backend_plugins);
         }
     }
 
