@@ -8,6 +8,7 @@ use minifb::{Scale, WindowOptions, MouseMode, MouseButton, Key, KeyRepeat};
 use core::view_plugins::{ViewHandle, ViewPlugins, ViewInstance};
 use core::session::{Sessions, Session, SessionHandle};
 use self::viewdock::{Workspace, Rect, Direction, DockHandle, SplitHandle};
+use menu::Menu;
 use imgui_sys::Imgui;
 use prodbg_api::ui_ffi::{PDVec2};
 use prodbg_api::view::CViewCallbacks;
@@ -36,9 +37,10 @@ impl MouseState {
     }
 }
 
-pub struct Window {
+pub struct Window<'a> {
     /// minifb window
     pub win: minifb::Window,
+    pub menu: Menu<'a>,
 
     /// Views in this window
     pub views: Vec<ViewHandle>,
@@ -61,14 +63,14 @@ struct WindowState {
 ///! 2. User "undocks" a view from an existing window giving it it's own floating window.
 ///! 3. etc
 
-pub struct Windows {
+pub struct Windows<'a> {
     /// All the windows being tracked
-    windows: Vec<Window>,
+    windows: Vec<Window<'a>>,
     current: usize,
 }
 
-impl Windows {
-    pub fn new() -> Windows {
+impl<'a> Windows<'a> {
+    pub fn new() -> Windows<'a> {
         Windows {
             windows: Vec::new(),
             current: 0,
@@ -81,12 +83,12 @@ impl Windows {
             return;
         }
 
-        let window = Self::create_window(WIDTH, HEIGHT).expect("Unable to create window");
+        let window = Self::create_window_with_menus().expect("Unable to create window");
 
         self.windows.push(window)
    }
 
-    pub fn create_window(width: usize, height: usize) -> minifb::Result<Window> {
+    pub fn create_window(width: usize, height: usize) -> minifb::Result<Window<'a>> {
         let res = minifb::Window::new("ProDBG",
                                       width,
                                       height,
@@ -102,6 +104,7 @@ impl Windows {
                                     height as c_int);
                 Ok(Window {
                     win: win,
+                    menu: Menu::new(),
                     views: Vec::new(),
                     mouse_state: MouseState::new(),
                     ws: Workspace::new(Rect::new(0.0, 0.0, width as f32, (height - 20) as f32)).unwrap(),
@@ -111,11 +114,15 @@ impl Windows {
         }
     }
 
-    pub fn create_window_with_menus(&mut self) -> minifb::Result<Window> {
+    pub fn create_window_with_menus() -> minifb::Result<Window<'a>> {
         //const WIDTH: usize = 1280;
         //const HEIGHT: usize = 1024;
 
-        let window = try!(Self::create_window(WIDTH, HEIGHT));
+        let mut window = try!(Self::create_window(WIDTH, HEIGHT));
+
+        println!("Tring to add menu...");
+
+        try!(window.win.add_menu("File", &window.menu.file_menu));
 
         // for menu in &menus {
         // window.add_menu(m.name, m.menu);
@@ -135,7 +142,7 @@ impl Windows {
         }
     }
 
-    pub fn get_current(&mut self) -> &mut Window {
+    pub fn get_current(&mut self) -> &'a mut Window {
         let current = self.current;
         &mut self.windows[current]
     }
@@ -152,7 +159,7 @@ impl Windows {
     pub fn load(_filename: &str) {}
 }
 
-impl Window {
+impl<'a> Window<'a> {
     fn is_inside(v: (f32, f32), pos: PDVec2, size: PDVec2) -> bool {
         let x0 = pos.x;
         let y0 = pos.y;
