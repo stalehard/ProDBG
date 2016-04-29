@@ -116,19 +116,10 @@ impl<'a> Windows<'a> {
     }
 
     pub fn create_window_with_menus() -> minifb::Result<Window<'a>> {
-        //const WIDTH: usize = 1280;
-        //const HEIGHT: usize = 1024;
-
         let mut window = try!(Self::create_window(WIDTH, HEIGHT));
 
-        println!("Tring to add menu...");
-
         try!(window.win.add_menu("File", &window.menu.file_menu));
-
-        // for menu in &menus {
-        // window.add_menu(m.name, m.menu);
-        // }
-        //
+        try!(window.win.add_menu("Debug", &window.menu.debug_menu));
 
         Ok(window)
     }
