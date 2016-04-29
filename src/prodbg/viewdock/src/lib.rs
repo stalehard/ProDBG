@@ -876,47 +876,12 @@ mod test {
     }
 
     #[test]
-    fn test_validate_x_less_than_zero() {
-        assert_eq!(Workspace::new(Rect::new(-0.1, 0.0, 1.0, 1.0)).is_err(), true);
-    }
-
-    #[test]
-    fn test_validate_y_less_than_zero() {
-        assert_eq!(Workspace::new(Rect::new(0.0, -0.1, 1.0, 1.0)).is_err(), true);
-    }
-
-    #[test]
-    fn test_validate_width_zero() {
-        assert_eq!(Workspace::new(Rect::new(0.0, 0.0, 0.0, 1.0)).is_err(), true);
-    }
-
-    #[test]
-    fn test_validate_height_zero() {
-        assert_eq!(Workspace::new(Rect::new(0.0, 0.0, 1.0, 0.0)).is_err(), true);
-    }
-
-    #[test]
-    fn test_validate_width_less_than_zero() {
-        assert_eq!(Workspace::new(Rect::new(0.0, 0.0, -1.0, 0.0)).is_err(), true);
-    }
-
-    #[test]
-    fn test_validate_height_less_than_zero() {
-        assert_eq!(Workspace::new(Rect::new(0.0, 0.0, 0.0, -1.0)).is_err(), true);
-    }
-
-    #[test]
-    fn test_validate_workspace_ok() {
-        assert_eq!(Workspace::new(Rect::new(0.0, 0.0, 1024.0, 1024.0)).is_ok(), true);
-    }
-
-    #[test]
     fn test_split_top() {
         let mut ws = Workspace::new(Rect::new(0.0, 0.0, 1024.0, 1024.0)).unwrap();
-        ws.split_top(DockHandle(1), Direction::Vertical);
+        ws.split(DockHandle(1), Direction::Vertical);
 
-        assert_eq!(ws.split.is_some(), true);
-        let split = ws.split.unwrap();
+        assert_eq!(ws.splits.len(), 1);
+        let split = &ws.splits[0];
 
         assert_eq!(split.left_docks.docks.len(), 1);
     }
@@ -924,11 +889,11 @@ mod test {
     #[test]
     fn test_split_top_2() {
         let mut ws = Workspace::new(Rect::new(0.0, 0.0, 1024.0, 1024.0)).unwrap();
-        ws.split_top(DockHandle(1), Direction::Vertical);
-        ws.split_top(DockHandle(2), Direction::Vertical);
+        ws.split(DockHandle(1), Direction::Vertical);
+        ws.split(DockHandle(2), Direction::Vertical);
 
-        assert_eq!(ws.split.is_some(), true);
-        let split = ws.split.unwrap();
+        assert_eq!(ws.splits.len(), 1);
+        let split = &ws.splits[0];
 
         assert_eq!(split.right_docks.docks.len(), 1);
         assert_eq!(split.left_docks.docks.len(), 1);
@@ -937,7 +902,7 @@ mod test {
 
     #[test]
     fn test_calc_rect_horz_half() {
-        let rects = Split::calc_horizontal_sizing(Rect::new(0.0, 0.0, 1024.0, 1024.0), 0.5);
+        let rects = Workspace::calc_horizontal_sizing(Rect::new(0.0, 0.0, 1024.0, 1024.0), 0.5);
 
         assert_eq!(check_range(rects.0.x, 0.0, 0.001), true);
         assert_eq!(check_range(rects.0.y, 0.0, 0.001), true);
@@ -952,7 +917,7 @@ mod test {
 
     #[test]
     fn test_calc_rect_horz_25_per() {
-        let rects = Split::calc_horizontal_sizing(Rect::new(0.0, 0.0, 1024.0, 1024.0), 0.25);
+        let rects = Workspace::calc_horizontal_sizing(Rect::new(0.0, 0.0, 1024.0, 1024.0), 0.25);
 
         assert_eq!(check_range(rects.0.x, 0.0, 0.001), true);
         assert_eq!(check_range(rects.0.y, 0.0, 0.001), true);
@@ -967,7 +932,7 @@ mod test {
 
     #[test]
     fn test_calc_rect_horz_25_per_2() {
-        let rects = Split::calc_horizontal_sizing(Rect::new(16.0, 32.0, 512.0, 1024.0), 0.25);
+        let rects = Workspace::calc_horizontal_sizing(Rect::new(16.0, 32.0, 512.0, 1024.0), 0.25);
 
         assert_eq!(check_range(rects.0.x, 16.0, 0.001), true);
         assert_eq!(check_range(rects.0.y, 32.0, 0.001), true);
@@ -1010,7 +975,7 @@ mod test {
         let rect = Rect::new(10.0, 20.0, 30.0, 40.0);
         let rect_horz = Split::get_sizer_from_rect_horizontal(rect, border_size);
 
-        assert_eq!(Split::is_inside((9.0, 61.0), rect_horz), false);
-        assert_eq!(Split::is_inside((11.0, 61.0), rect_horz), true);
+        assert_eq!(Rect::is_inside((9.0, 61.0), rect_horz), false);
+        assert_eq!(Rect::is_inside((11.0, 61.0), rect_horz), true);
     }
 }
