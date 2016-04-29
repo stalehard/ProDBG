@@ -7,6 +7,7 @@ use libc::{c_void, c_int};
 use minifb::{Scale, WindowOptions, MouseMode, MouseButton, Key, KeyRepeat};
 use core::view_plugins::{ViewHandle, ViewPlugins, ViewInstance};
 use core::session::{Sessions, Session, SessionHandle};
+use core::reader_wrapper::ReaderWrapper;
 use self::viewdock::{Workspace, Rect, Direction, DockHandle, SplitHandle};
 use menu::Menu;
 use imgui_sys::Imgui;
@@ -193,6 +194,9 @@ impl<'a> Window<'a> {
             Imgui::mark_show_popup(ui.api, false);
         }
 
+        // Make sure we move the cursor to the start of the stream here
+        ReaderWrapper::reset_reader(&mut session.reader);
+
         unsafe {
             let plugin_funcs = instance.plugin_type.plugin_funcs as *mut CViewCallbacks;
             ((*plugin_funcs).update.unwrap())(instance.plugin_data,
@@ -214,18 +218,9 @@ impl<'a> Window<'a> {
     pub fn remove_views(&mut self, view_plugins: &mut ViewPlugins, views: &Vec<ViewHandle>) {
         for view in views {
             view_plugins.destroy_instance(*view);
-            //println!("------------------ before delete ----------------------------");
-            //self.ws.dump_tree();
             self.ws.delete_by_handle(DockHandle(view.0));
-            //println!("------------------ after delete ----------------------------");
-            //self.ws.dump_tree();
         }
     }
-    /*
-    CursorType_Default,
-    CursorType_SizeHorizontal,
-    CursorType_SizeVertical,
-    */
 
     fn update_mouse_state(&mut self, mouse_pos: (f32, f32)) {
         match self.mouse_state.state {

@@ -65,11 +65,12 @@ impl Session {
 
     pub fn update(&mut self, backend_plugins: &mut BackendPlugins) {
         // swap the writers
+        let c_writer = self.current_writer;
         let p_writer = (self.current_writer + 1) & 1;
-        //let c_writer = self.current_writer;
         self.current_writer = p_writer;
 
         ReaderWrapper::init_from_writer(&mut self.reader, &self.writers[p_writer]);
+        ReaderWrapper::reset_writer(&mut self.writers[c_writer]);
 
         if let Some(backend) = backend_plugins.get_backend(self.backend) {
             unsafe {
@@ -81,9 +82,7 @@ impl Session {
             }
         }
 
-        //let mut writer = &mut self.writers[c_writer];
-
-
+        ReaderWrapper::init_from_writer(&mut self.reader, &self.writers[p_writer]);
     }
 }
 
