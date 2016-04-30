@@ -39,7 +39,9 @@ impl Dock {
     fn new(dock_handle: DockHandle) -> Dock {
         Dock {
             handle: dock_handle,
-            name: "".to_owned(),
+            //name: "".to_owned(),
+            plugin_name: "".to_owned(),
+            plugin_data: None,
             rect: Rect::default(),
         }
     }
@@ -53,7 +55,8 @@ impl Container {
         }
     }
 
-    pub fn set_dock_name(&mut self, name: &String, handle: DockHandle) -> bool {
+    /*
+    pub fn set_dock_data(&mut self, name: &String, handle: DockHandle) -> bool {
         for h in &mut self.docks {
             if h.handle == handle {
                 h.name = name.clone();
@@ -63,6 +66,7 @@ impl Container {
 
         false
     }
+    */
 
     pub fn find_handle(&self, handle: DockHandle) -> Option<&Dock> {
         self.docks.iter().find(|&dock| dock.handle == handle)
@@ -539,12 +543,14 @@ impl Workspace {
         Self::adjust_percentages(&mut self.splits);
     }
 
+    /*
     pub fn set_name_to_handle(&mut self, name: &String, handle: DockHandle) {
         for split in &mut self.splits {
             if split.left_docks.set_dock_name(name, handle) { break; }
             if split.right_docks.set_dock_name(name, handle) { break; }
         }
     }
+    */
 
     pub fn get_docks(&self) -> Vec<Dock> {
         let mut docks = Vec::new();
