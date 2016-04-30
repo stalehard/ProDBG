@@ -313,11 +313,11 @@ impl<'a> Window<'a> {
         }
 
         if self.win.is_key_pressed(Key::Up, KeyRepeat::No) {
-            let _ = self.ws.save("/Users/danielcollin/code/temp/test.xml");
+            let _ = self.ws.save("data/layout_temp.json");
         }
 
         if self.win.is_key_pressed(Key::Right, KeyRepeat::No) {
-            let ws = Workspace::load("/Users/danielcollin/code/temp/test.xml").unwrap();
+            let ws = Workspace::load("data/layout_temp.json");
             let docks = ws.get_docks();
             self.views.clear();
 
@@ -335,6 +335,8 @@ impl<'a> Window<'a> {
 
             self.ws = ws;
         }
+
+        // test
 
         // if now plugin has showed a menu we do it here
         // TODO: Handle diffrent cases when attach menu on to plugin menu or not

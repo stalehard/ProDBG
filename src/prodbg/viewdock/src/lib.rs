@@ -1,73 +1,13 @@
 mod error;
-mod save_load;
+extern crate serde;
+extern crate serde_json;
+use std::io::prelude::*;
+use std::fs::File;
+use std::io;
+
 pub use self::error::Error;
-//use std::io;
 
-
-pub type Result<T> = std::result::Result<T, Error>;
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub struct DockHandle(pub u64);
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub struct SplitHandle(pub u64);
-
-#[derive(Debug, Default, Clone, Copy)]
-pub struct Rect {
-    pub x: f32,
-    pub y: f32,
-    pub width: f32,
-    pub height: f32,
-}
-
-#[derive(Debug, Clone)]
-pub struct Dock {
-    pub handle: DockHandle,
-    pub name: String,
-    pub rect: Rect
-}
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Direction {
-    Vertical,
-    Horizontal,
-    Full,
-}
-
-#[derive(Debug, Clone)]
-pub struct Container {
-    pub docks: Vec<Dock>,
-    pub rect: Rect,
-}
-
-#[derive(Debug)]
-pub struct Split {
-    /// left/top slipit
-    pub left: Option<SplitHandle>,
-    /// right/bottom split
-    pub right: Option<SplitHandle>,
-    /// left/top docks
-    pub left_docks: Container,
-    /// right/top docks
-    pub right_docks: Container,
-    /// ratioage value of how much of each side that is visible. 1.0 = right/bottom fully visible
-    pub ratio: f32,
-    /// Direction of the split
-    pub direction: Direction,
-    /// Handle of the spliter
-    pub handle: SplitHandle,
-    /// Rect
-    rect: Rect,
-}
-
-#[derive(Debug)]
-pub struct Workspace {
-    pub splits: Vec<Split>,
-    pub rect: Rect,
-    /// border size of the windows (in pixels)
-    pub window_border: f32,
-    handle_counter: SplitHandle,
-}
+include!(concat!(env!("OUT_DIR"), "/data.rs"));
 
 impl Rect {
     pub fn new(x: f32, y: f32, width: f32, height: f32) -> Rect {
@@ -622,6 +562,23 @@ impl Workspace {
         docks
     }
 
+    // save to json
+
+    pub fn save(&self, file_name: &str) -> io::Result<()> {
+        let data = serde_json::to_string_pretty(self).unwrap_or("".to_owned());
+        let mut f = try!(File::create(file_name));
+        let _ = f.write_all(data.as_bytes());
+        println!("saved file");
+        Ok(())
+    }
+
+    pub fn load(file_name: &str) -> Workspace {
+        let mut f = File::open(file_name).unwrap();
+        let mut s = String::new();
+        f.read_to_string(&mut s).unwrap();
+        let ws: Workspace = serde_json::from_str(&s).unwrap();
+        ws
+    }
 }
 
 #[cfg(test)]
