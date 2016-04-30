@@ -141,8 +141,20 @@ impl Container {
     }
 
     pub fn get_rect_by_handle(&self, handle: DockHandle) -> Option<Rect> {
+        for dock in &self.docks {
+            if dock.handle == handle {
+                return Some(self.rect);
+            }
+        }
+
+        None
+    }
+
+    /*
+    pub fn get_rect_by_handle(&self, handle: DockHandle) -> Option<Rect> {
         self.docks.iter().find(|&dock| dock.handle == handle).map(|dock| dock.rect)
     }
+    */
 
     pub fn is_inside(&self, pos: (f32, f32)) -> Option<(DockHandle, f32)> {
         for dock in &self.docks {
