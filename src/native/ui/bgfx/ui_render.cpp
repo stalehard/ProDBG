@@ -83,7 +83,7 @@ struct ProgramInfo {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static const bgfx::Memory* loadShader(const char* filename) {
-    size_t size;
+    uint32_t size;
     uint8_t* data = (uint8_t*)File_loadToMemory(filename, &size, 1);
 
     if (!data) {
