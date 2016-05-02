@@ -280,6 +280,7 @@ StaticLibrary {
             "src/native/external/bgfx/include",
             "src/native/external/bx/include",
             "src/native/external/bgfx/3rdparty/khronos",
+          { "src/native/external/bgfx/3rdparty/dxsdk/include"; Config = "win64-*-*" },
         },
         
         CXXOPTS = {
