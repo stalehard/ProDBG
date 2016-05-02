@@ -292,6 +292,7 @@ StaticLibrary {
     Sources = { 
 		{ "src/native/external/bgfx/src/bgfx.cpp",
 		  "src/native/external/bgfx/src/image.cpp",
+          "src/native/external/bgfx/src/topology.cpp",
 		  "src/native/external/bgfx/src/vertexdecl.cpp",
 		  "src/native/external/bgfx/src/debug_renderdoc.cpp",
 		  "src/native/external/bgfx/src/renderer_gl.cpp",
