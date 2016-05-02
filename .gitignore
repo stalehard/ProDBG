@@ -9,3 +9,4 @@ target/
 Cargo.lock
 .vscode/
 *.orig
+*.DS_Store
