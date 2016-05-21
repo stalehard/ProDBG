@@ -4,22 +4,44 @@ extern crate prodbg_api;
 use prodbg_api::*;
 
 struct DisassemblyView {
-    dummy: i32,
+    location: u64,
+    address_size: u8,
+    reset_to_center: bool,
 }
 
 impl View for DisassemblyView {
     fn new(_: &Ui, _: &Service) -> Self {
         DisassemblyView {
-            dummy: 0
+            location: 0,
+            address_size: 4,
+            reset_to_center: true,
         }
     }
 
-    fn update(&mut self, ui: &Ui, _: &mut Reader, _: &mut Writer) {
-        if ui.button("sthteeoh", None) {
-            println!("yah");
-        }
+    fn update(&mut self, ui: &Ui, reader: &mut Reader, _: &mut Writer) {
+        let mut request_dissasembly = false;
 
-        self.dummy += 1;
+        for event in reader.get_event() {
+            /*
+            match event as EventType {
+                EventType::SetExceptionLocation => {
+                    let location = reader.find_u64("address").ok().unwrap();
+                    
+                    if self.location != location {
+                        self.location = location;
+                        request_dissasembly = true;
+                    }
+
+                    self.address_size = reader.find_u8("address_size").ok().unwrap();
+                }
+
+                EventType::SetExceptionLocation => {
+                }
+
+                _ => (),
+            }
+        */
+        }
     }
 }
 
