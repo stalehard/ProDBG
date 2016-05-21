@@ -109,6 +109,7 @@ pub struct CPdUI {
 	pub push_style_var: extern fn(c_uint, c_float),
 	pub push_style_var_vec: extern fn(c_uint, PDVec2),
 	pub pop_style_var: extern fn(c_int),
+	pub get_font_size: extern fn() -> f32,
 	pub push_item_width: extern fn(c_float),
 	pub pop_item_width: *mut extern fn () -> c_void,
 	pub calc_item_width: *mut extern fn () -> c_float,

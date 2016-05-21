@@ -112,6 +112,11 @@ impl Ui {
         unsafe { ((*self.api).push_style_var_vec)(index as u32, val) }
     }
 
+    #[inline]
+    pub fn get_font_size(&self) -> f32 {
+        unsafe { ((*self.api).get_font_size)() }
+    }
+
     // Text
 
     pub fn text(&self, text: &str) {
