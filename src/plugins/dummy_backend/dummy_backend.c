@@ -472,8 +472,9 @@ static void on_menu(PDReader* reader) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 static int find_instruction_index(uint64_t address) {
+	int i = 0;
 
-	for (int i = 0; i < (int)sizeof_array(s_disasm_data) - 1; ++i) {
+	for (i = 0; i < (int)sizeof_array(s_disasm_data) - 1; ++i) {
 		const DisasmData* t0 = &s_disasm_data[i + 0];
 		const DisasmData* t1 = &s_disasm_data[i + 1];
 		if (address >= t0->address &&
@@ -490,11 +491,16 @@ static int find_instruction_index(uint64_t address) {
 static void get_disassembly(PDReader* reader, PDWriter* writer) {
     uint64_t address_start = 0;
     uint32_t instruction_count = 0;
+	uint32_t i = 0;
+	int index;
+    int total_instruction_count = 0;
+    uint64_t last_address = 0;
+
 
     PDRead_find_u64(reader, &address_start, "address_start", 0);
     PDRead_find_u32(reader, &instruction_count, "instruction_count", 0);
 
-	int index = find_instruction_index(address_start);
+	index = find_instruction_index(address_start);
 
 	if (index == -1) {
 		return;
@@ -503,11 +509,11 @@ static void get_disassembly(PDReader* reader, PDWriter* writer) {
     PDWrite_event_begin(writer, PDEventType_SetDisassembly);
     PDWrite_array_begin(writer, "disassembly");
 
-    int total_instruction_count = sizeof_array(s_disasm_data);
+    total_instruction_count = sizeof_array(s_disasm_data);
 
-    uint64_t last_address = s_disasm_data[total_instruction_count - 1].address;
+    last_address = s_disasm_data[total_instruction_count - 1].address;
 
-	for (uint32_t i = 0; i < instruction_count; ++i) {
+	for (i = 0; i < instruction_count; ++i) {
         PDWrite_array_entry_begin(writer);
 
         if (index >= (int)sizeof_array(s_disasm_data)) {
