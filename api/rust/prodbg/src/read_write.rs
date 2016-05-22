@@ -201,6 +201,19 @@ impl Reader {
     find_fun!(read_find_float, find_float, f32);
     find_fun!(read_find_double, find_double, f64);
 
+    unsafe fn strlen(t: *const i8) -> usize{
+        // very lange slice so this is kinda hacky but should work
+        let slice = slice::from_raw_parts(t, 16834);
+        let mut count = 0;
+
+        loop {
+            if slice[count] == 0 { break; }
+            count += 1;
+        }
+
+        count
+    }
+
     pub fn find_string(&self, id: &str) -> Result<&str, ReadStatus> {
         let s = CFixedString::from_str(id).as_ptr();
         let mut temp = 0 as *const c_char;
@@ -209,8 +222,7 @@ impl Reader {
 
         unsafe {
             ret = ((*self.api).read_find_string)(transmute(self.api), &mut temp, s, self.it);
-            // TODO: fix len
-            let slice = slice::from_raw_parts(temp as *const u8, 10);
+            let slice = slice::from_raw_parts(temp as *const u8, Self::strlen(temp));
             res = str::from_utf8(slice).unwrap();
         }
 
