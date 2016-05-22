@@ -3,10 +3,37 @@ extern crate prodbg_api;
 
 use prodbg_api::*;
 
+struct Line {
+    opcode: String,
+    _address: u64,
+    _breakpoint: bool
+}
+
 struct DisassemblyView {
     location: u64,
     address_size: u8,
-    reset_to_center: bool,
+    _reset_to_center: bool,
+    lines: Vec<Line>,
+}
+
+impl DisassemblyView {
+    fn set_disassembly(&mut self, reader: &mut Reader) {
+        for entry in reader.find_array("disassembly") {
+            let addr = entry.find_u64("address").ok().unwrap();
+            let line = entry.find_string("line").ok().unwrap();
+            self.lines.push(Line {
+                _address: addr ,
+                _breakpoint: false,
+                opcode: line.to_owned(),
+            });
+        }
+    }
+
+    fn render_ui(&mut self, ui: &Ui) {
+        for line in &self.lines {
+            ui.text(&line.opcode);
+        }
+    }
 }
 
 impl View for DisassemblyView {
@@ -14,19 +41,19 @@ impl View for DisassemblyView {
         DisassemblyView {
             location: 0,
             address_size: 4,
-            reset_to_center: true,
+            lines: Vec::new(),
+            _reset_to_center: true,
         }
     }
 
-    fn update(&mut self, ui: &Ui, reader: &mut Reader, _: &mut Writer) {
+    fn update(&mut self, ui: &Ui, reader: &mut Reader, writer: &mut Writer) {
         let mut request_dissasembly = false;
 
-        for event in reader.get_event() {
-            /*
-            match event as EventType {
-                EventType::SetExceptionLocation => {
+        for event in reader.get_events() {
+            match event {
+                EVENT_SET_EXCEPTION_LOCATION => {
                     let location = reader.find_u64("address").ok().unwrap();
-                    
+
                     if self.location != location {
                         self.location = location;
                         request_dissasembly = true;
@@ -35,13 +62,23 @@ impl View for DisassemblyView {
                     self.address_size = reader.find_u8("address_size").ok().unwrap();
                 }
 
-                EventType::SetExceptionLocation => {
+                EVENT_SET_DISASSEMBLY => {
+                    self.set_disassembly(reader);
                 }
 
                 _ => (),
             }
-        */
         }
+
+        if request_dissasembly {
+            // some temp request right now
+            writer.event_begin(EVENT_GET_DISASSEMBLY as u16);
+            writer.write_u64("address_start", self.location);
+            writer.write_u32("instruction_count", 30);
+            writer.event_end();
+        }
+
+        self.render_ui(ui);
     }
 }
 
