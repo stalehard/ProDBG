@@ -476,7 +476,7 @@ static int find_instruction_index(uint64_t address) {
 	for (int i = 0; i < (int)sizeof_array(s_disasm_data) - 1; ++i) {
 		const DisasmData* t0 = &s_disasm_data[i + 0];
 		const DisasmData* t1 = &s_disasm_data[i + 1];
-		if (address >= t0->address && 
+		if (address >= t0->address &&
 			address < t1->address) {
 			return i;
 		}
@@ -554,8 +554,8 @@ static PDDebugState update(void* user_data,
 		}
 	}
 
-	send_6502_registers(writer);
 	set_exception_location(data, writer);
+	send_6502_registers(writer);
 
     // printf("Update backend\n");
 
