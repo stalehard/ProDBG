@@ -1,11 +1,14 @@
 use std::ptr;
 use ui_ffi::*;
+use std::fmt;
+use std::fmt::Write;
 
 use CFixedString;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Ui {
     pub api: *mut CPdUI,
+    fmt_buffer: String,
 }
 
 macro_rules! true_is_1 {
@@ -20,6 +23,7 @@ impl Ui {
     pub fn new(native_api: *mut CPdUI) -> Ui {
         Ui {
             api: native_api,
+            fmt_buffer: String::with_capacity(2048),
         }
     }
 
@@ -122,6 +126,15 @@ impl Ui {
     pub fn text(&self, text: &str) {
         unsafe {
             let t = CFixedString::from_str(text).as_ptr();
+            ((*self.api).text)(t);
+        }
+    }
+
+    pub fn text_fmt(&mut self, args: fmt::Arguments) {
+        unsafe {
+            self.fmt_buffer.clear();
+            write!(&mut self.fmt_buffer, "{}", args).unwrap();
+            let t = CFixedString::from_str(&self.fmt_buffer).as_ptr();
             ((*self.api).text)(t);
         }
     }

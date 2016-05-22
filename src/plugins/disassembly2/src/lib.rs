@@ -5,7 +5,7 @@ use prodbg_api::*;
 
 struct Line {
     opcode: String,
-    _address: u64,
+    address: u64,
     _breakpoint: bool
 }
 
@@ -22,16 +22,16 @@ impl DisassemblyView {
             let addr = entry.find_u64("address").ok().unwrap();
             let line = entry.find_string("line").ok().unwrap();
             self.lines.push(Line {
-                _address: addr ,
+                address: addr ,
                 _breakpoint: false,
                 opcode: line.to_owned(),
             });
         }
     }
 
-    fn render_ui(&mut self, ui: &Ui) {
+    fn render_ui(&mut self, ui: &mut Ui) {
         for line in &self.lines {
-            ui.text(&line.opcode);
+            ui.text_fmt(format_args!("0x{:x} {}", line.address, line.opcode));
         }
     }
 }
@@ -46,7 +46,7 @@ impl View for DisassemblyView {
         }
     }
 
-    fn update(&mut self, ui: &Ui, reader: &mut Reader, writer: &mut Writer) {
+    fn update(&mut self, ui: &mut Ui, reader: &mut Reader, writer: &mut Writer) {
         let mut request_dissasembly = false;
 
         for event in reader.get_events() {

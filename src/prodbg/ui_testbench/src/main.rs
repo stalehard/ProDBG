@@ -84,7 +84,7 @@ fn main() {
         let show_context_menu = window.get_mouse_down(MouseButton::Right);
 
         for instance in &view_plugins.borrow_mut().instances {
-            let ui = instance.ui;
+            let ui = &instance.ui;
 
             Imgui::begin_window("Test", true);
             Imgui::init_state(ui.api);

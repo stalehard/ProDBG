@@ -210,7 +210,7 @@ impl Window {
     }
 
     fn update_view(&self, instance: &mut ViewInstance, session: &mut Session, show_context_menu: bool, mouse: (f32, f32)) -> WindowState {
-        let ui = instance.ui;
+        let ui = &instance.ui;
 
         if let Some(rect) = self.ws.get_rect_by_handle(DockHandle(instance.handle.0)) {
             Imgui::set_window_pos(rect.x, rect.y);
