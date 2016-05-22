@@ -224,6 +224,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     data->requestDisassembly = false;
 
     while ((event = PDRead_get_event(inEvents)) != 0) {
+    	//printf("C: got event %d\n", event);
         switch (event) {
             case PDEventType_SetDisassembly:
             {
@@ -258,7 +259,7 @@ static int update(void* user_data, PDUI* uiFuncs, PDReader* inEvents, PDWriter* 
     }
 
     renderUI(data, uiFuncs);
- 
+
     if (data->requestDisassembly) {
         int pc = (int)(data->pc) & ~(BlockSize - 1);
         printf("request disassembly %x\n", pc);
