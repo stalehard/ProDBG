@@ -25,11 +25,11 @@ use bgfx_rs::Bgfx;
 const WIDTH: usize = 1024;
 const HEIGHT: usize = 800;
 
-fn is_inside(v: (f32, f32), pos: PDVec2, size: PDVec2) -> bool {
+fn is_inside(v: (f32, f32), pos: PDVec2, size: (f32, f32)) -> bool {
     let x0 = pos.x;
     let y0 = pos.y;
-    let x1 = pos.x + size.x;
-    let y1 = pos.y + size.y;
+    let x1 = pos.x + size.0;
+    let y1 = pos.y + size.1;
 
     if (v.0 >= x0 && v.0 < x1) && (v.1 >= y0 && v.1 < y1) {
         true

@@ -35,13 +35,21 @@ impl Ui {
     }
 
     #[inline]
-    pub fn get_window_size(&self) -> PDVec2 {
-        unsafe { ((*self.api).get_window_size)() }
+    pub fn get_window_size(&self) -> (f32, f32) {
+        unsafe { 
+            let t = ((*self.api).get_window_size)();
+            (t.x, t.y)
+        }
     }
 
     #[inline]
     pub fn get_window_pos(&self) -> PDVec2 {
         unsafe { ((*self.api).get_window_pos)() }
+    }
+
+    #[inline]
+    pub fn get_text_line_height_with_spacing(&self) -> f32 {
+        unsafe { ((*self.api).get_text_line_height_with_spacing)() as f32 }
     }
 
     pub fn begin_child(&self, id: &str, pos: Option<PDVec2>, border: bool, flags: u32) {
