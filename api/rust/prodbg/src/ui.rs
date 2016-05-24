@@ -36,7 +36,7 @@ impl Ui {
 
     #[inline]
     pub fn get_window_size(&self) -> (f32, f32) {
-        unsafe { 
+        unsafe {
             let t = ((*self.api).get_window_size)();
             (t.x, t.y)
         }
@@ -50,6 +50,34 @@ impl Ui {
     #[inline]
     pub fn get_text_line_height_with_spacing(&self) -> f32 {
         unsafe { ((*self.api).get_text_line_height_with_spacing)() as f32 }
+    }
+
+    #[inline]
+    pub fn get_cursor_pos(&self) -> (f32, f32) {
+        unsafe {
+            let t = ((*self.api).get_cursor_pos)();
+            (t.x, t.y)
+        }
+    }
+
+    #[inline]
+    pub fn get_cursor_screen_pos(&self) -> (f32, f32) {
+        unsafe {
+            let t = ((*self.api).get_cursor_screen_pos)();
+            (t.x, t.y)
+        }
+    }
+
+    #[inline]
+    pub fn fill_rect(&self, x: f32, y: f32, width: f32, height: f32, color: u32) {
+        unsafe {
+            ((*self.api).fill_rect)(PDRect { x: x, y: y, width: width, height: height }, color);
+        }
+    }
+
+    #[inline]
+    pub fn set_scroll_here(&self, center: f32) {
+        unsafe { ((*self.api).set_scroll_here)(center) }
     }
 
     pub fn begin_child(&self, id: &str, pos: Option<PDVec2>, border: bool, flags: u32) {
@@ -85,11 +113,6 @@ impl Ui {
     #[inline]
     pub fn set_scroll_y(&self, pos: f32) {
         unsafe { ((*self.api).set_scroll_y)(pos) }
-    }
-
-    #[inline]
-    pub fn set_scroll_here(&self, center_ratio: f32) {
-        unsafe { ((*self.api).set_scroll_here)(center_ratio) }
     }
 
     #[inline]
