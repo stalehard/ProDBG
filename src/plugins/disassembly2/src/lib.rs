@@ -53,7 +53,6 @@ impl DisassemblyView {
             }
         }
 
-
         writer.event_begin(EVENT_GET_DISASSEMBLY as u16);
         writer.write_u64("address_start", location - (visible_lines * 4));
         writer.write_u32("instruction_count", (visible_lines * 4) as u32);
@@ -101,7 +100,10 @@ impl View for DisassemblyView {
             match event {
                 EVENT_SET_EXCEPTION_LOCATION => {
                     let location = reader.find_u64("address").ok().unwrap();
-                    self.address_size = reader.find_u8("address_size").ok().unwrap();
+
+                    reader.find_u8("address_size").ok().map(|adress_size| {
+                        self.address_size = adress_size;
+                    });
 
                     if self.location != location {
                         self.request_disassembly(ui, location, writer);
