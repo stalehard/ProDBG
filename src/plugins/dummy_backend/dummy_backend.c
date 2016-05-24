@@ -14,7 +14,6 @@ typedef struct DisasmData {
 
 static DisasmData s_disasm_data[] = {
 	{ 0x0000e003, "jmp 0xe0c1" },
-	{ 0x0000e003, "jmp 0xe0c1" },
 	{ 0x0000e006, "rti" },
 	{ 0x0000e007, "rti" },
 	{ 0x0000e008, "rti" },
@@ -391,7 +390,7 @@ void* create_instance(ServiceFunc* serviceFunc) {
 
 	DummyPlugin* plugin = (DummyPlugin*)malloc(sizeof(DummyPlugin));
 	memset(plugin, 0, sizeof(DummyPlugin));
-	plugin->exception_location = 0x0000e0a2;
+	plugin->exception_location = s_disasm_data[0].address;
 
     return plugin;
 }
@@ -436,6 +435,23 @@ static void send_6502_registers(PDWriter* writer) {
 
 	PDWrite_array_end(writer);
 	PDWrite_event_end(writer);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+static void step_to_next_location(DummyPlugin* plugin) {
+	int i;
+
+	for (i = 0; i < (int)sizeof_array(s_disasm_data) - 1; ++i) {
+		if (s_disasm_data[i].address == plugin->exception_location) {
+			plugin->exception_location = s_disasm_data[i + 1].address;
+			printf("set exception to 0x%x\n", plugin->exception_location);
+			return;
+		}
+	}
+
+	plugin->exception_location = s_disasm_data[0].address;
+	printf("reseting to start\n");
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -503,7 +519,7 @@ static void get_disassembly(PDReader* reader, PDWriter* writer) {
 	index = find_instruction_index(address_start);
 
 	if (index == -1) {
-		return;
+		index = 0;
 	}
 
     PDWrite_event_begin(writer, PDEventType_SetDisassembly);
@@ -512,6 +528,8 @@ static void get_disassembly(PDReader* reader, PDWriter* writer) {
     total_instruction_count = sizeof_array(s_disasm_data);
 
     last_address = s_disasm_data[total_instruction_count - 1].address;
+
+    printf("requested count %d, total count %d\n", instruction_count, total_instruction_count);
 
 	for (i = 0; i < instruction_count; ++i) {
         PDWrite_array_entry_begin(writer);
@@ -542,7 +560,34 @@ static PDDebugState update(void* user_data,
 						   PDWriter* writer) {
     uint32_t event;
     DummyPlugin* data = (DummyPlugin*)user_data;
-    (void)action;
+
+	switch (action)
+	{
+		case PDAction_Step:
+		{
+			step_to_next_location(data);
+			break;
+		}
+
+		case PDAction_StepOut:
+		{
+
+			break;
+		}
+
+		case PDAction_StepOver:
+		{
+
+			break;
+		}
+
+		default :
+		{
+
+			break;
+		}
+	}
+
 
     while ((event = PDRead_get_event(reader))) {
         switch (event) {
