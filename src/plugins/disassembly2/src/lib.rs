@@ -72,7 +72,7 @@ impl DisassemblyView {
             if line.address == self.location {
                 let (cx, cy) = ui.get_cursor_screen_pos();
 
-                if (cy < 0.0 || cy > (size_h - text_height)) && self.reset_to_center {
+                if (cy < 0.0 || cy > (size_h - text_height)) || self.reset_to_center {
                     ui.set_scroll_here(0.5);
                     self.reset_to_center = false;
                 }
