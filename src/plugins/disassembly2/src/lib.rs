@@ -53,6 +53,7 @@ impl DisassemblyView {
             }
         }
 
+        self.reset_to_center = true;
         writer.event_begin(EVENT_GET_DISASSEMBLY as u16);
         writer.write_u64("address_start", location - (visible_lines * 4));
         writer.write_u32("instruction_count", (visible_lines * 4) as u32);
@@ -107,7 +108,6 @@ impl View for DisassemblyView {
 
                     if self.location != location {
                         self.request_disassembly(ui, location, writer);
-                        self.reset_to_center = true;
                     }
                 }
 
