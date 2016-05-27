@@ -93,24 +93,46 @@ impl AmigaUaeBackend {
             return;
         }
 
+        println!("disasm data address {:x} - len {}", address, data.len());
+
         if let Ok(insns) = self.capstone.disasm(&data, address as u64, 0) {
             writer.event_begin(EventType::SetDisassembly as u16);
             writer.array_begin("disassembly");
+            let mut c = 0;
 
             for i in insns.iter() {
                 let text = format!("{0: <10} {1: <10}", i.mnemonic().unwrap(), i.op_str().unwrap_or(""));
                 writer.array_entry_begin();
                 writer.write_u32("address", i.address as u32);
                 writer.write_string("line", &text);
-
                 writer.array_entry_end();
+                c += 1;
             }
+
+            println!("reported {} instructions", c);
 
             writer.array_end();
             writer.event_end();
         } else {
             println!("No instructions :(");
         }
+    }
+
+    fn get_memory(&mut self, reader: &mut Reader, writer: &mut Writer) {
+        let mut data = Vec::<u8>::with_capacity(256 * 1024);
+
+        let address = reader.find_u64("address_start").ok().unwrap();
+        let size = reader.find_u32("size").ok().unwrap();
+
+        if self.conn.get_memory(&mut data, address, size as u64).is_err() {
+            println!("Unable to fetch memory from {:x} - size {}", address, size);
+            return;
+        }
+
+        writer.event_begin(EventType::SetMemory as u16);
+        writer.write_u64("address", address);
+        writer.write_data("data", &data);
+        writer.event_end();
     }
 
     fn write_exception_location(&mut self, writer: &mut Writer) {
@@ -146,6 +168,10 @@ impl Backend for AmigaUaeBackend {
                 }
                 EVENT_GET_DISASSEMBLY => {
                     self.write_disassembly(reader, writer);
+                }
+
+                EVENT_GET_MEMORY => {
+                    self.get_memory(reader, writer);
                 }
 
                 _ => (),
